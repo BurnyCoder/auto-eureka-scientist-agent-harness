@@ -121,6 +121,11 @@ def render(project: Path, cycle: Path, *, backend='Codex', pdf=True, timeout=180
     summary = metrics(cycle)
     reports = cycle/'reports'
     reports.mkdir(parents=True,exist_ok=True)
+    snapshots = sorted((project/'reports').glob('run-*.json'),key=lambda path:path.stat().st_mtime)
+    run_status = read_json(snapshots[-1]) if snapshots else None
+    status_text = (f"Recorded harness status: **{run_status['status']}**; {len(run_status['completed_phases'])} operational phases accepted. "
+                   'Measurements below do not imply completion of unaccepted phases.' if run_status else
+                   'Research is in progress; no final run-status snapshot is available.')
     write_json(reports/'metrics.json',summary)
     table = markdown_table(summary)
     figures(cycle)
@@ -128,16 +133,24 @@ def render(project: Path, cycle: Path, *, backend='Codex', pdf=True, timeout=180
     references = '\n'.join(f"- [{s['id']}: {s.get('title',s['id'])}]({s['url']})" for s in sources)
     protocol = read_json(cycle/'research/protocol.json')
     primary = summary['primary']
+    seed_spread = f"{primary['seed_sample_sd']:.6f}" if primary and primary['seed_sample_sd'] is not None else 'not estimable from the recorded seeds'
     primary_text = ('The registered primary comparison is pending; no confirmatory conclusion is available.' if primary is None else
                     f"The mean paired accuracy difference is {primary['mean_difference']:.6f}, with conditional 95% bootstrap interval "
                     f"[{primary['ci95'][0]:.6f}, {primary['ci95'][1]:.6f}]. The registered decision is **{primary['conclusion']}**. "
-                    f"The sample standard deviation across seed effects is {primary['seed_sample_sd']:.6f}. "
+                    f"The sample standard deviation across seed effects is {seed_spread}. "
                     f"The interval uses {primary['bootstrap_resamples']} paired resamples of test examples and conditions on the trained models.")
     interpretation_path = reports/'interpretation.md'
     interpretation = interpretation_path.read_text(encoding='utf-8') if interpretation_path.exists() else (
         'This is a preliminary artifact generated before final interpretation. All available outcomes are retained; '
         'a completed experiment is not evidence that the favored hypothesis is true.')
     claims = read_json(cycle/'research/claims.json') if (cycle/'research/claims.json').exists() else []
+    if (run_status and run_status['status'] not in ('running','complete')
+            and 'analysis' not in run_status['completed_phases']):
+        interpretation = ('The analysis phase was not accepted before this run stopped. Its draft interpretation '
+                          'and claim ledger are preserved in the repository, but are excluded from this generated '
+                          'paper because their evidence contracts remain unresolved. The tables and primary '
+                          'calculation above are regenerated from saved predictions; review remains incomplete.')
+        claims = []
     source_urls = {s['id']:s['url'] for s in sources}
     ledger = cycle/'research/evidence.json'
     if ledger.exists():
@@ -150,7 +163,7 @@ def render(project: Path, cycle: Path, *, backend='Codex', pdf=True, timeout=180
     methodology = '\n'.join(f'- **{key}**: {json.dumps(protocol[key],ensure_ascii=False)}' for key in
                              ('question','architecture','optimizer','learning_rate','batch_size','epochs','methods','seeds','data_boundaries','analysis_plan','hyperparameter_rationale') if key in protocol)
     def figure(name,caption):
-        return f'![{caption}](../figures/{name}.png)' if (cycle/f'figures/{name}.png').exists() else f'{caption}: no applicable measurement recorded.'
+        return f'![{caption}](../figures/{name}.png)\n\n*{caption}.*' if (cycle/f'figures/{name}.png').exists() else f'{caption}: no applicable measurement recorded.'
     paper = f'''---
 title: "{project.name}: reproducible research report"
 author: 'Libor “Burny” Burian'
@@ -161,6 +174,8 @@ fontsize: 10pt
 # Abstract
 
 This report records a bounded research cycle executed through {backend}. {primary_text}
+
+{status_text}
 
 # Context, motivation, and introduction
 
@@ -215,7 +230,7 @@ The committed protocol, per-experiment JSON files, saved predictions, loss histo
 Codex wrote the harness and study fixture; {backend} performed this cycle and authored its interpretation. The harness generated this paper from recorded artifacts. A human supplied the exact specification. Human cleanup and rewriting are in progress.
 '''
     (reports/'paper.md').write_text(paper,encoding='utf-8')
-    (reports/'summary.md').write_text('# All experiments\n\n'+table+'\n\n'+primary_text+'\n\n'+methodology+'\n\n'+interpretation+'\n\n## Sources\n\n'+references+'\n',encoding='utf-8')
+    (reports/'summary.md').write_text('# All experiments\n\n'+status_text+'\n\n'+table+'\n\n'+primary_text+'\n\n'+methodology+'\n\n'+interpretation+'\n\n## Sources\n\n'+references+'\n',encoding='utf-8')
     for record in experiments(cycle):
         text = f"# {record['id']}\n\nMethod: {record['method']}. Analysis: {record['analysis_kind']}.\n\n"
         text += markdown_table({'experiments':[next(r for r in summary['experiments'] if r['id']==record['id'])]})
@@ -225,7 +240,7 @@ Codex wrote the harness and study fixture; {backend} performed this cycle and au
     root_readme = project/'README.md'
     original = root_readme.read_text(encoding='utf-8') if root_readme.exists() else '# '+project.name+'\n'
     start,end = '<!-- EUREKA:RESULTS:START -->','<!-- EUREKA:RESULTS:END -->'
-    block = f'{start}\n## Recorded results\n\n{table}\n\n{primary_text}\n\nSee [full report](cycles/{cycle.name}/reports/summary.md).\n{end}'
+    block = f'{start}\n## Recorded results\n\n{status_text}\n\n{table}\n\n{primary_text}\n\nSee [full report](cycles/{cycle.name}/reports/summary.md).\n{end}'
     if start in original and end in original:
         original = original[:original.index(start)]+block+original[original.index(end)+len(end):]
     else:
@@ -233,8 +248,8 @@ Codex wrote the harness and study fixture; {backend} performed this cycle and au
     root_readme.write_text(original,encoding='utf-8')
     model_dir = cycle/'models'
     model_dir.mkdir(exist_ok=True)
-    (model_dir/'README.md').write_text('---\nlicense: mit\nlibrary_name: pytorch\ntags:\n- reproducibility\n- digits\n---\n\n# '+project.name+'\n\n'
-                                     'Experimental checkpoints, not a production OCR system. Input: flattened digits, normalized by the documented pixel range.\n\n'+table+'\n\n'+primary_text+'\n\n'+methodology+'\n\n'+references,encoding='utf-8')
+    (model_dir/'README.md').write_text('---\ntags:\n- reproducibility\n---\n\n# '+project.name+'\n\n'
+                                     'Experimental checkpoints. Input definitions, preprocessing and usage limitations are specified by the registered protocol and reproduction guide.\n\n'+table+'\n\n'+primary_text+'\n\n'+methodology+'\n\n'+references,encoding='utf-8')
     if (cycle/'study.py').exists():
         shutil.copy2(cycle/'study.py',model_dir/'study.py')
         shutil.copy2(cycle/'research/protocol.json',model_dir/'protocol.json')
@@ -243,12 +258,15 @@ Codex wrote the harness and study fixture; {backend} performed this cycle and au
     shutil.copy2(reports/'paper.md',site/'paper.md')
     (site/'index.html').write_bytes(files('auto_eureka_scientist').joinpath('resources/explorer.html').read_bytes())
     write_json(site/'data.json',{'title':project.name,'cycle':cycle.name,**summary,
+                               'run_status':run_status,
                                'records':[{**r,'outcome':r.get('outcome','measured')} for r in experiments(cycle)],
                                'sources':sources,'claims':claims})
     if pdf:
         if not shutil.which('pandoc') or not shutil.which('pdflatex'):
             raise RuntimeError('PDF rendering requires pandoc and pdflatex; Markdown and site outputs were preserved')
-        command(['pandoc','paper.md','--standalone','--pdf-engine=pdflatex','-o','paper.pdf'],reports,timeout=timeout,cancelled=cancelled)
+        # Inline images avoid longtable/float interactions that can overlap page footers.
+        # https://pandoc.org/MANUAL.html#extension-implicit_figures
+        command(['pandoc','paper.md','--from=markdown-implicit_figures','--standalone','--pdf-engine=pdflatex','-o','paper.pdf'],reports,timeout=timeout,cancelled=cancelled)
         shutil.copy2(reports/'paper.pdf',site/'paper.pdf')
     return summary
 

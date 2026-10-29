@@ -172,6 +172,8 @@ def main():
                 result = {'id':run['id'],'stop_requested':True}
             store.close()
         print(json.dumps(result,ensure_ascii=False,indent=2),flush=True)
+        if args.command=='verify':
+            return 0 if result['complete'] else 2
         return 0 if not isinstance(result,dict) or result.get('status') not in ('blocked','budget_exhausted','interrupted') else 2
     except (ValueError,OSError,RuntimeError) as exc:
         print(f'eureka: {exc}',file=sys.stderr)

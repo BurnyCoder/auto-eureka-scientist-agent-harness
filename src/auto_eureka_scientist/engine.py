@@ -99,6 +99,7 @@ class Controller:
             write_json(cycle/'research/core-publication.json',receipt)
             self.publisher.branch(number,'pilot')
         if phase in ('pilot','analysis','publish'):
+            self.write_summary()
             render(self.project,cycle,backend='Claude Code' if self.config.backend=='claude' else 'Codex',
                    timeout=min(180,self.remaining()),cancelled=lambda:bool(self.store.get(self.run_id)['stop']))
         if phase in ('pilot','publish'):
@@ -259,6 +260,8 @@ class Controller:
                         # final snapshot too, so public clones can verify the final phase.
                         self.store.update(self.run_id,elapsed=self.consumed+time.monotonic()-self.started)
                         self.write_summary()
+                        render(self.project,cycle,backend='Claude Code' if self.config.backend=='claude' else 'Codex',
+                               timeout=min(180,self.remaining()),cancelled=lambda:bool(self.store.get(self.run_id)['stop']))
                         self.publisher.branch(row['cycle'],'summary')
                         self.publisher.checkpoint(row['cycle'],'summary')
                         break
