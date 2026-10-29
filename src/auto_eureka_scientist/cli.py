@@ -23,7 +23,7 @@ def parser():
         item = commands.add_parser(name)
         item.add_argument('--project',type=Path,default=Path.cwd())
         if name in ('init','run'):
-            item.add_argument('--profile',choices=('research','digits'),default='research')
+            item.add_argument('--profile',choices=('research','digits','digits-replication'),default='research')
             item.add_argument('--task',type=Path,required=name=='run')
         if name in ('run','resume'):
             item.add_argument('--backend',choices=('claude','codex'),required=name=='run')
@@ -36,10 +36,13 @@ def parser():
             item.add_argument('--owner')
             item.add_argument('--repository')
             item.add_argument('--executable')
+            item.add_argument('--hf-collection')
         if name in ('resume','status','stop','verify','render'):
             item.add_argument('--run-id')
         if name in ('verify','render'):
             item.add_argument('--cycle',type=int)
+        if name=='verify':
+            item.add_argument('--phase',choices=PHASES,help='Check draft phase files without accepting a handoff')
         if name=='render':
             item.add_argument('--no-pdf',action='store_true')
             item.add_argument('--backend',choices=('claude','codex'))
@@ -77,7 +80,7 @@ def configuration(args, previous=None):
     values = dict(previous or {'project':str(project),'backend':args.backend,'profile':args.profile})
     if previous and args.backend and args.backend!=previous['backend']:
         raise ValueError('Resume retains its backend; start a new run to change providers')
-    for key in ('model','mode','max_minutes','max_calls','max_cycles','publish','owner','repository','executable'):
+    for key in ('model','mode','max_minutes','max_calls','max_cycles','publish','owner','repository','executable','hf_collection'):
         value = getattr(args,key,None)
         if value is None and not previous:
             variable = f'EUREKA_{args.backend.upper()}_MODEL' if key=='model' else f'EUREKA_{key.upper()}'
@@ -111,6 +114,13 @@ def inspect_artifacts(args):
         raise ValueError('No recorded cycle directory')
     number = args.cycle or (recorded['cycle'] if recorded else int(cycles[-1].name))
     cycle = project/'cycles'/f'{number:03d}'
+    if getattr(args,'phase',None):
+        handoff = {'status':'complete','summary':'Draft file check','artifacts':[],'evidence':[],'issues':[],
+            'stage':'exploration','analysis_kind':'exploratory','objective':'Check draft artifacts',
+            'predictions':[],'alternatives':[],'observations':[],'learning':'','rationale':'Return validation errors',
+            'decision':'continue'}
+        errors = verify_phase(args.phase,cycle,handoff)
+        return {'phase':args.phase,'errors':errors,'complete':not errors,'draft_only':True}
     if args.command=='render':
         summaries = sorted((project/'reports').glob('run-*.json'))
         backend = getattr(args,'backend',None) or (recorded['config']['backend'] if recorded else
@@ -150,7 +160,7 @@ def main():
             config = configuration(args)
             task = args.task.read_text(encoding='utf-8-sig')
             initialize(project,profile=config.profile,task=task)
-            prepare_cycle(project,1,config.profile)
+            prepare_cycle(project,1,config.profile,config.to_dict())
             store = Store(project)
             run_id = store.create(config,task,policy_hash())
             result = asyncio.run(Controller(store,run_id).run())
@@ -162,7 +172,7 @@ def main():
                 if run['status']=='complete':
                     raise ValueError('Run is already complete; start another run for new research')
                 config = configuration(args,run['config'])
-                store.update(run['id'],config=config.to_dict())
+                store.reconfigure(run['id'],config)
                 result = asyncio.run(Controller(store,run['id']).run())
             elif args.command=='status':
                 result = {key:run[key] for key in ('id','status','cycle','phase_index','calls','elapsed','message','config')}

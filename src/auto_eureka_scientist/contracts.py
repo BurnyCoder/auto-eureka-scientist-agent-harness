@@ -26,6 +26,10 @@ PHASE_SCHEMA = object_schema({
 
 
 def validate_handoff(value):
+    if isinstance(value,dict):
+        # Empty navigation/NA fields convey no evidence and need not cost a repair call.
+        value.setdefault('revisit_phase','')
+        value.setdefault('not_applicable',[])
     jsonschema.validate(value, PHASE_SCHEMA)
     for key in ('summary','objective','rationale'):
         if not value[key].strip():

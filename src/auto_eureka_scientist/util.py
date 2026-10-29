@@ -12,7 +12,9 @@ def now() -> str:
 
 
 def digest(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    """Stream large checkpoints using https://docs.python.org/3/library/hashlib.html#hashlib.file_digest."""
+    with path.open('rb') as stream:
+        return hashlib.file_digest(stream,'sha256').hexdigest()
 
 
 def read_json(path: Path):
