@@ -1,5 +1,11 @@
 # Architecture and recovery
 
+[![Research phases, execution loop and durable evidence](images/architecture.svg)](images/architecture.svg)
+
+[Research phases at full size](../reports/figures/architecture-phases.svg) · [Execution and recovery at full size](../reports/figures/architecture-runtime.svg) · [Interactive diagram](https://burnycoder.github.io/auto-eureka-scientist-agent-harness/#architecture-heading)
+
+Solid blue arrows show the usual progression. Dashed teal arrows represent an optional new cycle; dashed amber arrows return failed evidence checks to context construction for a targeted repair. Neel Nanda's research stages apply throughout the operational phases, rather than defining a separate sequence of agents. The state and publication panels show the durable records shared by those phases. A completed schema or retrieved citation is not proof of scientific truth.
+
 `cli.py` parses commands and delegates to `engine.py`. The loop calls imported phase builders/verifiers, backend adapters, transport, publication and rendering modules. The selected CLI does research/editing/execution; the deterministic controller verifies and publishes. There is no second research/review agent.
 
 `config.py` serializes run choices. `workspace.py` attaches or initializes directories without replacing existing instructions. `policy.py` packages the original bytes and extracts section-level evidence requirements. `contracts.py` defines the strict JSON handoff. `phases.py` injects the complete policy on every invocation and checks expected outputs. `science.py` checks prospective provenance, prediction arithmetic, split overlap, and claim/evidence classification. Source retrieval proves access, not the semantic truth of every claim.
@@ -25,3 +31,7 @@ Publication uses authenticated `gh` and `hf` commands, meaningful feature branch
 No sandbox, container, additional permission dialog, or action allowlist is supplied by the harness. Its unrestricted execution flags are explicit in `adapters.py`. The validation profile suppresses native delegated Codex agents and pins Claude helpers so inference cannot silently escape the chosen model/call accounting.
 
 Only the supplied digits profile has live validation evidence. The general controller can initialize or attach other projects, but the bundled numerical reporting specializes in saved classification predictions, validation-loss histories and the registered regularization comparison. Other domains need appropriate metric calculations and verification rules; schema completion alone is insufficient evidence that a new domain is scientifically supported.
+
+## Regenerating the diagrams
+
+The overview, print layouts and accessible website descriptions share [one source module](../src/auto_eureka_scientist/architecture.py). Its phase keys are checked against the controller's `PHASES` contract. `uv run --extra research --extra cuda python scripts/summarize_validation.py` regenerates the README assets, paper figures and website views together with the existing numerical report. `eureka render` also uses these views in newly rendered study reports and explorers. The website offers view selection, keyboard-operable zoom, a fit control, a full-size vector link and a text description.

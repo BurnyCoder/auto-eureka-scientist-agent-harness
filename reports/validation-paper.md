@@ -19,6 +19,20 @@ The architecture draws on [Anthropic's harness design](https://www.anthropic.com
 
 The original bounded trials follow reports/validation-preregistration.md. The user-authorized Haiku continuation and Sonnet/GPT-6.1 Sol replications follow reports/validation-extension-preregistration.md. Original and extended Haiku rows are successive observations of the same run, not independent trials. Sonnet and Sol use known evaluation data and are explicitly exploratory engineering replications. The scientific definitions retain the fixed weight-decay comparison, simple baselines, shuffled training labels, registered seeds and descriptive sensitivity. Test-example bootstrap intervals condition on the trained models. The shared implementation is a confound for any claim about independent algorithm discovery.
 
+\clearpage
+
+![Research cycle, publication gates and optional return to a new cycle.](figures/architecture-phases.png){width=95%}
+
+*Operational phases. Distillation and review may reopen earlier work; changed hypotheses preserve earlier observations in a separate cycle.*
+
+\clearpage
+
+![Execution loop, durable memory and bounded recovery.](figures/architecture-runtime.png){width=100%}
+
+*Execution architecture. The selected CLI produces evidence; the controller verifies, persists and publishes it. See [architecture and recovery](https://github.com/BurnyCoder/auto-eureka-scientist-agent-harness/blob/main/docs/architecture.md) for implementation details.*
+
+\clearpage
+
 # Results, claims, discussion, and implications
 
 # Recorded validation outcomes
@@ -232,6 +246,8 @@ Public checkpoints were loaded with tensor-only or non-pickle readers and their 
 
 *First saved test examples per method; regenerated from saved predictions.*
 
+
+\clearpage
 
 # Conclusion
 
