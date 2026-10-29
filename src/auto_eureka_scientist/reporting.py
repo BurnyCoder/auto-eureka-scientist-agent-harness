@@ -76,7 +76,8 @@ def figures(cycle: Path):
         return
     fig, ax = plt.subplots(figsize=(9,max(3,len(records)*.3)))
     for i,row in enumerate(records):
-        ax.scatter(row['accuracy'],i,color='#0072B2' if row.get('split')=='test' else '#D55E00')
+        if row.get('accuracy') is not None:
+            ax.scatter(row['accuracy'],i,color='#0072B2' if row.get('split')=='test' else '#D55E00')
     ax.set(yticks=range(len(records)),yticklabels=[r['id'] for r in records],xlim=(0,1),xlabel='Accuracy (fraction)',
            title='Recorded outcomes: blue = test; orange = validation pilot')
     ax.grid(axis='x',alpha=.25)
@@ -224,7 +225,8 @@ Codex wrote the harness and supplied study fixture. {backend} executed this cycl
     shutil.copy2(reports/'paper.md',site/'paper.md')
     (site/'index.html').write_bytes(files('auto_eureka_scientist').joinpath('resources/explorer.html').read_bytes())
     write_json(site/'data.json',{'title':project.name,'cycle':cycle.name,**summary,
-                               'records':experiments(cycle),'sources':sources,'claims':claims})
+                               'records':[{**r,'outcome':r.get('outcome','measured')} for r in experiments(cycle)],
+                               'sources':sources,'claims':claims})
     if pdf:
         if not shutil.which('pandoc') or not shutil.which('pdflatex'):
             raise RuntimeError('PDF rendering requires pandoc and pdflatex; Markdown and site outputs were preserved')
