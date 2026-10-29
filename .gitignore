@@ -1,0 +1,22 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+.env
+.eureka/
+workspaces/
+tmp/
+*.pdf
+*.png
+*.safetensors
+*.pt
+*.sqlite3*
+.pytest_cache/
+!docs/images/*.png
+!reports/*.pdf
