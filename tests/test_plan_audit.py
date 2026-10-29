@@ -177,3 +177,26 @@ def test_claude_pin_covers_internal_background_models(tmp_path):
     assert model_error(config,Response(models=['claude-sonnet-different']))
     with pytest.raises(ValueError,match='pin'):
         RunConfig(str(tmp_path),'claude',model='sonnet',model_pin='claude-haiku-other')
+
+
+@pytest.mark.asyncio
+async def test_controller_recheck_preserves_agent_cited_receipt(tmp_path):
+    """A successful repeat check must not overwrite the agent's cited evidence."""
+    import sys
+    from auto_eureka_scientist.engine import Controller
+    from auto_eureka_scientist.science import artifact_evidence
+    from auto_eureka_scientist.util import read_json
+    cycle = tmp_path/'cycles/001'
+    write_json(cycle/'research/checks.json',{'command':[sys.executable,'-c','print("check passed")'],'cwd':'cycle'})
+    original = {'agent_check':'original output including negative probes'}
+    write_json(cycle/'research/core-checks.json',original)
+    write_json(cycle/'research/evidence.json',[{'id':'audit-core-checks','analysis_kind':'exploratory',
+        'path':'cycles/001/research/core-checks.json','sha256':digest(cycle/'research/core-checks.json')}])
+    store = Store(tmp_path)
+    run_id = store.create(RunConfig(str(tmp_path),'claude'),'offline','policy')
+    await Controller(store,run_id,echo=False).check_command(cycle)
+    evidence,errors = artifact_evidence(cycle)
+    assert not errors
+    assert read_json(tmp_path/evidence[0]['path'])==original
+    assert read_json(cycle/'research/core-checks.json')['returncode']==0
+    store.close()
