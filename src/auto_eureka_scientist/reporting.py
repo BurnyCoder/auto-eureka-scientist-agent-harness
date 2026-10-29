@@ -163,7 +163,7 @@ def render(project: Path, cycle: Path, *, backend='Codex', pdf=True, timeout=180
     methodology = '\n'.join(f'- **{key}**: {json.dumps(protocol[key],ensure_ascii=False)}' for key in
                              ('question','architecture','optimizer','learning_rate','batch_size','epochs','methods','seeds','data_boundaries','analysis_plan','hyperparameter_rationale') if key in protocol)
     def figure(name,caption):
-        return f'![{caption}](../figures/{name}.png)' if (cycle/f'figures/{name}.png').exists() else f'{caption}: no applicable measurement recorded.'
+        return f'![{caption}](../figures/{name}.png)\n\n*{caption}.*' if (cycle/f'figures/{name}.png').exists() else f'{caption}: no applicable measurement recorded.'
     paper = f'''---
 title: "{project.name}: reproducible research report"
 author: 'Libor “Burny” Burian'
@@ -264,7 +264,9 @@ Codex wrote the harness and study fixture; {backend} performed this cycle and au
     if pdf:
         if not shutil.which('pandoc') or not shutil.which('pdflatex'):
             raise RuntimeError('PDF rendering requires pandoc and pdflatex; Markdown and site outputs were preserved')
-        command(['pandoc','paper.md','--standalone','--pdf-engine=pdflatex','-o','paper.pdf'],reports,timeout=timeout,cancelled=cancelled)
+        # Inline images avoid longtable/float interactions that can overlap page footers.
+        # https://pandoc.org/MANUAL.html#extension-implicit_figures
+        command(['pandoc','paper.md','--from=markdown-implicit_figures','--standalone','--pdf-engine=pdflatex','-o','paper.pdf'],reports,timeout=timeout,cancelled=cancelled)
         shutil.copy2(reports/'paper.pdf',site/'paper.pdf')
     return summary
 

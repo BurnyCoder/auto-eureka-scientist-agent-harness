@@ -73,5 +73,5 @@ if __name__=='__main__':
     args = parser.parse_args()
     result = verify(args.project.resolve(),args.url)
     write_json(args.output,result)
-    print({'passed':result['passed'],'checkpoints':len(result['records']),'output':str(args.output)})
+    print({'passed':result['passed'],'experiment_records':len(result['records']),'output':str(args.output)})
     raise SystemExit(0 if result['passed'] else 1)
