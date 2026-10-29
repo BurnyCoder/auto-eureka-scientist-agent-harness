@@ -59,6 +59,8 @@ You may read .eureka logs for this project. The controller handles those publica
 Use installed tools directly; no sandbox or permission prompts are imposed by the harness.
 Do not ask the user to proceed. On an actual blocker, return status blocked and a concrete explanation.
 Research protocol histories and result files must be preserved; never delete negative results.
+Only per-experiment records belong in results/*.json; put derived summaries and auxiliary analyses in research/ or reports/.
+On a repair, reuse valid existing artifacts and measurements. Correct the listed failures; do not repeat training merely to repair a handoff path.
 Required deliverables: {json.dumps(DELIVERABLES[phase])}
 Instructions: {INSTRUCTIONS[phase]}
 {fixture}

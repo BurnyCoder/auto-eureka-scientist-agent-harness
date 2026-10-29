@@ -127,6 +127,7 @@ class Controller:
 
     async def phase(self, phase: str, cycle: Path):
         key = f'pending:{self.store.get(self.run_id)["cycle"]}:{phase}'
+        errors = []
         # A controller may crash after the CLI has finished but before its result commits.
         # Recover only a complete provider terminal event, then revalidate the files.
         unfinished = [a for a in self.store.attempts(self.run_id) if a['cycle']==self.store.get(self.run_id)['cycle']
@@ -160,6 +161,9 @@ class Controller:
                     self.store.finish_attempt(attempt['id'],'accepted',audit)
                     write_json(logs/'outcome.json',audit)
                     self.store.receipt(self.run_id,key,{'handoff':response.value})
+                else:
+                    self.store.finish_attempt(attempt['id'],'failed',{'errors':errors,'models':response.models,
+                                              'usage':response.usage,'handoff':response.value,'recovered_from_terminal_event':True})
         pending = self.store.receipt(self.run_id,key)
         if pending and not pending.get('consumed'):
             errors = verify_phase(phase,cycle,pending['handoff'])
@@ -167,7 +171,6 @@ class Controller:
                 await self.finalize(phase,cycle,pending['handoff'])
                 self.store.receipt(self.run_id,key,{'consumed':True})
                 return pending['handoff']
-        errors = []
         repairs,transports = 0,0
         while True:
             if reason := self.limit_reason(call=True):
@@ -203,7 +206,7 @@ class Controller:
                     errors.append('Digits trial research requires an observed native web search/fetch tool event')
                 if self.config.profile=='digits' and phase=='experiments':
                     required = {f'{method}_s{seed}' for method in ('regularized','unregularized','sensitivity','shuffled_labels') for seed in (0,1,2)}|{'logistic_s0','class_prior_s0','pilot_regularized_s0'}
-                    missing = required-{r['id'] for r in experiments(cycle)}
+                    missing = required-{r.get('id') for r in experiments(cycle) if isinstance(r,dict)}
                     if missing:
                         errors.append(f'Missing registered comparisons: {sorted(missing)}')
             audit = {'execution':asdict(execution),'errors':errors,'models':response.models,
