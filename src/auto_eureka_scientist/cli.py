@@ -12,7 +12,7 @@ from .phases import verify_phase
 from .policy import policy_hash
 from .reporting import render
 from .state import Store
-from .util import command
+from .util import command, read_json
 from .workspace import initialize, prepare_cycle
 
 
@@ -42,6 +42,7 @@ def parser():
             item.add_argument('--cycle',type=int)
         if name=='render':
             item.add_argument('--no-pdf',action='store_true')
+            item.add_argument('--backend',choices=('claude','codex'))
         if name=='doctor':
             item.add_argument('--backend',choices=('claude','codex'))
     return root
@@ -92,6 +93,42 @@ def configuration(args, previous=None):
     return RunConfig(**values)
 
 
+def inspect_artifacts(args):
+    """A public clone can regenerate evidence without private SQLite conversations."""
+    project = args.project.resolve()
+    recorded = None
+    if (project/'.eureka/state.sqlite3').exists():
+        store = Store(project)
+        try:
+            recorded = store.get(args.run_id)
+        except ValueError:
+            if args.run_id:
+                raise
+        finally:
+            store.close()
+    cycles = sorted(path for path in (project/'cycles').glob('*') if path.is_dir() and path.name.isdigit())
+    if not cycles:
+        raise ValueError('No recorded cycle directory')
+    number = args.cycle or (recorded['cycle'] if recorded else int(cycles[-1].name))
+    cycle = project/'cycles'/f'{number:03d}'
+    if args.command=='render':
+        summaries = sorted((project/'reports').glob('run-*.json'))
+        backend = getattr(args,'backend',None) or (recorded['config']['backend'] if recorded else
+                   read_json(summaries[-1]).get('backend') if summaries else None)
+        return render(project,cycle,backend={'claude':'Claude Code','codex':'Codex'}.get(backend,'an unrecorded backend'),pdf=not args.no_pdf)
+    if recorded:
+        store = Store(project)
+        completed = {p['name']:p['result'] for p in store.phases(recorded['id'],number)}
+        store.close()
+    else:
+        history = cycle/'research/decisions.jsonl'
+        completed = {row['phase']:{key:value for key,value in row.items() if key not in ('phase','at')}
+                     for line in history.read_text(encoding='utf-8').splitlines() if (row:=json.loads(line))} if history.exists() else {}
+    errors = {phase:verify_phase(phase,cycle,handoff) for phase,handoff in completed.items()}
+    return {'cycle':number,'phases':errors,'complete':set(completed)==set(PHASES) and not any(errors.values()),
+            'state_source':'private SQLite' if recorded else 'public artifact history'}
+
+
 def main():
     # Windows redirected consoles may default to a legacy code page; logs stay UTF-8.
     for stream in (sys.stdout,sys.stderr):
@@ -102,6 +139,8 @@ def main():
     try:
         if args.command=='doctor':
             result = doctor(project,args.backend)
+        elif args.command in ('verify','render'):
+            result = inspect_artifacts(args)
         elif args.command=='init':
             task = args.task.read_text(encoding='utf-8-sig') if args.task else ''
             initialize(project,profile=args.profile,task=task)
@@ -131,15 +170,6 @@ def main():
             elif args.command=='stop':
                 store.update(run['id'],stop=1)
                 result = {'id':run['id'],'stop_requested':True}
-            else:
-                cycle_number = args.cycle or run['cycle']
-                cycle = project/'cycles'/f'{cycle_number:03d}'
-                if args.command=='render':
-                    result = render(project,cycle,backend='Claude Code' if run['config']['backend']=='claude' else 'Codex',pdf=not args.no_pdf)
-                else:
-                    completed = store.phases(run['id'],cycle_number)
-                    result = {'cycle':cycle_number,'phases':{p['name']:verify_phase(p['name'],cycle,p['result']) for p in completed}}
-                    result['complete'] = set(p['name'] for p in completed)==set(PHASES) and not any(result['phases'].values())
             store.close()
         print(json.dumps(result,ensure_ascii=False,indent=2),flush=True)
         return 0 if not isinstance(result,dict) or result.get('status') not in ('blocked','budget_exhausted','interrupted') else 2

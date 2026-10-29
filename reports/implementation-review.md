@@ -12,6 +12,8 @@ One review of the implemented controller, adapters, persistence, scientific fixt
 - The class-prior checkpoint path originally marked reload verification without performing the read. The fixture now reloads it and verifies predictions. Baselines report CPU execution rather than inheriting the available neural-device label. Both changes were completed before any training.
 - The paper attribution now distinguishes the Codex-authored harness/fixture from the selected backend's research phases and interpretation.
 - The live Haiku pilot exposed the provider-message parser issue in the already-running controller. Its terminal event and corrected artifacts were intact. Recovery now recognizes a completed terminal event, reparses and verifies the handoff, and resumes publication without another inference. A fake-process regression reproduces a parser crash at this exact boundary. Historical attempts lacking a saved process exit record retain unknown execution metadata.
+- Public-clone inspection now uses published decision history without requiring the private SQLite database. Auxiliary aggregate files no longer count as experiment samples. Local claim evidence has an explicit hash-and-analysis-kind ledger, and resumed repairs receive previous failure details. These fixes followed observed Haiku contract failures; the trial is therefore also a development run, not an untouched evaluation of a frozen harness version.
+- Publication subprocesses now honor stop requests while draining both output pipes; PDF subprocesses receive the remaining time budget. Cancellation tests cover this path separately from model invocations.
 
 ## Scientific assessment and limits
 

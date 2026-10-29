@@ -17,6 +17,7 @@ def test_bootstrap_uses_matched_predictions_and_keeps_negative_results(tmp_path)
                 'analysis_kind':'confirmatory','y_true':[0,1,1,1],'y_pred':predictions,
                 'example_ids':[10,11,12,13], 'accuracy':.25 if method=='regularized' else 1.,
                 'started_at':'2026-01-02','protocol_sha256':registration['protocol_sha256']})
+    write_json(tmp_path/'results/auxiliary-summary.json',{'mean_difference':999,'description':'Not a per-experiment record'})
     summary = metrics(tmp_path)
     assert summary['primary']['mean_difference'] == -.75
     assert summary['primary']['conclusion'] == 'contradicts improvement'

@@ -39,6 +39,8 @@ def metrics(cycle: Path) -> dict:
             paired.append((np.asarray(left['y_pred']) == truth).astype(float)-(np.asarray(right['y_pred']) == truth))
     if paired and len(paired) == len(protocol['seeds']):
         differences = np.asarray(paired)
+        if not np.any(differences):
+            result['limitations'].append('No discordant predictions were observed in the primary pairs. The empirical bootstrap interval collapses to zero; this is not an equivalence test or a guarantee about unseen examples.')
         per_example = differences.mean(axis=0)
         rng = np.random.default_rng(protocol.get('bootstrap_seed',2026))
         n_resamples = protocol.get('bootstrap_resamples',10000)
@@ -114,7 +116,7 @@ def figures(cycle: Path):
     plt.close(fig)
 
 
-def render(project: Path, cycle: Path, *, backend='Codex', pdf=True) -> dict:
+def render(project: Path, cycle: Path, *, backend='Codex', pdf=True, timeout=180, cancelled=None) -> dict:
     """One command rebuilds reports, figures, paper, model card, and browser data."""
     summary = metrics(cycle)
     reports = cycle/'reports'
@@ -137,6 +139,10 @@ def render(project: Path, cycle: Path, *, backend='Codex', pdf=True) -> dict:
         'a completed experiment is not evidence that the favored hypothesis is true.')
     claims = read_json(cycle/'research/claims.json') if (cycle/'research/claims.json').exists() else []
     source_urls = {s['id']:s['url'] for s in sources}
+    ledger = cycle/'research/evidence.json'
+    if ledger.exists():
+        import os
+        source_urls.update({r['id']:Path(os.path.relpath(project/r['path'],reports)).as_posix() for r in read_json(ledger)})
     def evidence_link(identifier):
         url = source_urls.get(identifier,f'../results/{identifier}.json')
         return f'[{identifier}]({url})'
@@ -242,7 +248,7 @@ Codex wrote the harness and study fixture; {backend} performed this cycle and au
     if pdf:
         if not shutil.which('pandoc') or not shutil.which('pdflatex'):
             raise RuntimeError('PDF rendering requires pandoc and pdflatex; Markdown and site outputs were preserved')
-        command(['pandoc','paper.md','--standalone','--pdf-engine=pdflatex','-o','paper.pdf'],reports,timeout=180)
+        command(['pandoc','paper.md','--standalone','--pdf-engine=pdflatex','-o','paper.pdf'],reports,timeout=timeout,cancelled=cancelled)
         shutil.copy2(reports/'paper.pdf',site/'paper.pdf')
     return summary
 
