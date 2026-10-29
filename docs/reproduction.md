@@ -27,6 +27,8 @@ Rebuild the harness-level validation tables, report, PDF and Pages data from the
 uv run --extra research --extra cuda python scripts/summarize_validation.py
 ```
 
+This command also regenerates the shared architecture diagrams in the README, paper and website. The figures have separate overview, research-phase and execution/recovery layouts; all use the same authored architecture definitions.
+
 The saved snapshots preserve the observed trial status. This command does not run either coding CLI, download credentials, or infer that a constructed public URL is reachable. Independent verification receipts are stored under `reports/verification/` when available.
 
 The original Haiku cutoff and its continuation refer to the same observations. Regeneration retains both execution statuses while showing unchanged scientific measurements once. The shared [Hugging Face collection](https://huggingface.co/collections/BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75) links all trial bundles. Parent repairs and claim corrections are disclosed in [the interpretation](../reports/validation-interpretation.md); reproducing saved measurements does not turn these development runs into independent scientific confirmation.

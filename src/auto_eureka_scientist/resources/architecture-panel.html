@@ -1,0 +1,33 @@
+<section class="architecture-panel" aria-labelledby="architecture-heading">
+<style>
+.architecture-panel{margin:32px 0;padding:24px;border:1px solid #cddce5;border-radius:18px;background:#fff;box-shadow:0 10px 35px #142d4008;color:#142d40}
+.architecture-panel *{box-sizing:border-box}.architecture-panel h2{font-size:1.65rem;line-height:1.2;margin:6px 0 12px}.architecture-panel .arch-kicker{font-size:.72rem;letter-spacing:.14em;font-weight:700;color:#087f80}.architecture-panel p{max-width:75ch;color:#506778;margin:8px 0 20px}
+.arch-toolbar{display:flex;gap:14px;justify-content:space-between;flex-wrap:wrap;align-items:center;margin:18px 0}.arch-tabs{display:flex;gap:5px;flex-wrap:wrap;background:#f2f6f8;border-radius:10px;padding:5px}.architecture-panel button{font:inherit;font-size:.85rem;border:1px solid transparent;border-radius:7px;background:transparent;color:#506778;padding:8px 12px;cursor:pointer}.architecture-panel button[aria-pressed="true"]{background:#142d40;color:#fff;box-shadow:0 2px 7px #142d4020}.architecture-panel button:focus-visible,.architecture-panel a:focus-visible,.architecture-panel input:focus-visible,.architecture-panel summary:focus-visible{outline:3px solid #087f80;outline-offset:3px}.arch-zoom{display:flex;align-items:center;gap:10px;font-size:.82rem}.arch-zoom label{margin:0}.arch-zoom input{width:95px;accent-color:#087f80}.arch-zoom output{min-width:3.5em;font-variant-numeric:tabular-nums}.arch-viewport{overflow:auto;max-height:76vh;border:1px solid #dce6ec;border-radius:12px;background:#f2f6f8;overscroll-behavior:contain}.arch-viewport img{display:block;width:100%;height:auto;max-width:none}.arch-links{display:flex;gap:18px;flex-wrap:wrap;margin:13px 0;font-size:.85rem}.architecture-panel details{border-top:1px solid #dce6ec;margin-top:20px;padding-top:16px;font-size:.9rem}.architecture-panel summary{cursor:pointer;font-weight:600}.architecture-panel li{margin:9px 0;color:#506778}.architecture-panel strong{color:#142d40}
+@media(max-width:600px){.architecture-panel{padding:15px;border-radius:12px}.architecture-panel h2{font-size:1.35rem}.arch-toolbar{gap:8px}.arch-tabs{width:100%}.architecture-panel button{padding:8px 9px}.arch-zoom{width:100%;justify-content:space-between}.arch-viewport{max-height:65vh}}
+</style>
+<div class="arch-kicker">THE ARCHITECTURE</div>
+<h2 id="architecture-heading">A research cycle with durable memory</h2>
+<p>Follow the eight phases, then look inside the execution loop. Every accepted step connects to evidence, saved state and explicit publication gates.</p>
+<div class="arch-toolbar">
+<div class="arch-tabs" role="group" aria-label="Architecture diagram view">
+<button type="button" data-view="architecture" aria-pressed="true">Overview</button>
+<button type="button" data-view="architecture-phases" aria-pressed="false">Research phases</button>
+<button type="button" data-view="architecture-runtime" aria-pressed="false">Execution + recovery</button>
+</div>
+<div class="arch-zoom"><label for="architecture-zoom">Zoom</label><input id="architecture-zoom" type="range" min="100" max="300" step="25" value="100"><output for="architecture-zoom">100%</output><button type="button" data-fit>Fit</button></div>
+</div>
+<div class="arch-viewport" tabindex="0" role="region" aria-label="Architecture diagram; scroll to explore when zoomed">
+<img src="figures/architecture.svg" alt="Architecture overview: eight phases, one selected coding CLI, evidence verification, durable state and publication." loading="lazy">
+</div>
+<div class="arch-links"><a class="arch-open" href="figures/architecture.svg" target="_blank" rel="noopener">Open full-size SVG ↗</a><a href="https://github.com/BurnyCoder/auto-eureka-scientist-agent-harness/blob/main/docs/architecture.md">Architecture documentation ↗</a></div>
+<details><summary>Read the architecture as text</summary><ol><!-- PHASE_DESCRIPTIONS --></ol><p>Each phase builds a fresh context, invokes the selected Claude Code or Codex model, verifies its artifacts, then persists and publishes progress. SQLite retains attempts, budgets and pending handoffs. Research files retain observations; raw logs stay local. Repair and publication recovery use durable evidence. Changed hypotheses after observed results require a new protocol and cycle. The controller's structural checks do not guarantee scientific truth.</p></details>
+<script>
+// Native controls keep the figure keyboard-accessible without another UI dependency.
+(()=>{const panel=document.currentScript.closest('.architecture-panel'),image=panel.querySelector('img'),viewport=panel.querySelector('.arch-viewport'),zoom=panel.querySelector('input'),output=panel.querySelector('output'),link=panel.querySelector('.arch-open');
+const descriptions={architecture:'Architecture overview: eight phases, one selected coding CLI, evidence verification, durable state and publication.','architecture-phases':'Research phases from scope and preregistration through core, pilot, comparisons, analysis, review and publication.','architecture-runtime':'Execution loop: build context, invoke one CLI, verify evidence, finalize progress; durable memory and bounded recovery.'};
+function scale(){image.style.width=zoom.value+'%';output.textContent=zoom.value+'%'}
+function fit(){zoom.value='100';scale();viewport.scrollTo(0,0)}
+zoom.addEventListener('input',scale);panel.querySelector('[data-fit]').addEventListener('click',fit);
+panel.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{panel.querySelectorAll('[data-view]').forEach(item=>item.setAttribute('aria-pressed',String(item===button)));image.src='figures/'+button.dataset.view+'.svg';image.alt=descriptions[button.dataset.view];link.href=image.src;fit()}));})();
+</script>
+</section>
