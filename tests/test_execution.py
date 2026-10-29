@@ -3,8 +3,10 @@ import asyncio
 import json
 import sys
 import time
+import pytest
 
 from auto_eureka_scientist.execution import execute
+from auto_eureka_scientist.util import command
 
 
 def test_long_unicode_output_and_both_pipes(tmp_path):
@@ -32,4 +34,13 @@ def test_deadline_and_stop_are_distinct(tmp_path):
                                     cancel, echo=False))
         assert result.reason == reason
         assert result.returncode != 0
+
+
+def test_publication_commands_stop_promptly_and_preserve_both_pipes(tmp_path):
+    started = time.monotonic()
+    with pytest.raises(InterruptedError,match='stop requested'):
+        command([sys.executable,'-c','import time; time.sleep(60)'],tmp_path,
+                cancelled=lambda:time.monotonic()-started>.3)
+    assert time.monotonic()-started<5
+    assert command([sys.executable,'-c','import sys; print("x"*100000); print("y"*100000,file=sys.stderr)'],tmp_path)=='x'*100000
 

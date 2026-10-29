@@ -69,7 +69,7 @@ def parse_response(backend: str, logs: Path) -> Response:
             if model and model not in response.models:
                 response.models.append(model)
             if event.get('type') in ('error','turn.failed') or event.get('is_error'):
-                response.error = str(event.get('error') or event.get('result') or event)
+                response.error = str(event.get('error') or event.get('errors') or event.get('result') or event.get('subtype') or event.get('type'))
             if event.get('usage'):
                 response.usage = event['usage']
             if event.get('modelUsage'):
