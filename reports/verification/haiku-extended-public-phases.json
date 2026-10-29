@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-29T21:15:51.511+00:00",
+  "revision": "530824f3c2f7971ce5d3547efdcbaa250fef66d3",
+  "verification": {
+    "cycle": 1,
+    "phases": {
+      "research": [],
+      "preregister": [],
+      "core": [],
+      "pilot": [],
+      "experiments": [],
+      "analysis": [],
+      "review": [],
+      "publish": []
+    },
+    "complete": true,
+    "state_source": "public artifact history"
+  }
+}

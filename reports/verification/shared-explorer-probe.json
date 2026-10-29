@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-29T22:11:05.453+00:00",
+  "scope": "Actual shared explorer script exercised with Sol saved records and its local DOM adapter; not a browser observation.",
+  "template_sha256": "5b8fdd0678455d252daaff6d8072228b8b7900d05d2cef3c8794916d71f08dc2",
+  "test_sha256": "ea1f8c2cb18a9dd1c3c5dbbe4f9a6ba09a56ac529f2fb81df3d5a0ff139a8ae5",
+  "result": {
+    "analysis_kind": "exploratory",
+    "environment": "Node vm with minimal DOM/canvas adapter; no browser rendering",
+    "passed": {
+      "counts": {
+        "all": 15,
+        "id": 1,
+        "method": 1,
+        "seed": 7,
+        "split": 14,
+        "outcome": 15,
+        "conflicting_filters": 0,
+        "reset": 15
+      },
+      "examples_identify_run": true
+    },
+    "error_path": {
+      "fetch_error_displayed": true
+    }
+  }
+}

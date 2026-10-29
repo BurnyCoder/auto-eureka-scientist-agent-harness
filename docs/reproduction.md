@@ -13,7 +13,7 @@ uv run --extra research --extra cuda eureka verify --project workspaces/eureka-d
 uv run --extra research --extra cuda python scripts/verify_artifacts.py --project workspaces/eureka-digits-haiku --output reports/haiku-reproduction.json
 ```
 
-Replace `haiku` with `luna` for the other independently recorded trial. Omit the `cuda` extra on platforms without a compatible CUDA wheel; CPU regeneration is supported. Exact package versions are in `uv.lock`; observed training versions and device details are in each result record. CPU and CUDA installation choices are explicit because wheel availability can differ. The checkpoint verification command performs CPU inference and checks hashes and saved predictions, without training or inference through an LLM.
+Replace `haiku` with `luna`, `sonnet` or `sol` for the other recorded projects. Haiku's current repository contains its completed continuation; its original bounded cutoff remains in the harness's saved validation data and historical Git commits. Omit the `cuda` extra on platforms without a compatible CUDA wheel; CPU regeneration is supported. Exact package versions are in `uv.lock`; observed training versions and device details are in each result record. CPU and CUDA installation choices are explicit because wheel availability can differ. The checkpoint verification command performs CPU inference and checks hashes and saved predictions, without training or inference through an LLM.
 
 `render` rebuilds numerical tables, figures, generated experiment reports, the consolidated report, paper, model-card metrics, README results and explorer data. Pandoc and `pdflatex` must be installed for PDF output; `--no-pdf` regenerates the other artifacts. The original predictions remain the source of the regenerated measurements. Authored interpretation and prospective protocols are separate from generated numerical sections.
 
@@ -28,3 +28,5 @@ uv run --extra research --extra cuda python scripts/summarize_validation.py
 ```
 
 The saved snapshots preserve the observed trial status. This command does not run either coding CLI, download credentials, or infer that a constructed public URL is reachable. Independent verification receipts are stored under `reports/verification/` when available.
+
+The original Haiku cutoff and its continuation refer to the same observations. Regeneration retains both execution statuses while showing unchanged scientific measurements once. The shared [Hugging Face collection](https://huggingface.co/collections/BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75) links all trial bundles. Parent repairs and claim corrections are disclosed in [the interpretation](../reports/validation-interpretation.md); reproducing saved measurements does not turn these development runs into independent scientific confirmation.

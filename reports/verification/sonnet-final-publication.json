@@ -1,0 +1,64 @@
+{
+  "at": "2026-10-29T21:23:23.639+00:00",
+  "scope": "Parent artifact review and corrections; no new model call or training.",
+  "github": {
+    "sha": "c22e027009330080580b3f048e5ab888b8594a82",
+    "pr": "https://github.com/BurnyCoder/eureka-digits-sonnet/pull/5",
+    "url": "https://github.com/BurnyCoder/eureka-digits-sonnet",
+    "at": "2026-10-29T21:23:23.637+00:00"
+  },
+  "models": {
+    "repository": "BurnyCoder/eureka-digits-sonnet-models",
+    "url": "https://huggingface.co/BurnyCoder/eureka-digits-sonnet-models",
+    "collection": "https://huggingface.co/collections/BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75",
+    "upload": {
+      "url": "https://huggingface.co/BurnyCoder/eureka-digits-sonnet-models/commit/5e0336a0c7bec39b93dcb55c27f94829dc6abd8d"
+    },
+    "verified": true,
+    "files": {
+      "class_prior.npz": "69a03e6a16427f3f361001066d0aef20c645f1109ce51a744e8319065edda79a",
+      "logistic.npz": "5f6f6257d4ecbc4b66f80fdc6c90bdf032a2f35a008cd2ba395db6af5d5b6c27",
+      "protocol.json": "b5047a8549930ea1abedc111de1fca3f05034826805d4645473912bb5365456b",
+      "README.md": "ab2f8b96acda821ecbabf2b0a7d11a056a3457f1f0a110954dbb440d7644c248",
+      "regularized-s0.safetensors": "a57cb6e24f5e7d2a3e83da8efd97233a4b7e0e5b8492f89b3cbe6064cb86cc3d",
+      "regularized-s1.safetensors": "6d6004f99a91584a2ffbedc1747cf80919909f5010133568624a035d8fe6ac95",
+      "regularized-s2.safetensors": "973a19ffaad8399256d974e76d6eb0ebd42f9f6a926c6fa089799968ef458537",
+      "sensitivity-s0.safetensors": "d12e34e4c990874be8603a5d0ac6cb06f5648db4245afaed83ab7182cb94e220",
+      "sensitivity-s1.safetensors": "3c5ae5b269a45bd5c74baf47384f13a469d5475e88be331db1510202ff14d930",
+      "sensitivity-s2.safetensors": "86900e93b81224dd2bcf1413be63694a0488d16bfe7d25b1bd3e631c36bd90d3",
+      "shuffled_labels-s0.safetensors": "66f8ea92d43937a7e09f420751597b3c60c560aa35ecc27aea45b21a287223dc",
+      "shuffled_labels-s1.safetensors": "960a5428d49a66052acb46f8238b37f059ef37d868b7fcc082631feab864dee7",
+      "shuffled_labels-s2.safetensors": "cea6d947279edfed5d90d9a1df01c0c034f06341a0435366d4b63924d4f04b66",
+      "study.py": "a16454eb60949757d367bb81811a539d026eefa940575476e732e4c73cfe9358",
+      "unregularized-s0.safetensors": "6e09e36eb29b0f2e691039f76708d6306dc3483e82726d6ac9f5cdf971d009f2",
+      "unregularized-s1.safetensors": "865d50b44158576353bbeb744304210c29ed5642e3b9b6f4235b9e2f48395b77",
+      "unregularized-s2.safetensors": "227cf9c01e4e3da3838bb3be23cea540ca1e2d4b69ebebbabc637e5ed7f3e7fe"
+    },
+    "at": "2026-10-29T21:23:09.157+00:00"
+  },
+  "observations_unchanged_from_public_clone": {
+    "cycles/001/study.py": "a16454eb60949757d367bb81811a539d026eefa940575476e732e4c73cfe9358",
+    "cycles/001/research/protocol.json": "b5047a8549930ea1abedc111de1fca3f05034826805d4645473912bb5365456b",
+    "cycles/001/results/class_prior_s0.json": "73e1b654e12ef4b7b8a461e931b22e75f29c96fd5d5234d505eda780fd43ccbc",
+    "cycles/001/results/logistic_s0.json": "22c73dc4218c3d07068e944f88091785572d94166d700b1e9494be84f890dc46",
+    "cycles/001/results/pilot_regularized_s0.json": "686c1c4a522af99dae4f03403427b6f68d5fd50579650259e12587ce717f5014",
+    "cycles/001/results/regularized_s0.json": "342d7a3fc6ee43c772ba1befa388482f9b88b478d861fefd3a2ae2177b1ad268",
+    "cycles/001/results/regularized_s1.json": "0501ae8d8a90a09a008a4c134a27d25dabec852a8d5ed0d0ae9cd0e6d88b3167",
+    "cycles/001/results/regularized_s2.json": "e183c8dc6ca968c7df8d64744f705241558553f2bc2484f4c3736d1c1bf79c8d",
+    "cycles/001/results/sensitivity_s0.json": "bd7afc84b1ec3ca76305baa9440845086aace7bd26fefb21f90b7ddca7c46487",
+    "cycles/001/results/sensitivity_s1.json": "aa2f87abc8d547e38ba588cc206904883c033592934f8e445e38fb5997ce1ba8",
+    "cycles/001/results/sensitivity_s2.json": "172e94302d0bacc9f46aade349be2a969561fe76e891c7fe3d0b8f64b67b3f7b",
+    "cycles/001/results/shuffled_labels_s0.json": "914e060f6d89c5c943d9c841579f5f0fc0d15179c00956e13eb260889a60067c",
+    "cycles/001/results/shuffled_labels_s1.json": "347a7163afb8d9b25813b23f1d87eeb878fbf5b9d6ec571f27706e90bfafc47d",
+    "cycles/001/results/shuffled_labels_s2.json": "c9b140ee6544fd377b42c7fb7a19c9678cd1f8bd16fe5f1127c09c9ead264d99",
+    "cycles/001/results/unregularized_s0.json": "ff6dc461d22eaa7b35a6dd550fb2ffbf563a534e4cda0482b9b5b3fdfce47c7f",
+    "cycles/001/results/unregularized_s1.json": "dce8884cae3d08732c1b2408ae71d43f868065dc3bd3a8c4bf60dc8478d07b71",
+    "cycles/001/results/unregularized_s2.json": "4fd8b5582eea4d51eaa355eb6e7c1ab3829fb5bf8224ccde45af2f3434889623"
+  },
+  "unchanged_run_counters": {
+    "status": "complete",
+    "calls": 9,
+    "elapsed": 795.1688581000199,
+    "phase_index": 8
+  }
+}

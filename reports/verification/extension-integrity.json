@@ -1,0 +1,43 @@
+{
+  "at": "2026-10-29T21:29:03.301+00:00",
+  "policy_sha256": "6a9addc31e8fe730400c32e935c1a62fc7b9f12b615a997f84c0e6025cd3e922",
+  "policy_matches_packaged_copy": true,
+  "policy_matches_original_run": true,
+  "haiku_records_unchanged": true,
+  "haiku_original": {
+    "status": "budget_exhausted",
+    "calls": 17,
+    "active_seconds": 3600.1455705000553,
+    "limits": {
+      "minutes": 60.0,
+      "calls": 20
+    }
+  },
+  "haiku_extended": {
+    "status": "complete",
+    "calls": 20,
+    "active_seconds": 4368.261031400005,
+    "limits": {
+      "minutes": 180.0,
+      "calls": 60
+    }
+  },
+  "additional_haiku_calls": 3,
+  "additional_haiku_active_seconds": 768.1154608999495,
+  "sonnet_accepted_models": [
+    "claude-sonnet-5-5"
+  ],
+  "sonnet_failed_attempts": [
+    {
+      "id": 1,
+      "phase": "research",
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-haiku-5-5"
+      ]
+    }
+  ],
+  "sonnet_pin": "claude-sonnet-5-5",
+  "all_accepted_sonnet_attempts_match_pin": true,
+  "passed": true
+}

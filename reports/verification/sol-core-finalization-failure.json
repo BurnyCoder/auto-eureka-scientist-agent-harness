@@ -1,0 +1,81 @@
+{
+  "id": "c72f3a5b3d76",
+  "backend": "codex",
+  "requested_model": "gpt-6.1-sol",
+  "model_pin": "",
+  "status": "blocked",
+  "message": "Reviewed output changed before snapshot: audit-core-checks",
+  "calls": 3,
+  "active_seconds": 808.8270804000203,
+  "limits": {
+    "minutes": 180.0,
+    "calls": 60
+  },
+  "configuration_history": {
+    "changes": []
+  },
+  "policy_sha256": "6a9addc31e8fe730400c32e935c1a62fc7b9f12b615a997f84c0e6025cd3e922",
+  "completed_phases": [
+    "research",
+    "preregister"
+  ],
+  "attempts": [
+    {
+      "id": 1,
+      "cycle": 1,
+      "phase": "research",
+      "status": "accepted",
+      "started": "2026-10-29T21:19:11.456+00:00",
+      "ended": "2026-10-29T21:23:34.736+00:00",
+      "prompt_sha256": "9f5a7139da412f8efb443f03c8e17526a7e6ccfd3a9faba612bdde2418a569ea",
+      "models": [],
+      "model_identity_status": "not exposed by CLI; requested identifier only",
+      "usage": {
+        "input_tokens": 770763,
+        "cached_input_tokens": 673280,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 9934,
+        "reasoning_output_tokens": 1547
+      },
+      "searched": true
+    },
+    {
+      "id": 2,
+      "cycle": 1,
+      "phase": "preregister",
+      "status": "accepted",
+      "started": "2026-10-29T21:23:34.903+00:00",
+      "ended": "2026-10-29T21:26:31.544+00:00",
+      "prompt_sha256": "fb843c12b65cfbc377c533a38e18c7264074edcde71322f9680c174a9a9fb938",
+      "models": [],
+      "model_identity_status": "not exposed by CLI; requested identifier only",
+      "usage": {
+        "input_tokens": 381976,
+        "cached_input_tokens": 327168,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 6182,
+        "reasoning_output_tokens": 1076
+      },
+      "searched": true
+    },
+    {
+      "id": 3,
+      "cycle": 1,
+      "phase": "core",
+      "status": "accepted",
+      "started": "2026-10-29T21:26:32.172+00:00",
+      "ended": "2026-10-29T21:32:29.951+00:00",
+      "prompt_sha256": "5cbccb96846525ab92e8dedbc66b40497390ff952be0b12414b8dc74d7796e79",
+      "models": [],
+      "model_identity_status": "not exposed by CLI; requested identifier only",
+      "usage": {
+        "input_tokens": 801076,
+        "cached_input_tokens": 733824,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 14805,
+        "reasoning_output_tokens": 2799
+      },
+      "searched": true
+    }
+  ]
+}

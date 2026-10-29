@@ -1,6 +1,6 @@
 # Requirement-to-evidence map
 
-This map distinguishes implemented behavior from observed live acceptance. The [generated report](../reports/validation-summary.md) records the outcomes: the original Haiku cutoff was incomplete, and Luna's accepted workflow required post-publication provenance repairs. The [second audit](../reports/plan-audit.md) and [prospective extension](../reports/validation-extension-preregistration.md) cover the user's later budget increase and Sonnet/GPT-6.1 Sol authorization. Trial-specific checklists and results are retained in each project. These development executions are not frozen-version autonomy benchmarks.
+This map distinguishes implemented behavior from observed live acceptance. The [generated report](../reports/validation-summary.md) retains the original incomplete Haiku cutoff alongside its extended execution and the Luna, Sonnet and GPT-6.1 Sol trials. The [second audit](../reports/plan-audit.md) and [prospective extension](../reports/validation-extension-preregistration.md) cover the user's later budget increase, interface repairs and additional models. Trial-specific checklists and results are retained in each project. These development executions include disclosed parent interventions and are not frozen-version autonomy benchmarks.
 
 | Requirement | Evidence location |
 |---|---|
@@ -23,6 +23,8 @@ This map distinguishes implemented behavior from observed live acceptance. The [
 | Final checks and visual inspection | Public-clone, checkpoint, PDF and browser receipts under `reports/verification/`; failures and repairs retained |
 
 The final artifact checks are independent of accepted phase counts. Regeneration and parent verification do not fill missing phases or add unrecorded work to a model's budget. Luna's initial failing verification, exact-byte diagnosis and repair ledger document why its original completion status was insufficient. Public evidence snapshots and Git byte-preservation tests address the observed defects.
+
+The later executions additionally exposed a Claude background-model selection issue and a controller audit-overwrite defect. Their failed attempts and repairs remain recorded. Parent claim review corrected overstatements in Haiku and Sonnet after their accepted phases. See [final checks](../reports/final-checks.md) for public artifact verification and [interpretation](../reports/validation-interpretation.md) for the limits of these outcomes.
 
 Full local CLI streams remain in ignored runtime directories. Published execution summaries expose status, prompt hashes, attempts and reported model usage without raw transcripts or credentials. A byte hash verifies identity, not semantic truth; source inspection and claim review still require research judgment. The implementation review documents additional limits of publication retries and hard-crash recovery.
 

@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-29T22:01:25.702+00:00",
+  "project": "tmp\\sol-public-clone",
+  "install": "uv sync --locked --extra cuda",
+  "lockfile_sha256": "c0612759d6aed7264700fdaff03ced6bcc615d87d9303325f885f6591141a1ac",
+  "check_command": ".venv/Scripts/python.exe cycles/001/study.py check",
+  "check_exit_code": 0,
+  "check_status": "passed",
+  "environment": ".venv",
+  "scope": "Fresh public project clone using its own locked environment; no fitting."
+}
