@@ -92,7 +92,6 @@ class Controller:
             sha = commit(self.project,f'Preregister research cycle {number} before results')
             register_protocol(cycle,sha)
         if phase == 'core':
-            await self.check_command(cycle)
             if (cycle/'study.py').exists():
                 write_json(cycle/'research/core-code.json',{'sha256':digest(cycle/'study.py'),'at':now()})
             receipt = self.publisher.checkpoint(number,'core')
@@ -160,6 +159,11 @@ class Controller:
                 raise InterruptedError(execution.reason)
             if not errors:
                 errors = verify_phase(phase,cycle,response.value,fetch=phase=='research')
+                if not errors and phase=='core':
+                    try:
+                        await self.check_command(cycle)
+                    except ValueError as exc:
+                        errors.append(str(exc))
                 if self.config.profile=='digits' and phase=='research' and not response.searched:
                     errors.append('Digits trial research requires an observed native web search/fetch tool event')
                 if self.config.profile=='digits' and phase=='experiments':
