@@ -22,12 +22,17 @@ class RunConfig:
     executable: str = ''
     reasoning: str = 'high'
     hf_collection: str = ''
+    model_pin: str = ''
 
     def __post_init__(self):
         self.project = str(Path(self.project).resolve())
         if self.backend not in ('claude', 'codex'):
             raise ValueError('backend must be claude or codex')
         self.model = self.model or {'claude':'haiku', 'codex':'gpt-6-luna'}[self.backend]
+        if self.model_pin and self.model_pin!=self.model:
+            if not (self.backend=='claude' and self.model in ('haiku','sonnet','opus') and
+                    self.model_pin.startswith(f'claude-{self.model}-')):
+                raise ValueError('model pin must identify the selected model or its Claude alias family')
         if self.mode not in ('cycle', 'continuous', 'budget'):
             raise ValueError('mode must be cycle, continuous, or budget')
         for key in ('max_minutes', 'max_calls', 'max_cycles'):

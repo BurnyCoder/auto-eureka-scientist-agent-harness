@@ -162,3 +162,18 @@ def test_recovery_checks_keep_live_search_requirement(tmp_path,monkeypatch):
     assert not controller.check_outputs('research',tmp_path,{},True)
     assert 'Missing registered comparisons' in controller.check_outputs('experiments',tmp_path,{},False)[0]
     store.close()
+
+
+def test_claude_pin_covers_internal_background_models(tmp_path):
+    from auto_eureka_scientist.adapters import invocation
+    selected = 'claude-sonnet-5-5'
+    config = RunConfig(str(tmp_path),'claude',model='sonnet',model_pin=selected)
+    argv,env = invocation(config,tmp_path,{'ANTHROPIC_DEFAULT_HAIKU_MODEL':'claude-haiku-other'})
+    settings = json.loads(argv[argv.index('--settings')+1])
+    assert argv[argv.index('--model')+1]==selected
+    assert env['ANTHROPIC_DEFAULT_HAIKU_MODEL']==selected
+    assert settings['env']['ANTHROPIC_DEFAULT_HAIKU_MODEL']==selected
+    assert not model_error(config,Response(models=[selected]))
+    assert model_error(config,Response(models=['claude-sonnet-different']))
+    with pytest.raises(ValueError,match='pin'):
+        RunConfig(str(tmp_path),'claude',model='sonnet',model_pin='claude-haiku-other')

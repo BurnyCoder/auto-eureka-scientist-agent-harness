@@ -28,6 +28,7 @@ def parser():
         if name in ('run','resume'):
             item.add_argument('--backend',choices=('claude','codex'),required=name=='run')
             item.add_argument('--model')
+            item.add_argument('--model-pin',help='Pin a selected Claude alias to a full model ID, including background calls')
             item.add_argument('--mode',choices=('cycle','continuous','budget'))
             item.add_argument('--max-minutes',type=float)
             item.add_argument('--max-calls',type=int)
@@ -80,7 +81,7 @@ def configuration(args, previous=None):
     values = dict(previous or {'project':str(project),'backend':args.backend,'profile':args.profile})
     if previous and args.backend and args.backend!=previous['backend']:
         raise ValueError('Resume retains its backend; start a new run to change providers')
-    for key in ('model','mode','max_minutes','max_calls','max_cycles','publish','owner','repository','executable','hf_collection'):
+    for key in ('model','model_pin','mode','max_minutes','max_calls','max_cycles','publish','owner','repository','executable','hf_collection'):
         value = getattr(args,key,None)
         if value is None and not previous:
             variable = f'EUREKA_{args.backend.upper()}_MODEL' if key=='model' else f'EUREKA_{key.upper()}'
@@ -93,6 +94,8 @@ def configuration(args, previous=None):
             values[key] = value
     if previous and args.model and args.model!=previous['model']:
         raise ValueError('Resume retains its model; start a separate run for a different model')
+    if previous and previous.get('model_pin') and args.model_pin and args.model_pin!=previous['model_pin']:
+        raise ValueError('Resume retains its resolved model pin')
     return RunConfig(**values)
 
 

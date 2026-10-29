@@ -22,11 +22,20 @@ def invocation(config: RunConfig, logs: Path, base_env: dict) -> tuple[list[str]
     # Nested CLI sessions use their own conversations. No credentials are copied to files.
     env.pop('CLAUDECODE',None)
     if config.backend == 'claude':
-        env['CLAUDE_CODE_SUBAGENT_MODEL'] = config.model
+        selected = config.model_pin or config.model
+        env['CLAUDE_CODE_SUBAGENT_MODEL'] = selected
         env['CLAUDE_CODE_SUBAGENT_MODEL_FORCE'] = '1'
-        settings = {'sandbox':{'enabled':False}, 'fallbackModel':[], 'availableModels':[config.model]}
+        pinned = {}
+        if selected not in ('haiku','sonnet','opus','fable','default','opusplan'):
+            # Background WebFetch summarization can otherwise use Haiku independently
+            # of subagents. These documented overrides require a full model identifier.
+            # https://code.claude.com/docs/en/model-config#environment-variables
+            pinned = {f'ANTHROPIC_DEFAULT_{family}_MODEL':selected for family in ('HAIKU','SONNET','OPUS')}
+            env.update(pinned)
+        settings = {'sandbox':{'enabled':False}, 'fallbackModel':[], 'availableModels':[selected],
+                    'env':{**pinned,'CLAUDE_CODE_SUBAGENT_MODEL':selected,'CLAUDE_CODE_SUBAGENT_MODEL_FORCE':'1'}}
         schema = {**PHASE_SCHEMA,'required':[key for key in PHASE_SCHEMA['required'] if key not in ('revisit_phase','not_applicable')]}
-        return [executable,'-p','--model',config.model,'--dangerously-skip-permissions',
+        return [executable,'-p','--model',selected,'--dangerously-skip-permissions',
                 '--settings',json.dumps(settings),'--output-format','stream-json','--verbose',
                 '--include-partial-messages','--json-schema',json.dumps(schema)], env
     logs.mkdir(parents=True,exist_ok=True)
@@ -113,9 +122,10 @@ def parse_response(backend: str, logs: Path) -> Response:
 
 def model_error(config: RunConfig, response: Response) -> str:
     """Audit every model identifier actually reported by the CLI, including helpers."""
+    selected = config.model_pin or config.model
     for model in response.models:
-        valid = model == config.model or (config.backend == 'claude' and config.model in ('haiku','sonnet','opus')
-                                         and model.startswith(f'claude-{config.model}-'))
+        valid = model == selected or (config.backend == 'claude' and selected in ('haiku','sonnet','opus')
+                                      and model.startswith(f'claude-{selected}-'))
         if not valid:
             return f'Unexpected model {model}; requested {config.model}. No fallback permitted.'
     return ''
