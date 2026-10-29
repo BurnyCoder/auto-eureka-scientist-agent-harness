@@ -28,8 +28,8 @@ class FakePublisher:
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('backend',['claude','codex'])
-async def test_pipeline_recovers_without_duplicate_model_call(tmp_path,monkeypatch,backend):
+@pytest.mark.parametrize('backend,recovery',[('claude','publication'),('codex','publication'),('claude','parser')])
+async def test_pipeline_recovers_without_duplicate_model_call(tmp_path,monkeypatch,backend,recovery):
     project = tmp_path/'Unicode ž research'
     initialize(project)
     (project/'transient-once').touch()
@@ -44,8 +44,18 @@ async def test_pipeline_recovers_without_duplicate_model_call(tmp_path,monkeypat
     store = Store(project)
     run_id = store.create(RunConfig(str(project),backend,publish=False,max_calls=20),'offline task',policy_hash())
     publisher = FakePublisher()
+    if recovery=='parser':
+        publisher.fail_once = False
+        original_parse = engine.parse_response
+        crashed = []
+        def parse_with_crash(provider,logs):
+            if logs.name.endswith('-pilot') and not crashed:
+                crashed.append(True)
+                raise RuntimeError('Simulated parser outage')
+            return original_parse(provider,logs)
+        monkeypatch.setattr(engine,'parse_response',parse_with_crash)
     first = await Controller(store,run_id,publisher=publisher,echo=False).run()
-    assert first['status']=='blocked' and 'publication outage' in first['message']
+    assert first['status']=='blocked' and f'{recovery} outage' in first['message']
     calls_at_failure = first['calls']
     assert calls_at_failure==(6 if backend=='claude' else 5)
     second = await Controller(store,run_id,publisher=publisher,echo=False).run()
