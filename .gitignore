@@ -20,3 +20,5 @@ tmp/
 .pytest_cache/
 !docs/images/*.png
 !reports/*.pdf
+!site/*.pdf
+!reports/figures/*.png
