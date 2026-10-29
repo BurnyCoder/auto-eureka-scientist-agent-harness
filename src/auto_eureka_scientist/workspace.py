@@ -8,6 +8,19 @@ from .policy import policy_bytes, requirements
 from .util import command, read_json, write_json
 
 
+def preserve_artifact_bytes(project: Path):
+    """Content hashes must survive Git checkout on every operating system.
+
+    https://git-scm.com/docs/gitattributes#_text
+    """
+    attributes = project/'.gitattributes'
+    existing = attributes.read_text(encoding='utf-8') if attributes.exists() else ''
+    additions = [line for line in ('cycles/** -text','site/** -text') if line not in existing.splitlines()]
+    if additions:
+        with attributes.open('a',encoding='utf-8') as stream:
+            stream.write('\n# Preserve exact scientific evidence bytes across Git publication.\n'+'\n'.join(additions)+'\n')
+
+
 def initialize(project: Path, *, profile='research', task='', harness_revision=''):
     project.mkdir(parents=True,exist_ok=True)
     for name in ('.eureka','docs','reports','cycles'):
@@ -33,6 +46,7 @@ def initialize(project: Path, *, profile='research', task='', harness_revision='
     attributes = project/'.gitattributes'
     if not attributes.exists():
         attributes.write_text('* text=auto eol=lf\nresearch-policy.txt -text\n*.png binary\n*.pdf binary\n',encoding='utf-8')
+    preserve_artifact_bytes(project)
     config_path = project/'.eureka/project.json'
     if not config_path.exists():
         write_json(config_path,{'profile':profile,'task':task,'harness_revision':harness_revision})

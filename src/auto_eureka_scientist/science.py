@@ -72,11 +72,61 @@ def artifact_evidence(cycle: Path) -> tuple[list, list]:
         if not record.get('id') or record.get('analysis_kind') not in ('exploratory','confirmatory','not_applicable'):
             errors.append(f'Artifact evidence {record.get("id")}: analysis_kind must be exploratory, confirmatory, or not_applicable; got {record.get("analysis_kind")}')
         path = cycle.parents[1]/record.get('path','')
+        if not path.resolve().is_relative_to(cycle.parents[1].resolve()):
+            errors.append(f'Artifact evidence path is outside its project: {record.get("id")}')
+            continue
         if not path.is_file():
             errors.append(f'Artifact evidence file missing: {record.get("path")}')
         elif record.get('sha256') != digest(path):
             errors.append(f'Artifact evidence hash mismatch: {record.get("id")}')
     return [r for r in records if r.get('id')], errors
+
+
+def snapshot_evidence(cycle: Path, *, allow_unverified=False):
+    """Pin public evidence versions before later phases edit or regenerate files.
+
+    Ignored files stay excluded from public snapshots, including local transcripts
+    and downloaded models. Git's NUL-delimited interface preserves Unicode paths:
+    https://git-scm.com/docs/git-check-ignore
+    """
+    ledger = cycle/'research/evidence.json'
+    if not ledger.exists():
+        return
+    project = cycle.parents[1]
+    records = read_json(ledger)
+    import subprocess
+    paths = [r.get('path','').replace('\\','/') for r in records
+             if (project/r.get('path','')).resolve().is_relative_to(project.resolve())]
+    result = subprocess.run(['git','check-ignore','-z','--stdin'],cwd=project,
+                            input=('\0'.join(paths)+'\0').encode(),capture_output=True,timeout=10)
+    if (project/'.git').exists() and result.returncode not in (0,1):
+        raise ValueError('Could not determine ignored files for public evidence snapshots')
+    ignored = set(result.stdout.decode('utf-8',errors='replace').split('\0'))
+    snapshot_root = cycle/'research/evidence-snapshots'
+    prefix = snapshot_root.relative_to(project).as_posix()+'/'
+    changed = False
+    for record in records:
+        relative = record.get('path','').replace('\\','/')
+        if relative in ignored or relative.startswith((prefix,'.eureka/','.venv/')) or Path(relative).name=='.env':
+            continue
+        original = project/relative
+        if not original.resolve().is_relative_to(project.resolve()):
+            if allow_unverified:
+                continue
+            raise ValueError(f'Artifact evidence path is outside its project: {record.get("id")}')
+        if not original.is_file() or digest(original)!=record.get('sha256'):
+            if allow_unverified:
+                continue
+            raise ValueError(f'Reviewed output changed before snapshot: {record.get("id")}')
+        snapshot = snapshot_root/f'{record["sha256"]}{original.suffix}'
+        snapshot.parent.mkdir(exist_ok=True)
+        if not snapshot.exists():
+            snapshot.write_bytes(original.read_bytes())
+        record['original_path'] = relative
+        record['path'] = snapshot.relative_to(project).as_posix()
+        changed = True
+    if changed:
+        write_json(ledger,records)
 
 
 def retrieve_sources(cycle: Path, timeout=20) -> list[str]:

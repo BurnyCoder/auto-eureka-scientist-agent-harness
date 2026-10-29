@@ -9,7 +9,7 @@ import shutil
 import subprocess
 import xml.etree.ElementTree as ET
 
-from auto_eureka_scientist.reporting import metrics, markdown_table
+from auto_eureka_scientist.reporting import metrics, markdown_table, summarize_records
 from auto_eureka_scientist.science import experiments
 from auto_eureka_scientist.util import read_json, write_json
 
@@ -27,7 +27,7 @@ def collect(root: Path):
             cycle = project/'cycles/001'
             summary = metrics(cycle) if (cycle/'research/registration.json').exists() else {'experiments':[],'primary':None}
             records = experiments(cycle)
-            trial = {'name':backend,'run':run,'summary':summary,'records':records,
+            trial = {'name':backend,'run':run,'summary':summary,'records':records,'protocol':read_json(cycle/'research/protocol.json'),
                      'repository':f'https://github.com/BurnyCoder/{project.name}',
                      'explorer':f'https://BurnyCoder.github.io/{project.name}/',
                      'models':f'https://huggingface.co/BurnyCoder/{project.name}-models'}
@@ -36,6 +36,7 @@ def collect(root: Path):
             trial = read_json(saved)
         else:
             continue
+        trial['summary'] = summarize_records(trial['records'],trial['protocol'])
         trials.append(trial)
     return trials
 
