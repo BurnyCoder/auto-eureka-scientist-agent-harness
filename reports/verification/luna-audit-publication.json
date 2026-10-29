@@ -1,0 +1,19 @@
+{
+  "github": {
+    "sha": "152d0f81fa30dc4597acb66e2f373f7c9f492735",
+    "pr": "https://github.com/BurnyCoder/eureka-digits-luna/pull/5",
+    "url": "https://github.com/BurnyCoder/eureka-digits-luna",
+    "at": "2026-10-29T20:02:13.230+00:00"
+  },
+  "models": {
+    "repository": "BurnyCoder/eureka-digits-luna-models",
+    "url": "https://huggingface.co/BurnyCoder/eureka-digits-luna-models",
+    "collection": "https://huggingface.co/collections/BurnyCoder/eureka-digits-luna-6ae39b1a9fbf13c0618b07a5",
+    "upload": {
+      "url": "https://huggingface.co/BurnyCoder/eureka-digits-luna-models/commit/6006c751c5c92ceb70f7d57191921f52b03cc6ef"
+    },
+    "verified": true,
+    "at": "2026-10-29T20:01:57.479+00:00"
+  },
+  "scope": "post-run bookkeeping; no new model invocation"
+}

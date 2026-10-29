@@ -87,11 +87,13 @@ def markdown_table(summary: dict, *, compact=False) -> str:
     return '\n'.join(lines)
 
 
-def figures(cycle: Path):
+def figures(cycle: Path, records=None):
+    """Plot recorded scores, histories and deterministic prediction examples."""
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
-    records = experiments(cycle)
+    records = experiments(cycle) if records is None else records
+    (cycle/'figures').mkdir(parents=True,exist_ok=True)
     if not records or not any('accuracy' in r for r in records):
         return
     fig, ax = plt.subplots(figsize=(9,max(3,len(records)*.3)))
@@ -124,6 +126,23 @@ def figures(cycle: Path):
             ax.annotate('',xy=(.25+i*.25,.5),xytext=(.22+i*.25,.5),arrowprops={'arrowstyle':'->'})
     fig.savefig(cycle/'figures/architecture.png',dpi=160,bbox_inches='tight')
     plt.close(fig)
+    # Select in saved order, without inspecting correctness or choosing favorable cases.
+    examples = {}
+    for record in records:
+        if record.get('y_true') and record.get('split')=='test':
+            examples.setdefault(record['method'],record)
+    if examples:
+        fig,axes = plt.subplots(len(examples),1,figsize=(10,max(2,len(examples)*.65)),squeeze=False)
+        for ax,record in zip(axes[:,0],examples.values()):
+            ax.axis('off')
+            ax.text(0,.5,record['id'],fontsize=8,va='center')
+            for i,(truth,prediction,identifier) in enumerate(zip(record['y_true'][:6],record['y_pred'][:6],record['example_ids'][:6])):
+                ax.text(.30+i*.115,.5,f'ID {identifier}\n{prediction} / {truth}',fontsize=8,ha='center',va='center',
+                        bbox={'facecolor':'#e7f1e9' if prediction==truth else '#f8e4dc','edgecolor':'#adc4cf'})
+        fig.suptitle('Saved examples: prediction / true label; first test record per method',fontsize=10)
+        fig.tight_layout()
+        fig.savefig(cycle/'figures/examples.png',dpi=160)
+        plt.close(fig)
 
 
 def render(project: Path, cycle: Path, *, backend='Codex', pdf=True, timeout=180, cancelled=None) -> dict:
@@ -172,6 +191,9 @@ def render(project: Path, cycle: Path, *, backend='Codex', pdf=True, timeout=180
         if repository_url:
             return repository_url+'/blob/main/'+quote(path.relative_to(project).as_posix(),safe='/')
         return Path(os.path.relpath(path,reports)).as_posix()
+    audit_path = project/'reports/post-run-publication.md'
+    audit_notice = (f'Post-run repairs or publication work are documented in the [audit disclosure]({artifact_link(audit_path)}). '
+                    'They are separate from the bounded model execution.' if audit_path.exists() else '')
     ledger = cycle/'research/evidence.json'
     if ledger.exists():
         source_urls.update({r['id']:artifact_link(project/r['path']) for r in read_json(ledger)})
@@ -196,6 +218,8 @@ This report records a bounded research cycle executed through {backend}. {primar
 
 {status_text}
 
+{audit_notice}
+
 # Context, motivation, and introduction
 
 {protocol.get('question','See the registered protocol.')}
@@ -217,6 +241,8 @@ The objective is reproducible evidence and an inspectable research process. This
 {figure('accuracy','All recorded accuracies')}
 
 {figure('loss','Recorded learning curves')}
+
+{figure('examples','First saved test examples; no correctness-based selection')}
 
 # Claims and evidence
 

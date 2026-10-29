@@ -1,0 +1,43 @@
+{
+  "at": "2026-10-29T20:06:47.033+00:00",
+  "scope": "Post-run parent inspection; no additional phase acceptance",
+  "pdf_sha256": "faba2c3c345968475058e4a2fd8c972ebd70a3c47e6598ca6a8b87322009f770",
+  "page_images": [
+    {
+      "file": "final-1.png",
+      "sha256": "5df5c880b29862fd2fabf629803ff65bb37cde68f5bb9ed3828572534ec51b7d"
+    },
+    {
+      "file": "final-2.png",
+      "sha256": "8aedac349a2931aa60c7546d8d78d582a2d06d4467c7f0a45bce3e5c71f4f80b"
+    },
+    {
+      "file": "final-3.png",
+      "sha256": "aed3d8ed4971b37c586dda3f4991b0f4007f9a62f0b006822ee7153489b9b485"
+    },
+    {
+      "file": "final-4.png",
+      "sha256": "c49e15041f4962886e56ccae489cc0a71aaa20a6a427ea6543d7cc7453eadf68"
+    },
+    {
+      "file": "final-5.png",
+      "sha256": "9056515d79876318e0c3955e3c81a447599479c5c732d81aa39eac6aa670650b"
+    }
+  ],
+  "layout": "All rendered pages inspected: legible tables, labels, figures and final attribution; no overlap or clipped content observed.",
+  "browser": {
+    "url": "https://burnycoder.github.io/eureka-digits-haiku/",
+    "filters_checked": [
+      "experiment",
+      "method",
+      "seed",
+      "split",
+      "outcome"
+    ],
+    "combined_record": "regularized_s1",
+    "empty_intersection_checked": true,
+    "reset_restored_all_records": true,
+    "screenshot_sha256": "8b4702ffe809330d99a16864e56c551be0aada2f7124382003e66a234bbd5264",
+    "interaction_scope": "Filter interactions on the identical local explorer; public URL availability verified separately."
+  }
+}

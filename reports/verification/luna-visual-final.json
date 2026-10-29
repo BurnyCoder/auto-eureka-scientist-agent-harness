@@ -1,0 +1,50 @@
+{
+  "at": "2026-10-29T20:06:47.047+00:00",
+  "scope": "Post-run parent inspection; no additional phase acceptance",
+  "pdf_sha256": "c54b5c294556c7e8a32a8be8a3875ef76b41d4554d2261c5c9b0282ba6b6f4a8",
+  "page_images": [
+    {
+      "file": "final-1.png",
+      "sha256": "f40086d1d5c406721938d159ab3c6359e17f45d9a6b866c8e7c6800c42ea2290"
+    },
+    {
+      "file": "final-2.png",
+      "sha256": "bbe6d80cc5ca35d17384320cd3c30dee19c233274e84595bf38d510021b9669a"
+    },
+    {
+      "file": "final-3.png",
+      "sha256": "aed3d8ed4971b37c586dda3f4991b0f4007f9a62f0b006822ee7153489b9b485"
+    },
+    {
+      "file": "final-4.png",
+      "sha256": "2aa1037fb2dcc882461533adb8f2257db2b5a0c2901b25df782f9af4cb0b5b15"
+    },
+    {
+      "file": "final-5.png",
+      "sha256": "ef1ecf4b8d71cf1e3523ce5d0b5df251b56785183a0b4a7f8f63cab5480a44ef"
+    },
+    {
+      "file": "final-6.png",
+      "sha256": "4de72c8573cb9ac4e33ca7fce3160c684db873d4de46bffb2bed4b6c47680b72"
+    },
+    {
+      "file": "final-7.png",
+      "sha256": "bd29a9c8d16e49d030a97cc4cb83da9e50b65e13eb20cc4b75a6d1a3ee30ea25"
+    }
+  ],
+  "layout": "All rendered pages inspected: legible tables, labels, figures and final attribution; no overlap or clipped content observed.",
+  "browser": {
+    "url": "https://burnycoder.github.io/eureka-digits-luna/",
+    "filters_checked": [
+      "experiment",
+      "method",
+      "seed",
+      "split",
+      "outcome"
+    ],
+    "combined_record": "regularized_s1",
+    "empty_intersection_checked": true,
+    "reset_restored_all_records": true,
+    "screenshot_sha256": "a87470668cbd674ea4f9a3246ac1cf7540e7fa65d2bce6acafc949b48d374e98"
+  }
+}
