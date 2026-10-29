@@ -1,0 +1,5 @@
+* text=auto eol=lf
+prompts/full.txt -text
+src/auto_eureka_scientist/resources/full.txt -text
+*.png binary
+*.pdf binary

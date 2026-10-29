@@ -30,6 +30,9 @@ def initialize(project: Path, *, profile='research', task='', harness_revision='
                                        'See cycles/ for protocols, code, and generated reports.\n',encoding='utf-8')
     if not (project/'.git').exists():
         command(['git','init','-b','main'],project)
+    attributes = project/'.gitattributes'
+    if not attributes.exists():
+        attributes.write_text('* text=auto eol=lf\nresearch-policy.txt -text\n*.png binary\n*.pdf binary\n',encoding='utf-8')
     config_path = project/'.eureka/project.json'
     if not config_path.exists():
         write_json(config_path,{'profile':profile,'task':task,'harness_revision':harness_revision})
