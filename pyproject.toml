@@ -1,0 +1,51 @@
+[project]
+name = "auto-eureka-scientist"
+version = "0.1.0"
+description = "Resumable, evidence-checked research cycles through Claude Code or Codex CLI"
+readme = "README.md"
+authors = [
+    { name = "Libor Burny Burian" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "jsonschema>=4.26.0",
+    "psutil>=7.2.2",
+    "python-dotenv>=1.2.4",
+]
+
+[project.scripts]
+auto-eureka-scientist = "auto_eureka_scientist:main"
+eureka = "auto_eureka_scientist.cli:main"
+
+[project.optional-dependencies]
+cuda = ["torch>=2.14.1"]
+research = [
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.4",
+    "safetensors>=0.8.0",
+    "scikit-learn>=1.9.1",
+    "scipy>=1.18.1",
+    "torch>=2.14.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.0,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.4.1",
+]
+
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu130", extra = "cuda" }]
