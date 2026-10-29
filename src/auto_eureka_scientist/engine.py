@@ -20,10 +20,10 @@ from .phases import artifact_hashes, make_prompt, verify_phase
 from .policy import policy_hash
 from .publication import Publisher, commit, install_pages_workflow
 from .reporting import render
-from .science import experiments
+from .science import experiments, snapshot_evidence
 from .state import Store
 from .util import digest, log, now, read_json, write_json
-from .workspace import prepare_cycle
+from .workspace import prepare_cycle, preserve_artifact_bytes
 
 
 def register_protocol(cycle: Path, commit_sha: str) -> dict:
@@ -89,6 +89,7 @@ class Controller:
     async def finalize(self, phase: str, cycle: Path, handoff: dict):
         """Publication errors resume here without paying for another model response."""
         number = self.store.get(self.run_id)['cycle']
+        snapshot_evidence(cycle)
         if phase == 'preregister':
             sha = commit(self.project,f'Preregister research cycle {number} before results')
             register_protocol(cycle,sha)
@@ -119,6 +120,9 @@ class Controller:
             write_json(cycle/f'research/{phase}-publication.json',{'github':receipt,'models':models,'pages':pages})
             if phase == 'pilot':
                 self.publisher.branch(number,'final')
+            errors = verify_phase(phase,cycle,handoff)
+            if errors:
+                raise ValueError('Post-publication artifact verification failed: '+'; '.join(errors))
         self.store.complete_phase(self.run_id,phase,handoff,artifact_hashes(cycle))
         # The append-only handoff history retains revisited phases as separate observations.
         record = {'at':now(),'phase':phase,**handoff}
@@ -247,6 +251,7 @@ class Controller:
                 raise ValueError('Canonical policy changed; preserve the original run or start a new run')
             if reason := self.limit_reason():
                 raise InterruptedError(reason)
+            preserve_artifact_bytes(self.project)
             self.publisher.bootstrap()
             while True:
                 row = self.store.get(self.run_id)
@@ -264,6 +269,10 @@ class Controller:
                                timeout=min(180,self.remaining()),cancelled=lambda:bool(self.store.get(self.run_id)['stop']))
                         self.publisher.branch(row['cycle'],'summary')
                         self.publisher.checkpoint(row['cycle'],'summary')
+                        errors = [error for saved in self.store.phases(self.run_id)
+                                  for error in verify_phase(saved['name'],cycle,saved['result'])]
+                        if errors:
+                            raise ValueError('Final artifact verification failed: '+'; '.join(errors))
                         break
                     self.store.update(self.run_id,cycle=row['cycle']+1,phase_index=0)
                     continue
