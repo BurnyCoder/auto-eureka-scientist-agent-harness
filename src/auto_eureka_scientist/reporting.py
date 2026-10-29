@@ -57,7 +57,15 @@ def metrics(cycle: Path) -> dict:
     return result
 
 
-def markdown_table(summary: dict) -> str:
+def markdown_table(summary: dict, *, compact=False) -> str:
+    if compact:
+        lines = ['| Method | Seed | Split | Accuracy | Seconds | Device |',
+                 '|-------------------------|-----:|------------|-----------:|----------:|----------|']
+        for row in summary['experiments']:
+            score = f"{row['accuracy']:.6f}" if row['accuracy'] is not None else 'not recorded'
+            seconds = f"{row['seconds']:.3f}" if row['seconds'] is not None else 'not recorded'
+            lines.append(f"| {str(row['method']).replace('_',' ')} | {row['seed']} | {row['split']} | {score} | {seconds} | {row['device']} |")
+        return '\n'.join(lines)
     lines = ['| Experiment | Method | Seed | Split | Accuracy | Seconds | Device |',
              '|---|---|---:|---|---:|---:|---|']
     for row in summary['experiments']:
@@ -128,7 +136,11 @@ def render(project: Path, cycle: Path, *, backend='Codex', pdf=True) -> dict:
         'This is a preliminary artifact generated before final interpretation. All available outcomes are retained; '
         'a completed experiment is not evidence that the favored hypothesis is true.')
     claims = read_json(cycle/'research/claims.json') if (cycle/'research/claims.json').exists() else []
-    claim_text = '\n'.join(f"- **{c['id']}**: {c['text']} Evidence: {', '.join(c['evidence'])}. Limitations: {c['limitations']}" for c in claims) or 'Claims have not yet been distilled.'
+    source_urls = {s['id']:s['url'] for s in sources}
+    def evidence_link(identifier):
+        url = source_urls.get(identifier,f'../results/{identifier}.json')
+        return f'[{identifier}]({url})'
+    claim_text = '\n'.join(f"- **{c['id']}**: {c['text']} Evidence: {', '.join(evidence_link(ref) for ref in c['evidence'])}. Limitations: {c['limitations']}" for c in claims) or 'Claims have not yet been distilled.'
     methodology = '\n'.join(f'- **{key}**: {json.dumps(protocol[key],ensure_ascii=False)}' for key in
                              ('question','architecture','optimizer','learning_rate','batch_size','epochs','methods','seeds','data_boundaries','analysis_plan','hyperparameter_rationale') if key in protocol)
     def figure(name,caption):
@@ -158,7 +170,7 @@ The objective is reproducible evidence and an inspectable research process. This
 
 # Results
 
-{table}
+{markdown_table(summary,compact=True)}
 
 {primary_text}
 
@@ -194,7 +206,7 @@ The committed protocol, per-experiment JSON files, saved predictions, loss histo
 
 # AI statement
 
-Codex wrote the harness and supplied study fixture. {backend} executed this cycle's research phases and authored its interpretation; the harness generated the paper from recorded artifacts. A human provided the exact specification that was executed. Human cleanup and rewriting are in progress.
+Codex wrote the harness and study fixture; {backend} performed this cycle and authored its interpretation. The harness generated this paper from recorded artifacts. A human supplied the exact specification. Human cleanup and rewriting are in progress.
 '''
     (reports/'paper.md').write_text(paper,encoding='utf-8')
     (reports/'summary.md').write_text('# All experiments\n\n'+table+'\n\n'+primary_text+'\n\n'+methodology+'\n\n'+interpretation+'\n\n## Sources\n\n'+references+'\n',encoding='utf-8')
