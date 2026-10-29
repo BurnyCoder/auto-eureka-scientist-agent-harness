@@ -1,5 +1,8 @@
 """Public artifacts must remain inspectable after private state has been excluded."""
 from types import SimpleNamespace
+import subprocess
+import sys
+import json
 
 from auto_eureka_scientist.cli import inspect_artifacts
 from auto_eureka_scientist.util import write_json
@@ -18,3 +21,6 @@ def test_stateless_verify_does_not_claim_unrecorded_phases(tmp_path):
     (tmp_path/'cycles/001').mkdir(parents=True)
     args = SimpleNamespace(project=tmp_path,run_id=None,cycle=None,command='verify')
     assert inspect_artifacts(args)=={'cycle':1,'phases':{},'complete':False,'state_source':'public artifact history'}
+    process = subprocess.run([sys.executable,'-m','auto_eureka_scientist.cli','verify','--project',str(tmp_path)],capture_output=True,text=True,encoding='utf-8')
+    assert process.returncode==2
+    assert not json.loads(process.stdout)['complete']

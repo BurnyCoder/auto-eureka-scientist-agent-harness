@@ -49,7 +49,9 @@ def verify_claims(claims: list, experiments: list, sources: list, artifacts=()) 
     items = [*experiments,*sources,*artifacts]
     evidence = {item['id']: item for item in items}
     if len(items) != len(evidence):
-        errors.append('Evidence identifiers must be unique across all ledgers')
+        from collections import Counter
+        duplicates = sorted(key for key,count in Counter(item['id'] for item in items).items() if count>1)
+        errors.append(f'Evidence identifiers must be unique across all ledgers; duplicated: {duplicates}')
     for claim in claims:
         if not claim.get('text') or not claim.get('limitations') or not claim.get('evidence'):
             errors.append(f"Claim {claim.get('id')}: text, limitations, and evidence required")
