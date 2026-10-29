@@ -1,0 +1,9 @@
+{
+  "at": "2026-10-29T21:35:25.547+00:00",
+  "failure": "Controller repeat-check receipt overwrote an agent-cited audit before snapshot.",
+  "recovery": "Reconstructed the original audit from preserved native command outputs and unchanged environment metadata; accepted only an exact match to the pre-existing SHA-256. Snapshotted those bytes, retained the controller repeat-check receipt.",
+  "original_audit_sha256": "8106e18b577721025dbec09e32d09e359826e0b9067e6a104113c7b38e228297",
+  "controller_receipt_sha256": "8fe883c4333d0d2b715f6afa612aa68d277d80ab16621b721c2bdc5a9103e8e2",
+  "new_inference_calls": 0,
+  "training_performed": false
+}
