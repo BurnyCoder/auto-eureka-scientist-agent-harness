@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-29T20:06:47.062+00:00",
+  "pdf_sha256": "01c22525682c6d580e262239dbe05f6fd0410d8a1d5dccab8e90f0c4f9225e26",
+  "page_images": [
+    {
+      "file": "page-1.png",
+      "sha256": "ec812d6e420f04e34e0128a8e570e77130740ca06c18a32279d72c755bd7a1ca"
+    },
+    {
+      "file": "page-2.png",
+      "sha256": "0c2de190399392d45f365153727517d8deeee890d0aaceb3441fa064bcc5a23f"
+    },
+    {
+      "file": "page-3.png",
+      "sha256": "afc471c43e5da1334082c78050ca52ffe494ff7d0d3e9e8123014b8978b878e4"
+    },
+    {
+      "file": "page-4.png",
+      "sha256": "4f5366a23037df24889b2ea200d35fd058146a7669b4300f4d51180ec4e865c6"
+    },
+    {
+      "file": "page-5.png",
+      "sha256": "1e8b2790347acc231327b7489e5b0fb48c0b50e559e5a8b9a054a48a9ea8101b"
+    },
+    {
+      "file": "page-6.png",
+      "sha256": "13743658bafa3d32f17228029df0e9d61f96354a915a4c3a5a723885a5e3a154"
+    }
+  ],
+  "layout": "All rendered pages inspected; tables and figures are legible without overlap or clipping."
+}

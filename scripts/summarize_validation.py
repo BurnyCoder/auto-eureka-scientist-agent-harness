@@ -7,9 +7,10 @@ import argparse
 import json
 import shutil
 import subprocess
+import statistics
 import xml.etree.ElementTree as ET
 
-from auto_eureka_scientist.reporting import metrics, markdown_table, summarize_records
+from auto_eureka_scientist.reporting import metrics, markdown_table, summarize_records, figures
 from auto_eureka_scientist.science import experiments
 from auto_eureka_scientist.util import read_json, write_json
 
@@ -50,6 +51,14 @@ def build(root: Path, pdf: bool):
         identities = sorted({m for a in run['attempts'] for m in a['models']})
         lines.append(f"| {trial['name']} | {run['status']} | {len(run['completed_phases'])} | {run['calls']} | {run['active_seconds']/60:.2f} | {', '.join(identities) or 'not exposed'} |")
     table = '\n'.join(lines)
+    comparison = ['| Trial | Method | Test records | Mean accuracy | Seed SD |','|---|---|---:|---:|---:|']
+    for trial in trials:
+        methods = sorted({r['method'] for r in trial['summary']['experiments'] if r['split']=='test'})
+        for method in methods:
+            scores = [r['accuracy'] for r in trial['summary']['experiments'] if r['split']=='test' and r['method']==method]
+            spread = f'{statistics.stdev(scores):.6f}' if len(scores)>1 else 'not estimable'
+            comparison.append(f"| {trial['name']} | {method} | {len(scores)} | {statistics.mean(scores):.6f} | {spread} |")
+    comparison_table = '\n'.join(comparison)
     test_path = root/'reports/offline-tests.xml'
     tests = ''
     if test_path.exists():
@@ -70,8 +79,17 @@ def build(root: Path, pdf: bool):
     body += '\n## Interpretation and limitations\n\n'+authored+'\n'
     (root/'reports/validation-summary.md').write_text(body,encoding='utf-8')
     paper_body = body
+    compact = ['| Trial | Recorded status | Phases | Calls | Minutes |','|---|---|---:|---:|---:|']
+    for trial in trials:
+        run = trial['run']
+        compact.append(f"| {trial['name']} | {run['status'].replace('_',' ')} | {len(run['completed_phases'])} | {run['calls']} | {run['active_seconds']/60:.2f} |")
+    paper_body = paper_body.replace(table,'\n'.join(compact))
     for trial in trials:
         paper_body = paper_body.replace(markdown_table(trial['summary']),markdown_table(trial['summary'],compact=True))
+        figure_root = root/'reports/figures'/trial['name']
+        figures(figure_root,trial['records'])
+        for name,caption in [('accuracy','Recorded accuracies'),('examples','First saved test examples per method')]:
+            paper_body += f"\n\n## {trial['name']}: {caption}\n\n![{caption}](figures/{trial['name']}/figures/{name}.png)\n\n*{caption}; regenerated from saved predictions.*\n"
     paper = '''---
 title: "Auto Eureka Scientist: bounded CLI harness validation"
 author: 'Libor “Burny” Burian'
@@ -113,7 +131,9 @@ Codex wrote this harness codebase and report from the exact specification suppli
     readme = root/'README.md'
     content = readme.read_text(encoding='utf-8')
     start,end = '<!-- VALIDATION:START -->','<!-- VALIDATION:END -->'
-    block = f'{start}\n## Recorded validation\n\n{table}\n\n[Full report](reports/validation-summary.md). {tests}\n{end}'
+    block = (f'{start}\n## Recorded validation\n\n{table}\n\n[Full report](reports/validation-summary.md). {tests}\n\n'
+             'Saved test accuracies by method. SD describes the recorded seed variation, not a confidence interval.\n\n'
+             f'{comparison_table}\n\n![All recorded Luna scores, including the validation pilot](reports/figures/luna/figures/accuracy.png)\n{end}')
     if start in content:
         content = content[:content.index(start)]+block+content[content.index(end)+len(end):]
     else:
@@ -126,9 +146,11 @@ Codex wrote this harness codebase and report from the exact specification suppli
     (site/'index.html').write_text('''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Auto Eureka Scientist</title><style>body{font:17px/1.6 system-ui;max-width:980px;margin:auto;padding:40px;color:#18313c;background:#f5f7f8}h1{font-size:3rem;line-height:1.1}table{width:100%;border-collapse:collapse;background:white}td,th{padding:14px;text-align:left;border-bottom:1px solid #ccdce3}a{color:#006a98}.tag{letter-spacing:.14em;color:#54727f;font-size:.8rem}</style><div class="tag">DURABLE RESEARCH / OBSERVABLE EVIDENCE</div><h1>Auto Eureka Scientist</h1><p>One selected coding CLI, persistent scientific artifacts, and explicit completion checks.</p><p>These independent bounded trials use the same fixed study implementation. Their outcomes do not establish general scientific reliability or rank the providers.</p><table><thead><tr><th>Trial</th><th>Status</th><th>Phases</th><th>Calls</th><th>Evidence</th></tr></thead><tbody>'''+rows+'''</tbody></table><p><a href="validation-paper.pdf">Validation paper</a> · <a href="validation-summary.md">Full report</a> · <a href="https://github.com/BurnyCoder/auto-eureka-scientist-agent-harness">Code and prospective protocol</a> · <a href="https://www.alignmentforum.org/s/5GT3yoYM9gRmMEKqL">Neel Nanda's research process</a></p></html>''',encoding='utf-8')
     shutil.copy2(root/'reports/validation-summary.md',site/'validation-summary.md')
     if pdf:
-        subprocess.run(['pandoc','validation-paper.md','--standalone','--pdf-engine=pdflatex','-o','validation-paper.pdf'],cwd=root/'reports',check=True,timeout=180)
+        subprocess.run(['pandoc','validation-paper.md','--from=markdown-implicit_figures','--standalone','--pdf-engine=pdflatex','-o','validation-paper.pdf'],cwd=root/'reports',check=True,timeout=180)
         shutil.copy2(root/'reports/validation-paper.pdf',site/'validation-paper.pdf')
-    write_json(site/'validation.json',trials)
+    # Keep raw observations once in reports/validation-data; the hub needs summaries only.
+    write_json(site/'validation.json',[{key:trial[key] for key in ('name','summary','repository','explorer','models')}
+                                      for trial in trials])
 
 
 if __name__=='__main__':

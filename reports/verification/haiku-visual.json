@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-29T19:27:57.377+00:00",
+  "scope": "Post-run artifact inspection, not acceptance of missing research phases",
+  "pdf_sha256": "12148faa0bf9bcc38a21bc6a02af2d049a5deae2cd83f5acf4011d028f74a5b0",
+  "rendered_pages_inspected": [
+    "repaired-1.png",
+    "repaired-2.png",
+    "repaired-3.png",
+    "repaired-4.png"
+  ],
+  "layout": "All rendered pages inspected after replacing floats; tables, figures, body text and attribution are legible without footer overlap.",
+  "browser": {
+    "filters_checked": [
+      "experiment",
+      "method",
+      "seed",
+      "split",
+      "outcome"
+    ],
+    "combined_filter_record": "regularized_s1",
+    "empty_intersection_verified": true,
+    "all_records_restored": true,
+    "screenshot_sha256": "8b4702ffe809330d99a16864e56c551be0aada2f7124382003e66a234bbd5264",
+    "available_records": 15
+  }
+}

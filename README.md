@@ -4,7 +4,11 @@ A resumable Python harness for research through **one selected coding CLI per ru
 
 The motivation is inspectable execution: an agent's claim that it finished is insufficient. Protocol hashes, predictions, checkpoint hashes, source retrievals, publication receipts, and SQLite state make completion and failure visible. The workflow incorporates [Neel Nanda's research process](https://www.alignmentforum.org/s/5GT3yoYM9gRmMEKqL) and lessons from [Anthropic's long-running harness](https://www.anthropic.com/research/effective-harnesses-for-long-running-agents). It does not guarantee correct science. See the [source and license review](docs/sources.md).
 
-Live validation results are pending. Other models are configurable, but the live validation profile permits only Haiku and Luna. The [prospective validation protocol](reports/validation-preregistration.md) defines the acceptance criteria, comparisons, and stopping limits before live calls.
+The recorded Haiku trial stopped at its time limit with missing phases. Luna's controller completed its phases, but final publication needed mechanical provenance repairs. Both retained the inconclusive scientific result. Read the [generated validation report](reports/validation-summary.md) and [audit disclosures](reports/validation-interpretation.md) before interpreting these as evidence of reliability. Other models are configurable; only Haiku and Luna were live-tested under the [prospective protocol](reports/validation-preregistration.md).
+
+![Results explorer with filters and recorded experiment scores](docs/images/explorer.png)
+
+[Results hub](https://burnycoder.github.io/auto-eureka-scientist-agent-harness/) · [Validation paper](reports/validation-paper.pdf) · [Reproduce published artifacts](docs/reproduction.md) · [Haiku explorer](https://burnycoder.github.io/eureka-digits-haiku/) · [Luna explorer](https://burnycoder.github.io/eureka-digits-luna/)
 
 ```mermaid
 flowchart LR
@@ -28,6 +32,8 @@ git clone https://github.com/BurnyCoder/auto-eureka-scientist-agent-harness.git
 cd auto-eureka-scientist-agent-harness
 uv sync --locked --extra research
 Copy-Item .env.example .env
+gh auth login
+hf auth login
 uv run --extra research eureka doctor
 uv run --extra research pytest
 ```
@@ -40,7 +46,7 @@ Write the research task in a UTF-8 file. Backend selection is required. CLI argu
 
 ```powershell
 uv run --extra research eureka init --project workspaces/my-study
-uv run --extra research eureka run --project workspaces/my-study --task tasks/digits.md --backend claude --model haiku --mode cycle
+uv run --extra research eureka run --project workspaces/my-study --task my-task.md --backend claude --model haiku --mode cycle
 uv run --extra research eureka status --project workspaces/my-study
 uv run --extra research eureka stop --project workspaces/my-study
 uv run --extra research eureka resume --project workspaces/my-study
@@ -57,6 +63,8 @@ Publication is enabled by default; `--no-publish` records local receipts for loc
 ## Models and execution permissions
 
 Any model identifier can be passed through `--model`, `EUREKA_CLAUDE_MODEL`, or `EUREKA_CODEX_MODEL`. Availability is determined by the selected CLI and account; unavailable models produce an error without substitution. General runs are not restricted to the two validation models.
+
+For example, general Claude runs can request `--model sonnet` or `--model opus`, and general Codex runs can request another account-supported GPT identifier such as `--model gpt-6-sol`. These are configuration examples, not live-tested availability claims. The validation profile rejects model changes and only permits its designated Haiku or Luna selection.
 
 Claude uses `--dangerously-skip-permissions`, session settings that disable its sandbox and fallback list, streaming JSON, and a pinned helper model. Codex uses `--dangerously-bypass-approvals-and-sandbox`, `web_search="live"`, JSONL, and the selected model. Validation disables Codex's native multi-agent feature so uncounted helper inference cannot escape its call budget. No harness action classifier or permission dialog is added. Provider-side model policies remain in effect. Commands run with the user's normal machine/network access; only run tasks you intend to authorize.
 
@@ -91,6 +99,8 @@ The [fixed machine-readable protocol](src/auto_eureka_scientist/resources/digits
 
 The supplied training fixture makes these trials tests of research orchestration and inspection, not independent algorithm invention or model superiority. GPU time is used for the neural experiments, not for remote CLI inference. No harness weights exist to upload; trained validation checkpoints have their own collections.
 
+The model collections are [Haiku's digits checkpoints](https://huggingface.co/collections/BurnyCoder/eureka-digits-haiku-6ae38bdd8bdaca1527379a69) and [Luna's digits checkpoints](https://huggingface.co/collections/BurnyCoder/eureka-digits-luna-6ae39b1a9fbf13c0618b07a5). The generated tables below compare methods, controls and ablations. In plain language, regularization did not improve observed accuracy over the unregularized network; shuffled-label controls performed much worse than real-label training. This narrow result does not establish equivalence or rule out every confound.
+
 ## Development and provenance
 
 Python standard-library asyncio, subprocess, SQLite, argparse, and importlib resources provide the core. `jsonschema` validates handoffs; `python-dotenv` loads config; `psutil` manages process trees. The optional scientific stack is PyTorch, NumPy, SciPy, scikit-learn, safetensors, and Matplotlib. Pandoc/LaTeX renders the paper; a dependency-free static HTML/Canvas site runs on GitHub Pages.
@@ -98,3 +108,34 @@ Python standard-library asyncio, subprocess, SQLite, argparse, and importlib res
 The original user policy is preserved byte-for-byte in [prompts/full.txt](prompts/full.txt) and packaged as a checked copy. [Architecture and recovery](docs/architecture.md), [source/license review](docs/sources.md), [validation preregistration](reports/validation-preregistration.md), and [acceptance checklist](docs/acceptance.md) contain the detailed contracts and limits. Unit and subprocess integration tests use fake executables and do not call live models.
 
 License: MIT for this implementation. Referenced projects retain their own licenses; no AI Scientist v2 or unlicensed implementation code was copied. Dataset attribution and scientific references accompany generated reports.
+
+
+<!-- VALIDATION:START -->
+## Recorded validation
+
+| Trial | Status | Completed phases | Calls | Active minutes | Reported model identities |
+|---|---|---:|---:|---:|---|
+| haiku | budget_exhausted | 5 | 17 | 60.00 | claude-haiku-5-5 |
+| luna | complete | 8 | 10 | 27.29 | not exposed |
+
+[Full report](reports/validation-summary.md). The saved offline test report records 27 tests, 0 failures and 0 errors.
+
+Saved test accuracies by method. SD describes the recorded seed variation, not a confidence interval.
+
+| Trial | Method | Test records | Mean accuracy | Seed SD |
+|---|---|---:|---:|---:|
+| haiku | class_prior | 1 | 0.102778 | not estimable |
+| haiku | logistic | 1 | 0.955556 | not estimable |
+| haiku | regularized | 3 | 0.967593 | 0.003208 |
+| haiku | sensitivity | 3 | 0.967593 | 0.003208 |
+| haiku | shuffled_labels | 3 | 0.095370 | 0.029961 |
+| haiku | unregularized | 3 | 0.967593 | 0.003208 |
+| luna | class_prior | 1 | 0.102778 | not estimable |
+| luna | logistic | 1 | 0.955556 | not estimable |
+| luna | regularized | 3 | 0.967593 | 0.003208 |
+| luna | sensitivity | 3 | 0.967593 | 0.003208 |
+| luna | shuffled_labels | 3 | 0.095370 | 0.029961 |
+| luna | unregularized | 3 | 0.967593 | 0.003208 |
+
+![All recorded Luna scores, including the validation pilot](reports/figures/luna/figures/accuracy.png)
+<!-- VALIDATION:END -->

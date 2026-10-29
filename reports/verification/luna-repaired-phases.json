@@ -1,0 +1,15 @@
+{
+  "cycle": 1,
+  "phases": {
+    "research": [],
+    "preregister": [],
+    "core": [],
+    "pilot": [],
+    "experiments": [],
+    "analysis": [],
+    "review": [],
+    "publish": []
+  },
+  "complete": true,
+  "state_source": "private SQLite"
+}
