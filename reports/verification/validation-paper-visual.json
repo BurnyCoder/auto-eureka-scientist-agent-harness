@@ -1,31 +1,48 @@
 {
-  "at": "2026-10-29T20:06:47.062+00:00",
-  "pdf_sha256": "01c22525682c6d580e262239dbe05f6fd0410d8a1d5dccab8e90f0c4f9225e26",
+  "at": "2026-10-29T22:22:24.631+00:00",
+  "scope": "Final expanded validation report; all rendered pages inspected after numerical regeneration.",
+  "pdf_sha256": "9222bea75b056597139714b8bca00f8d66d7b9492825985b37b991d1fddc8fa2",
   "page_images": [
     {
-      "file": "page-1.png",
-      "sha256": "ec812d6e420f04e34e0128a8e570e77130740ca06c18a32279d72c755bd7a1ca"
+      "file": "page-01.png",
+      "sha256": "24044f22fc79b2f86610b79e75bb3f280bc9b5caca202e02d612fa4d10e37b38"
     },
     {
-      "file": "page-2.png",
-      "sha256": "0c2de190399392d45f365153727517d8deeee890d0aaceb3441fa064bcc5a23f"
+      "file": "page-02.png",
+      "sha256": "08505bbf0bf68d2b55a5c27dc5ba76408949f8a45914ba2807aa9a26ccd5f2b6"
     },
     {
-      "file": "page-3.png",
-      "sha256": "afc471c43e5da1334082c78050ca52ffe494ff7d0d3e9e8123014b8978b878e4"
+      "file": "page-03.png",
+      "sha256": "04d0cd815e2ebf435fd8db5367082c18ee7578a39b3a242eaa5ca7cd04138b9b"
     },
     {
-      "file": "page-4.png",
-      "sha256": "4f5366a23037df24889b2ea200d35fd058146a7669b4300f4d51180ec4e865c6"
+      "file": "page-04.png",
+      "sha256": "1dd391e95b3d0be442d3059c4cee11cc42df4a80920874eed27ad17018044b58"
     },
     {
-      "file": "page-5.png",
-      "sha256": "1e8b2790347acc231327b7489e5b0fb48c0b50e559e5a8b9a054a48a9ea8101b"
+      "file": "page-05.png",
+      "sha256": "8e97aa977353ca86132ce29d1d5e8da19e4ab40e8c459e1ef8ef73f34820f809"
     },
     {
-      "file": "page-6.png",
-      "sha256": "13743658bafa3d32f17228029df0e9d61f96354a915a4c3a5a723885a5e3a154"
+      "file": "page-06.png",
+      "sha256": "38d35f9fb9e944168c26e81a790f718bdb77b206b5e0135b79be1d4a15676acb"
+    },
+    {
+      "file": "page-07.png",
+      "sha256": "badfea835223730f9660a73fb8df0afd7a43e0af36681fc63c6d497b4970aec9"
+    },
+    {
+      "file": "page-08.png",
+      "sha256": "fc82374461af28e4d4f85d53a0555629d7318c134b47357a31a292ff505d0005"
+    },
+    {
+      "file": "page-09.png",
+      "sha256": "8fe7c8973f20350c86fe94d7922632627ddcd0ad5be6b218447f9dfe401eff6f"
+    },
+    {
+      "file": "page-10.png",
+      "sha256": "c5bd442bc80eb53572013a609ac6ff5fbdbd5f9486be7c10f15c3c6b2a6824b0"
     }
   ],
-  "layout": "All rendered pages inspected; tables and figures are legible without overlap or clipping."
+  "layout": "Legible tables with repeated headings across page breaks, readable figures, preserved disclosures and final attribution; no observed clipping or overlap."
 }

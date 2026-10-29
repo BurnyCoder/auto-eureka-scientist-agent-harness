@@ -52,6 +52,11 @@ def collect(root: Path):
 
 def build(root: Path, pdf: bool):
     trials = collect(root)
+    extended = next((trial for trial in trials if trial['name']=='haiku-extended'),None)
+    # Keep both execution checkpoints, but do not repeat identical scientific tables/figures.
+    repeated = {trial['name'] for trial in trials if trial['name']=='haiku-original'
+                and extended and trial['records']==extended['records']}
+    scientific_trials = [trial for trial in trials if trial['name'] not in repeated]
     lines = ['| Trial | Status | Completed phases | Calls | Active minutes | Reported model identities |',
              '|---|---|---:|---:|---:|---|']
     for trial in trials:
@@ -60,7 +65,7 @@ def build(root: Path, pdf: bool):
         lines.append(f"| {trial['name']} | {run['status']} | {len(run['completed_phases'])} | {run['calls']} | {run['active_seconds']/60:.2f} | {', '.join(identities) or 'not exposed'} |")
     table = '\n'.join(lines)
     comparison = ['| Trial | Method | Test records | Mean accuracy | Seed SD |','|---|---|---:|---:|---:|']
-    for trial in trials:
+    for trial in scientific_trials:
         methods = sorted({r['method'] for r in trial['summary']['experiments'] if r['split']=='test'})
         for method in methods:
             scores = [r['accuracy'] for r in trial['summary']['experiments'] if r['split']=='test' and r['method']==method]
@@ -76,6 +81,10 @@ def build(root: Path, pdf: bool):
     for trial in trials:
         run = trial['run']
         body += f"\n## {trial['name']}\n\n[Repository]({trial['repository']}) · [Explorer]({trial['explorer']}) · [Model bundle]({trial['models']})\n\n"
+        if trial['name'] in repeated:
+            body += (f"Recorded status: {run['status']}. {run['message']}\n\n"
+                     'Its saved experiment records are unchanged in the continuation. Scientific tables and figures are shown once under haiku-extended; the original cutoff remains in the execution table and linked historical paper.\n')
+            continue
         body += f"Recorded status: {run['status']}. {run['message']}\n\n"+markdown_table(trial['summary'])+'\n\n'
         primary = trial['summary']['primary']
         if primary:
@@ -92,7 +101,7 @@ def build(root: Path, pdf: bool):
         run = trial['run']
         compact.append(f"| {trial['name']} | {run['status'].replace('_',' ')} | {len(run['completed_phases'])} | {run['calls']} | {run['active_seconds']/60:.2f} |")
     paper_body = paper_body.replace(table,'\n'.join(compact))
-    for trial in trials:
+    for trial in scientific_trials:
         paper_body = paper_body.replace(markdown_table(trial['summary']),markdown_table(trial['summary'],compact=True))
         figure_root = root/'reports/figures'/trial['name']
         figures(figure_root,trial['records'])
@@ -157,6 +166,7 @@ Codex wrote this harness codebase and report from the exact specification suppli
 <p>One selected coding CLI, persistent scientific artifacts, and explicit completion checks.</p>
 <p>These executions share fixed scientific definitions. Their outcomes do not establish general scientific reliability or rank the providers.</p>
 <p>The original and extended Haiku rows describe the same run before and after an explicitly authorized budget increase. The original cutoff is preserved. Luna required post-run provenance repairs. Sonnet and GPT-6.1 Sol are exploratory replications with prior results known. Read the report for failures and interventions.</p>
+<p>Parent review corrected scientific overclaims in Haiku and Sonnet. Sonnet's first call was rejected for background Haiku usage; later accepted calls used its explicit Sonnet pin. Sol required recovery of an audit overwritten by the controller. Completed phases do not mean an untouched autonomous run.</p>
 <div class="scroll"><table><thead><tr><th>Trial</th><th>Status</th><th>Phases</th><th>Calls</th><th>Evidence</th></tr></thead><tbody>'''+rows+'''</tbody></table></div>
 <p><a href="validation-paper.pdf">Validation paper</a> · <a href="validation-summary.md">Full report</a> · <a href="https://github.com/BurnyCoder/auto-eureka-scientist-agent-harness">Code and prospective protocol</a> · <a href="https://www.alignmentforum.org/s/5GT3yoYM9gRmMEKqL">Neel Nanda's research process</a></p></html>''',encoding='utf-8')
     shutil.copy2(root/'reports/validation-summary.md',site/'validation-summary.md')

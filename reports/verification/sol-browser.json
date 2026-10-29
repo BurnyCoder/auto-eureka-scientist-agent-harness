@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-29T22:19:54.679+00:00",
+  "url": "https://burnycoder.github.io/eureka-digits-sol/",
+  "filters_checked": [
+    "experiment",
+    "method",
+    "seed",
+    "split",
+    "outcome"
+  ],
+  "combined_record": "regularized_s1",
+  "empty_intersection_checked": true,
+  "reset_restored_all_records": true,
+  "examples_identify_record_and_split": true,
+  "screenshot_sha256": "783858f24faa59bee242db5a12e9dea76cb9ebd6cee13ca801d8db6d12bc4f23"
+}

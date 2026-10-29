@@ -22,6 +22,8 @@ The source ledger records title, URL, summary, license, and access time. Indepen
 
 The requirement checklist covers every original policy section. Satisfied entries cite existing evidence. Not-applicable entries explain why, including no trained model, no reward objective, or an unavailable causal intervention. Generated numerical sections come only from result files; authored interpretation should reference evidence IDs without manually copying scores.
 
+Controller-owned work still applies to the project. README generation, environment setup, publication and attribution should cite their produced artifacts rather than be marked inapplicable merely because the phase agent delegates them. The checklist is an evidence index: semantic review remains necessary, as the documented parent corrections demonstrate.
+
 ## Neel Nanda integration
 
 [The research-process series](https://www.alignmentforum.org/s/5GT3yoYM9gRmMEKqL) is guidance, not empirical validation of this harness.

@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-29T21:15:51.595+00:00",
+  "url": "https://burnycoder.github.io/eureka-digits-haiku/",
+  "filters_checked": [
+    "experiment",
+    "method",
+    "seed",
+    "split",
+    "outcome"
+  ],
+  "combined_record": "regularized_s1",
+  "empty_intersection_checked": true,
+  "reset_restored_all_records": true,
+  "screenshot_sha256": "bd3239323ca9e82a2181673ba5482579d0239f7d66196d968539cba6c6a16fce"
+}

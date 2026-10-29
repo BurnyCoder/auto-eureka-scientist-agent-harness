@@ -1,0 +1,64 @@
+{
+  "at": "2026-10-29T22:20:18.991+00:00",
+  "scope": "Parent artifact review and corrections; no new model call or training.",
+  "github": {
+    "sha": "5063266ace18fccc109b1647abc3eb20bb4ab5b6",
+    "pr": "https://github.com/BurnyCoder/eureka-digits-sol/pull/5",
+    "url": "https://github.com/BurnyCoder/eureka-digits-sol",
+    "at": "2026-10-29T22:20:18.988+00:00"
+  },
+  "models": {
+    "repository": "BurnyCoder/eureka-digits-sol-models",
+    "url": "https://huggingface.co/BurnyCoder/eureka-digits-sol-models",
+    "collection": "https://huggingface.co/collections/BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75",
+    "upload": {
+      "url": "https://huggingface.co/BurnyCoder/eureka-digits-sol-models/commit/8bad5df36be339d971ffc4944c444683e969191a"
+    },
+    "verified": true,
+    "files": {
+      "class_prior.npz": "69a03e6a16427f3f361001066d0aef20c645f1109ce51a744e8319065edda79a",
+      "logistic.npz": "5f6f6257d4ecbc4b66f80fdc6c90bdf032a2f35a008cd2ba395db6af5d5b6c27",
+      "protocol.json": "b5047a8549930ea1abedc111de1fca3f05034826805d4645473912bb5365456b",
+      "README.md": "6f4d5c86cdefb09e175faf7b14e3c6db8bcf79932c8dfafda172d532ab7291e2",
+      "regularized-s0.safetensors": "a57cb6e24f5e7d2a3e83da8efd97233a4b7e0e5b8492f89b3cbe6064cb86cc3d",
+      "regularized-s1.safetensors": "6d6004f99a91584a2ffbedc1747cf80919909f5010133568624a035d8fe6ac95",
+      "regularized-s2.safetensors": "973a19ffaad8399256d974e76d6eb0ebd42f9f6a926c6fa089799968ef458537",
+      "sensitivity-s0.safetensors": "d12e34e4c990874be8603a5d0ac6cb06f5648db4245afaed83ab7182cb94e220",
+      "sensitivity-s1.safetensors": "3c5ae5b269a45bd5c74baf47384f13a469d5475e88be331db1510202ff14d930",
+      "sensitivity-s2.safetensors": "86900e93b81224dd2bcf1413be63694a0488d16bfe7d25b1bd3e631c36bd90d3",
+      "shuffled_labels-s0.safetensors": "66f8ea92d43937a7e09f420751597b3c60c560aa35ecc27aea45b21a287223dc",
+      "shuffled_labels-s1.safetensors": "960a5428d49a66052acb46f8238b37f059ef37d868b7fcc082631feab864dee7",
+      "shuffled_labels-s2.safetensors": "cea6d947279edfed5d90d9a1df01c0c034f06341a0435366d4b63924d4f04b66",
+      "study.py": "a16454eb60949757d367bb81811a539d026eefa940575476e732e4c73cfe9358",
+      "unregularized-s0.safetensors": "6e09e36eb29b0f2e691039f76708d6306dc3483e82726d6ac9f5cdf971d009f2",
+      "unregularized-s1.safetensors": "865d50b44158576353bbeb744304210c29ed5642e3b9b6f4235b9e2f48395b77",
+      "unregularized-s2.safetensors": "227cf9c01e4e3da3838bb3be23cea540ca1e2d4b69ebebbabc637e5ed7f3e7fe"
+    },
+    "at": "2026-10-29T22:20:03.580+00:00"
+  },
+  "observations_unchanged_from_public_clone": {
+    "cycles/001/study.py": "a16454eb60949757d367bb81811a539d026eefa940575476e732e4c73cfe9358",
+    "cycles/001/research/protocol.json": "b5047a8549930ea1abedc111de1fca3f05034826805d4645473912bb5365456b",
+    "cycles/001/results/class_prior_s0.json": "2407f4e1af014f78a9c8d257894ea01cb4f0bf32d3f7d2530f31bc6661578905",
+    "cycles/001/results/logistic_s0.json": "e17c0db3243905c68cf446edf8fbfa79c2d0befb1f9216341e2d10061ced30de",
+    "cycles/001/results/pilot_regularized_s0.json": "63225b97526bfa20fbaafe24ff54ad599334ed522a59ec63d94c3354377d6efd",
+    "cycles/001/results/regularized_s0.json": "a240da038cb9c221cb3ba7d7bfaa9df169fb53e41ca6f2fa36bc1768e1d37ca2",
+    "cycles/001/results/regularized_s1.json": "29aa87ee0f3c708c1ffb44537dbb2744120234f1bfd7fb47777196602ede9f3a",
+    "cycles/001/results/regularized_s2.json": "78221178fd5b098eb38069a322e33dcbdab2e3ab1978712c08f30725f1e63686",
+    "cycles/001/results/sensitivity_s0.json": "b0e3c20712ead38b3c77839222833747b2654f49f89f68d159f68eb352e9c2a8",
+    "cycles/001/results/sensitivity_s1.json": "295b4a5d1fa091308e3e129d8ca77ecf580d0ea2184639796f38bdbc13a5af11",
+    "cycles/001/results/sensitivity_s2.json": "3aa4e2d61d12ef151df3ce485607569f38481d2cb92933b0a9396ff873dfd07b",
+    "cycles/001/results/shuffled_labels_s0.json": "34b3a5571df254e8af24cec9cebf4b5ab6d023421ef364bdeacb089d30d4fb72",
+    "cycles/001/results/shuffled_labels_s1.json": "ccc587d2c6570579c88935c35a16d369c7b6178fd69094f205dbe5b2455421c7",
+    "cycles/001/results/shuffled_labels_s2.json": "d45c9dfa1e1b724df823f2e157361f4ca001cc0925a2ed6430c0b743142223db",
+    "cycles/001/results/unregularized_s0.json": "457963af210da33b70548965a72ae102c6a58d808a39428422f6f8d3c5ed308f",
+    "cycles/001/results/unregularized_s1.json": "a9c63d8e00b191a5e523b1eb81efd11c20c66d8798d138a43c977735f1a0bec7",
+    "cycles/001/results/unregularized_s2.json": "385961fe035d502c9f2109239947fb958688d7931eac73afabdfe8e020889ed5"
+  },
+  "unchanged_run_counters": {
+    "status": "complete",
+    "calls": 8,
+    "elapsed": 2947.6703811000334,
+    "phase_index": 8
+  }
+}
