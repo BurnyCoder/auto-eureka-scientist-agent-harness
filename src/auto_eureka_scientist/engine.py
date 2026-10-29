@@ -255,6 +255,12 @@ class Controller:
                 if row['phase_index'] >= len(PHASES):
                     if self.config.mode == 'cycle' or (self.config.max_cycles and row['cycle']>=self.config.max_cycles):
                         self.store.update(self.run_id,status='complete',message='All required phases completed')
+                        # The phase publication precedes its acceptance record. Publish a
+                        # final snapshot too, so public clones can verify the final phase.
+                        self.store.update(self.run_id,elapsed=self.consumed+time.monotonic()-self.started)
+                        self.write_summary()
+                        self.publisher.branch(row['cycle'],'summary')
+                        self.publisher.checkpoint(row['cycle'],'summary')
                         break
                     self.store.update(self.run_id,cycle=row['cycle']+1,phase_index=0)
                     continue
