@@ -93,6 +93,10 @@ def configuration(args, previous=None):
 
 
 def main():
+    # Windows redirected consoles may default to a legacy code page; logs stay UTF-8.
+    for stream in (sys.stdout,sys.stderr):
+        if hasattr(stream,'reconfigure'):
+            stream.reconfigure(encoding='utf-8',errors='backslashreplace')
     args = parser().parse_args()
     project = args.project.resolve()
     try:
