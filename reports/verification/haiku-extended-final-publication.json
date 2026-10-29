@@ -1,0 +1,46 @@
+{
+  "at": "2026-10-29T21:13:46.544+00:00",
+  "scope": "Parent semantic corrections and artifact bookkeeping; no new model call or training.",
+  "github": {
+    "sha": "0b545687caddec336ec78b8e32451b9ba3881a1c",
+    "pr": "https://github.com/BurnyCoder/eureka-digits-haiku/pull/10",
+    "url": "https://github.com/BurnyCoder/eureka-digits-haiku",
+    "at": "2026-10-29T21:13:46.529+00:00"
+  },
+  "models": {
+    "repository": "BurnyCoder/eureka-digits-haiku-models",
+    "url": "https://huggingface.co/BurnyCoder/eureka-digits-haiku-models",
+    "collection": "https://huggingface.co/collections/BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75",
+    "upload": {
+      "url": "https://huggingface.co/BurnyCoder/eureka-digits-haiku-models/commit/cca5c070bb41ce52a84f0825a7e7ec77be2b337b"
+    },
+    "verified": true,
+    "files": {
+      "class_prior.npz": "69a03e6a16427f3f361001066d0aef20c645f1109ce51a744e8319065edda79a",
+      "LICENSE": "627e3aa52fe5a1df535d2846521ff808bfc725b37563cb1e8648fb841a7aff2d",
+      "logistic.npz": "5f6f6257d4ecbc4b66f80fdc6c90bdf032a2f35a008cd2ba395db6af5d5b6c27",
+      "protocol.json": "5edcfb3fcda62035f6ea4013f88ebca59b7d75977f49d155af208a2bb50ec257",
+      "README.md": "b4243611824c494bb213ca5a1987421f852d2bdf0080feb33dac70573f600e1d",
+      "regularized-s0.safetensors": "a57cb6e24f5e7d2a3e83da8efd97233a4b7e0e5b8492f89b3cbe6064cb86cc3d",
+      "regularized-s1.safetensors": "6d6004f99a91584a2ffbedc1747cf80919909f5010133568624a035d8fe6ac95",
+      "regularized-s2.safetensors": "973a19ffaad8399256d974e76d6eb0ebd42f9f6a926c6fa089799968ef458537",
+      "sensitivity-s0.safetensors": "d12e34e4c990874be8603a5d0ac6cb06f5648db4245afaed83ab7182cb94e220",
+      "sensitivity-s1.safetensors": "3c5ae5b269a45bd5c74baf47384f13a469d5475e88be331db1510202ff14d930",
+      "sensitivity-s2.safetensors": "86900e93b81224dd2bcf1413be63694a0488d16bfe7d25b1bd3e631c36bd90d3",
+      "shuffled_labels-s0.safetensors": "66f8ea92d43937a7e09f420751597b3c60c560aa35ecc27aea45b21a287223dc",
+      "shuffled_labels-s1.safetensors": "960a5428d49a66052acb46f8238b37f059ef37d868b7fcc082631feab864dee7",
+      "shuffled_labels-s2.safetensors": "cea6d947279edfed5d90d9a1df01c0c034f06341a0435366d4b63924d4f04b66",
+      "study.py": "34415a875e7f61954cf3813486f46a189d6b647f2e9682552d16db88a6d67d39",
+      "unregularized-s0.safetensors": "6e09e36eb29b0f2e691039f76708d6306dc3483e82726d6ac9f5cdf971d009f2",
+      "unregularized-s1.safetensors": "865d50b44158576353bbeb744304210c29ed5642e3b9b6f4235b9e2f48395b77",
+      "unregularized-s2.safetensors": "227cf9c01e4e3da3838bb3be23cea540ca1e2d4b69ebebbabc637e5ed7f3e7fe"
+    },
+    "at": "2026-10-29T21:13:31.076+00:00"
+  },
+  "unchanged_run_counters": {
+    "status": "complete",
+    "calls": 20,
+    "elapsed": 4368.261031400005,
+    "phase_index": 8
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "at": "2026-10-29T21:23:01.194+00:00",
+  "scope": "Parent inspection after the completed model run; outside its active clock.",
+  "pdf_sha256": "abc1fb68b764345985705b20dc07a58ca4b314274702cb43f1cbe43ead0ba786",
+  "page_images": [
+    {
+      "file": "page-1.png",
+      "sha256": "cfc3c0348a24e0e6ebba1fd337e46b31c5d06ed0584539afb63d53297c148f49"
+    },
+    {
+      "file": "page-2.png",
+      "sha256": "bd26e22dd1464583ce9a7e6f926e3f165d90820e23a74f0674440025b99ee08b"
+    },
+    {
+      "file": "page-3.png",
+      "sha256": "fd197c8b1e6ce0dab7fa50184285a98302054e67370dc32fc9119b5aa425627f"
+    },
+    {
+      "file": "page-4.png",
+      "sha256": "6053e701f7058af0cc3a6cca7374c6e1731a36969e27c1ceccdb76b37c425037"
+    },
+    {
+      "file": "page-5.png",
+      "sha256": "e47c59542dd0c6710b38f145802b7fce4b2a548fdf61d646e216812732841409"
+    },
+    {
+      "file": "page-6.png",
+      "sha256": "e6b59e25227a3a27040157809610a5802c19a103e8e352779096317d5593c993"
+    },
+    {
+      "file": "page-7.png",
+      "sha256": "c6d73427bc4b4833e0d37c9126a9cc6a753c744be50b184b6ee9ada67bab08f0"
+    }
+  ],
+  "layout": "All listed pages visually inspected: readable tables, figures and final attribution, without observed overlap or clipping."
+}

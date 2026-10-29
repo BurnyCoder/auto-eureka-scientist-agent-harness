@@ -1,0 +1,44 @@
+{
+  "at": "2026-10-29T21:13:21.490+00:00",
+  "scope": "Parent inspection after the completed extension; outside the model clock.",
+  "pdf_sha256": "2bc2e0d39abd42d7e6e04b4b0d9bcb4b18da727971206523aba1bcbcb11f0916",
+  "page_images": [
+    {
+      "file": "refreshed-1.png",
+      "sha256": "0163e4e2a912664c40cc9c6a5912c372d6fe2d0169203b80a283d044a6604265"
+    },
+    {
+      "file": "refreshed-2.png",
+      "sha256": "d828bc645251126a963dadaf2c15996c3582c52d247c058ed270164eb0d57158"
+    },
+    {
+      "file": "refreshed-3.png",
+      "sha256": "8dc8eee61078ddade62d3660b9a35518cd85c4dc384831d890683e8b926a8594"
+    },
+    {
+      "file": "refreshed-4.png",
+      "sha256": "529df1c107161a9ec48a806f91d0a50847831d4e3a1cc51627f07c2a25a23a17"
+    },
+    {
+      "file": "refreshed-5.png",
+      "sha256": "201f058249fbeb0fea53fa394f93602a52e0c40d2948974e9fc34994ecdbaea2"
+    },
+    {
+      "file": "refreshed-6.png",
+      "sha256": "b500aba5a18b8106fd6c8252abb54ceb92bd98ac2aa94f223aee0a574bfec75c"
+    },
+    {
+      "file": "refreshed-7.png",
+      "sha256": "85931fcb929273ff5efb97fd592cf177f3ccb58e2369f43068fd63dd68cba571"
+    },
+    {
+      "file": "refreshed-8.png",
+      "sha256": "3810f68b4f4005b9f3119f1cd46f178836be83db8f5a6e411e287c1e0535d90a"
+    },
+    {
+      "file": "refreshed-9.png",
+      "sha256": "493076343bd148c750b1f81b0d75391f2d264e7d7644fa13253b034f664b86c3"
+    }
+  ],
+  "layout": "All pages inspected before source-link refresh; refreshed raster pages are byte-identical. Legible tables and figures, no observed clipping or overlap."
+}

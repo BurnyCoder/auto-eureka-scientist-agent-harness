@@ -8,7 +8,7 @@ The original Haiku trial stopped at its time limit with missing phases. Luna com
 
 ![Results explorer with filters and recorded experiment scores](docs/images/explorer.png)
 
-[Results hub](https://burnycoder.github.io/auto-eureka-scientist-agent-harness/) · [Validation paper](reports/validation-paper.pdf) · [Reproduce published artifacts](docs/reproduction.md) · [Haiku explorer](https://burnycoder.github.io/eureka-digits-haiku/) · [Luna explorer](https://burnycoder.github.io/eureka-digits-luna/)
+[Results hub](https://burnycoder.github.io/auto-eureka-scientist-agent-harness/) · [Validation paper](reports/validation-paper.pdf) · [Reproduce published artifacts](docs/reproduction.md) · [Haiku explorer](https://burnycoder.github.io/eureka-digits-haiku/) · [Luna explorer](https://burnycoder.github.io/eureka-digits-luna/) · [Sonnet explorer](https://burnycoder.github.io/eureka-digits-sonnet/) · [Sol explorer](https://burnycoder.github.io/eureka-digits-sol/)
 
 ```mermaid
 flowchart LR
@@ -103,7 +103,16 @@ The supplied training fixture makes these trials tests of research orchestration
 
 For replications after observing prior results, use `--profile digits-replication --task tasks/digits-replication.md`. The protocol and result records are explicitly exploratory. The original validation defaults remain bounded; `--max-minutes 180 --max-calls 60` explicitly selects the user-authorized extension. `eureka verify --project PATH --phase analysis` checks draft files without accepting a phase. Paths can be relative to the cycle or project when unambiguous; the prompt includes a complete handoff example.
 
-The model collections are [Haiku's digits checkpoints](https://huggingface.co/collections/BurnyCoder/eureka-digits-haiku-6ae38bdd8bdaca1527379a69) and [Luna's digits checkpoints](https://huggingface.co/collections/BurnyCoder/eureka-digits-luna-6ae39b1a9fbf13c0618b07a5). The generated tables below compare methods, controls and ablations. In plain language, regularization did not improve observed accuracy over the unregularized network; shuffled-label controls performed much worse than real-label training. This narrow result does not establish equivalence or rule out every confound.
+The expanded runs use these commands. Use a new project directory for a new run; use `resume` to continue an existing one without resetting consumption. Native CLI authentication determines model availability.
+
+```sh
+uv run --extra research --extra cuda eureka run --project workspaces/eureka-digits-sonnet --task tasks/digits-replication.md --backend claude --model sonnet --model-pin claude-sonnet-5-5 --profile digits-replication --max-minutes 180 --max-calls 60 --owner BurnyCoder --hf-collection BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75
+uv run --extra research --extra cuda eureka run --project workspaces/eureka-digits-sol --task tasks/digits-replication.md --backend codex --model gpt-6.1-sol --profile digits-replication --max-minutes 180 --max-calls 60 --owner BurnyCoder --hf-collection BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75
+```
+
+The recorded Sonnet run initially used the alias without the full pin, rejected a mixed-model call, then resumed with the pin. The command above includes the repair from the outset; it is not a claim that the historical run had no failed attempt.
+
+The [shared research collection](https://huggingface.co/collections/BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75) contains the trial model bundles. Historical per-project collection receipts remain in the publication history. The generated tables below compare methods, controls and ablations. In plain language, regularization did not improve observed accuracy over the unregularized network; shuffled-label controls performed much worse than real-label training. This narrow result does not establish equivalence or rule out every confound.
 
 ## Development and provenance
 
@@ -119,27 +128,42 @@ License: MIT for this implementation. Referenced projects retain their own licen
 
 | Trial | Status | Completed phases | Calls | Active minutes | Reported model identities |
 |---|---|---:|---:|---:|---|
-| haiku | budget_exhausted | 5 | 17 | 60.00 | claude-haiku-5-5 |
+| haiku-original | budget_exhausted | 5 | 17 | 60.00 | claude-haiku-5-5 |
+| haiku-extended | complete | 8 | 20 | 72.80 | claude-haiku-5-5 |
 | luna | complete | 8 | 10 | 27.29 | not exposed |
+| sonnet | complete | 8 | 9 | 13.25 | claude-haiku-5-5, claude-sonnet-5-5 |
+| sol | complete | 8 | 8 | 49.13 | not exposed |
 
-[Full report](reports/validation-summary.md). The saved offline test report records 27 tests, 0 failures and 0 errors.
+[Full report](reports/validation-summary.md). The saved offline test report records 40 tests, 0 failures and 0 errors.
 
 Saved test accuracies by method. SD describes the recorded seed variation, not a confidence interval.
 
 | Trial | Method | Test records | Mean accuracy | Seed SD |
 |---|---|---:|---:|---:|
-| haiku | class_prior | 1 | 0.102778 | not estimable |
-| haiku | logistic | 1 | 0.955556 | not estimable |
-| haiku | regularized | 3 | 0.967593 | 0.003208 |
-| haiku | sensitivity | 3 | 0.967593 | 0.003208 |
-| haiku | shuffled_labels | 3 | 0.095370 | 0.029961 |
-| haiku | unregularized | 3 | 0.967593 | 0.003208 |
+| haiku-extended | class_prior | 1 | 0.102778 | not estimable |
+| haiku-extended | logistic | 1 | 0.955556 | not estimable |
+| haiku-extended | regularized | 3 | 0.967593 | 0.003208 |
+| haiku-extended | sensitivity | 3 | 0.967593 | 0.003208 |
+| haiku-extended | shuffled_labels | 3 | 0.095370 | 0.029961 |
+| haiku-extended | unregularized | 3 | 0.967593 | 0.003208 |
 | luna | class_prior | 1 | 0.102778 | not estimable |
 | luna | logistic | 1 | 0.955556 | not estimable |
 | luna | regularized | 3 | 0.967593 | 0.003208 |
 | luna | sensitivity | 3 | 0.967593 | 0.003208 |
 | luna | shuffled_labels | 3 | 0.095370 | 0.029961 |
 | luna | unregularized | 3 | 0.967593 | 0.003208 |
+| sonnet | class_prior | 1 | 0.102778 | not estimable |
+| sonnet | logistic | 1 | 0.955556 | not estimable |
+| sonnet | regularized | 3 | 0.967593 | 0.003208 |
+| sonnet | sensitivity | 3 | 0.967593 | 0.003208 |
+| sonnet | shuffled_labels | 3 | 0.095370 | 0.029961 |
+| sonnet | unregularized | 3 | 0.967593 | 0.003208 |
+| sol | class_prior | 1 | 0.102778 | not estimable |
+| sol | logistic | 1 | 0.955556 | not estimable |
+| sol | regularized | 3 | 0.967593 | 0.003208 |
+| sol | sensitivity | 3 | 0.967593 | 0.003208 |
+| sol | shuffled_labels | 3 | 0.095370 | 0.029961 |
+| sol | unregularized | 3 | 0.967593 | 0.003208 |
 
 ![All recorded Luna scores, including the validation pilot](reports/figures/luna/figures/accuracy.png)
 <!-- VALIDATION:END -->

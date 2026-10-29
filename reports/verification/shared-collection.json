@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-29T22:14:03.914+00:00",
+  "url": "https://huggingface.co/collections/BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75",
+  "public": true,
+  "items": [
+    "BurnyCoder/eureka-digits-haiku-models",
+    "BurnyCoder/eureka-digits-luna-models",
+    "BurnyCoder/eureka-digits-sol-models",
+    "BurnyCoder/eureka-digits-sonnet-models"
+  ],
+  "all_expected_bundles_present": true,
+  "scope": "Collection membership only; final downloaded contents are checked separately in per-project checkpoint receipts."
+}
