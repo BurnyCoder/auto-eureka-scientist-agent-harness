@@ -16,6 +16,8 @@ Claims cite source/experiment IDs and disclose limitations. A confirmatory claim
 
 Local code and audit artifacts can be cited through `research/evidence.json`: an array of `{id,path,sha256,analysis_kind}` with project-relative paths. The verifier checks file existence, content hashes, unique IDs and exploratory/confirmatory compatibility. Post-hoc derived analyses and audits remain exploratory. This ledger does not infer scientific support from file existence.
 
+Accepted public evidence is copied into immutable content-addressed snapshots before subsequent phases edit or regenerate it. The ledger retains `original_path`; ignored local transcripts and model downloads are not copied into Git snapshots. Scientific cycle and site files disable Git newline conversion, so byte hashes survive publication and fresh checkouts. The controller rechecks artifacts after publication and before final acceptance. Rendered site Markdown uses copied figure assets and public repository links for evidence.
+
 The source ledger records title, URL, summary, license, and access time. Independent HTTP retrieval records timestamps and content-prefix hashes. A blocked source needs an explicit access limitation; at least one source must be independently retrievable. Do not treat URL existence as proof that a citation supports the claim.
 
 The requirement checklist covers every original policy section. Satisfied entries cite existing evidence. Not-applicable entries explain why, including no trained model, no reward objective, or an unavailable causal intervention. Generated numerical sections come only from result files; authored interpretation should reference evidence IDs without manually copying scores.
