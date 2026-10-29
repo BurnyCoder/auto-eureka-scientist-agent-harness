@@ -37,7 +37,8 @@ class Publisher:
         self.remaining = remaining
 
     def call(self, args, check=True):
-        return command(args,self.project,timeout=min(180,max(.1,self.remaining())),check=check)
+        return command(args,self.project,timeout=min(180,self.remaining()),check=check,
+                       cancelled=lambda:bool(self.store.get(self.run_id)['stop']))
 
     def bootstrap(self):
         existing = self.store.receipt(self.run_id,'repository')

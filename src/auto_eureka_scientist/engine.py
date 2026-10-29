@@ -99,7 +99,8 @@ class Controller:
             write_json(cycle/'research/core-publication.json',receipt)
             self.publisher.branch(number,'pilot')
         if phase in ('pilot','analysis','publish'):
-            render(self.project,cycle,backend='Claude Code' if self.config.backend=='claude' else 'Codex')
+            render(self.project,cycle,backend='Claude Code' if self.config.backend=='claude' else 'Codex',
+                   timeout=min(180,self.remaining()),cancelled=lambda:bool(self.store.get(self.run_id)['stop']))
         if phase in ('pilot','publish'):
             model_files = list((cycle/'models').glob('*.safetensors'))+list((cycle/'models').glob('*.npz'))
             if model_files:
@@ -128,6 +129,9 @@ class Controller:
     async def phase(self, phase: str, cycle: Path):
         key = f'pending:{self.store.get(self.run_id)["cycle"]}:{phase}'
         errors = []
+        previous = [a for a in self.store.attempts(self.run_id) if a['cycle']==self.store.get(self.run_id)['cycle'] and a['phase']==phase]
+        if previous and previous[-1]['result']:
+            errors = json.loads(previous[-1]['result']).get('errors',[])
         # A controller may crash after the CLI has finished but before its result commits.
         # Recover only a complete provider terminal event, then revalidate the files.
         unfinished = [a for a in self.store.attempts(self.run_id) if a['cycle']==self.store.get(self.run_id)['cycle']
@@ -273,7 +277,8 @@ class Controller:
         except (KeyboardInterrupt,asyncio.CancelledError):
             self.store.update(self.run_id,status='interrupted',message='Interrupted; owned CLI processes terminated')
         except Exception as exc:
-            self.store.update(self.run_id,status='blocked',message=str(exc))
+            reason = self.limit_reason()
+            self.store.update(self.run_id,status=('stopped' if 'stop' in reason else 'budget_exhausted') if reason else 'blocked',message=reason or str(exc))
             log(f'Resumable failure: {exc}')
         finally:
             self.done.set()

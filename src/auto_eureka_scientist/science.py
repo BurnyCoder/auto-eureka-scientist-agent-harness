@@ -44,9 +44,12 @@ def check_predictions(experiment: dict) -> list[str]:
     return []
 
 
-def verify_claims(claims: list, experiments: list, sources: list) -> list[str]:
+def verify_claims(claims: list, experiments: list, sources: list, artifacts=()) -> list[str]:
     errors = []
-    evidence = {item['id']: item for item in [*experiments,*sources]}
+    items = [*experiments,*sources,*artifacts]
+    evidence = {item['id']: item for item in items}
+    if len(items) != len(evidence):
+        errors.append('Evidence identifiers must be unique across all ledgers')
     for claim in claims:
         if not claim.get('text') or not claim.get('limitations') or not claim.get('evidence'):
             errors.append(f"Claim {claim.get('id')}: text, limitations, and evidence required")
@@ -56,6 +59,22 @@ def verify_claims(claims: list, experiments: list, sources: list) -> list[str]:
             elif claim.get('analysis_kind') == 'confirmatory' and evidence[reference].get('analysis_kind') == 'exploratory':
                 errors.append(f'Claim {claim.get("id")}: exploratory evidence cannot become confirmatory')
     return errors
+
+
+def artifact_evidence(cycle: Path) -> tuple[list, list]:
+    """Local audits need typed provenance too; a filename alone is not confirmation."""
+    ledger = cycle/'research/evidence.json'
+    records = read_json(ledger) if ledger.exists() else []
+    errors = []
+    for record in records:
+        if not record.get('id') or record.get('analysis_kind') not in ('exploratory','confirmatory','not_applicable'):
+            errors.append('Artifact evidence requires id and analysis_kind')
+        path = cycle.parents[1]/record.get('path','')
+        if not path.is_file():
+            errors.append(f'Artifact evidence file missing: {record.get("path")}')
+        elif record.get('sha256') != digest(path):
+            errors.append(f'Artifact evidence hash mismatch: {record.get("id")}')
+    return [r for r in records if r.get('id')], errors
 
 
 def retrieve_sources(cycle: Path, timeout=20) -> list[str]:
@@ -92,8 +111,14 @@ def retrieve_sources(cycle: Path, timeout=20) -> list[str]:
 
 
 def experiments(cycle: Path) -> list[dict]:
+    """Select declared experiment records, excluding auxiliary aggregate JSON.
+
+    A partial record with either identifying field still reaches validation. Aggregate
+    summaries must never become additional samples in the registered comparison.
+    """
     directory = cycle/'results'
-    return [read_json(path) for path in sorted(directory.glob('*.json'))] if directory.exists() else []
+    values = [read_json(path) for path in sorted(directory.glob('*.json'))] if directory.exists() else []
+    return [value for value in values if isinstance(value,dict) and ('id' in value or 'method' in value)]
 
 
 def verify_results(cycle: Path) -> list[str]:
