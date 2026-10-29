@@ -77,7 +77,7 @@ class Store:
             except psutil.NoSuchProcess:
                 pass
             process = psutil.Process()
-            self.update(run_id, owner_pid=process.pid, owner_start=process.create_time(), status='running', stop=0)
+            self.update(run_id, owner_pid=process.pid, owner_start=process.create_time(), status='running', stop=0, message='')
 
     def begin_attempt(self, run_id: str, phase: str, prompt: str) -> int:
         with self.lock, self.db:

@@ -59,6 +59,8 @@ You may read .eureka logs for this project. The controller handles those publica
 Use installed tools directly; no sandbox or permission prompts are imposed by the harness.
 Do not ask the user to proceed. On an actual blocker, return status blocked and a concrete explanation.
 Research protocol histories and result files must be preserved; never delete negative results.
+Only per-experiment records belong in results/*.json; put derived summaries and auxiliary analyses in research/ or reports/.
+On a repair, reuse valid existing artifacts and measurements. Correct the listed failures; do not repeat training merely to repair a handoff path.
 Required deliverables: {json.dumps(DELIVERABLES[phase])}
 Instructions: {INSTRUCTIONS[phase]}
 {fixture}
@@ -66,6 +68,8 @@ Previous completed phase summaries:
 {json.dumps([{'phase':p['name'],'summary':p['result']['summary'],'learning':p['result'].get('learning','')} for p in previous],ensure_ascii=False)}
 Corrections required from prior attempt: {json.dumps(errors,ensure_ascii=False)}
 Return the structured phase result specified by the supplied JSON schema. Artifact/evidence paths in the handoff must be project-relative.
+Include EVERY required key, including revisit_phase as an empty string when unused and not_applicable as an empty array when unused.
+Required keys: {', '.join(PHASE_SCHEMA['required'])}.
 Provide predictions, competing alternatives, observations and learning appropriate to this phase. Do not fabricate future observations.
 Use decision revisit with a named earlier phase if needed; use continue otherwise (finish in publish).
 '''
