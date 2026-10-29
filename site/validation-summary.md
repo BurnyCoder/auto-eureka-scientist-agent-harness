@@ -8,7 +8,7 @@
 | sonnet | complete | 8 | 9 | 13.25 | claude-haiku-5-5, claude-sonnet-5-5 |
 | sol | complete | 8 | 8 | 49.13 | not exposed |
 
-The saved offline test report records 40 tests, 0 failures and 0 errors.
+The saved offline test report records 47 tests, 0 failures and 0 errors.
 
 ## haiku-original
 

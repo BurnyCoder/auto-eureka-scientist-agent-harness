@@ -264,11 +264,18 @@ class Controller:
             self.publisher.bootstrap()
             while True:
                 row = self.store.get(self.run_id)
+                revision = self.store.receipt(self.run_id,'revised-hypothesis-cycle')
+                if revision and revision['from_cycle']==row['cycle']:
+                    if self.config.max_cycles and row['cycles_started']>=self.config.max_cycles:
+                        raise InterruptedError('cycle budget exhausted before revised hypothesis')
+                    self.store.advance_cycle(self.run_id,
+                        message='New cycle required for revised hypothesis; earlier results retained')
+                    continue
                 cycle = prepare_cycle(self.project,row['cycle'],self.config.profile,self.config.to_dict())
                 if row['phase_index'] == 0:
                     self.publisher.branch(row['cycle'],'core')
                 if row['phase_index'] >= len(PHASES):
-                    if self.config.mode == 'cycle' or (self.config.max_cycles and row['cycle']>=self.config.max_cycles):
+                    if self.config.mode == 'cycle' or (self.config.max_cycles and row['cycles_started']>=self.config.max_cycles):
                         self.store.update(self.run_id,status='complete',message='All required phases completed')
                         # The phase publication precedes its acceptance record. Publish a
                         # final snapshot too, so public clones can verify the final phase.
@@ -283,7 +290,7 @@ class Controller:
                         if errors:
                             raise ValueError('Final artifact verification failed: '+'; '.join(errors))
                         break
-                    self.store.update(self.run_id,cycle=row['cycle']+1,phase_index=0)
+                    self.store.advance_cycle(self.run_id)
                     continue
                 if reason := self.limit_reason():
                     raise InterruptedError(reason)
@@ -295,8 +302,9 @@ class Controller:
                     if next_index>=row['phase_index']:
                         raise ValueError('Revisit must name an earlier phase')
                     if next_index<=1 and experiments(cycle):
-                        self.store.update(self.run_id,cycle=row['cycle']+1,phase_index=0,
-                                          message='New cycle required for revised hypothesis; earlier results retained')
+                        # Persist navigation before checking limits, so resume does not
+                        # ask the model to repeat or undo its accepted revision decision.
+                        self.store.receipt(self.run_id,'revised-hypothesis-cycle',{'from_cycle':row['cycle']})
                         continue
                 self.store.update(self.run_id,phase_index=next_index)
         except InterruptedError as exc:
@@ -328,6 +336,7 @@ class Controller:
         write_json(self.project/'reports'/f'run-{self.run_id}.json',{
             'id':self.run_id,'backend':self.config.backend,'requested_model':self.config.model,
             'model_pin':self.config.model_pin,
+            'cycle':run['cycle'],'cycles_started':run['cycles_started'],
             'status':run['status'],'message':run['message'],'calls':run['calls'],'active_seconds':run['elapsed'],
             'limits':{'minutes':self.config.max_minutes,'calls':self.config.max_calls},
             'configuration_history':self.store.receipt(self.run_id,'configuration_history') or {'changes':[]},
