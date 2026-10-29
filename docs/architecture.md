@@ -6,11 +6,15 @@
 
 `execution.py` uses stdin and argument arrays with `shell=False`. Concurrent chunk readers preserve partial/long/Unicode output, raw bytes, and timestamped readable transcripts. Cancellation/deadlines terminate the owned process tree; no unrelated agent sessions are targeted. Native provider behavior, tools and refusal policies remain outside the harness's control.
 
-`state.py` stores runs, charged attempts, accepted phases, and publication receipts in SQLite transactions. A PID plus process creation time prevents two live controllers from owning one run. A heartbeat persists active elapsed time. A machine crash may lose up to the last heartbeat interval; it does not reset the call count. Raw prompts/output remain local under `.eureka`.
+`state.py` stores runs, charged attempts, accepted phases, cycle ownership, and publication receipts in SQLite transactions. A PID plus process creation time prevents two live controllers from writing the same project concurrently. A heartbeat persists active elapsed time. A machine crash may lose up to the last heartbeat interval; it does not reset the call count. Raw prompts/output remain local under `.eureka`.
+
+New runs and continuing cycles reserve a project-wide cycle number in a SQLite write transaction. Existing cycle directories count even when attaching a public clone without private state. Initialization never prepares or rewrites an earlier cycle. Cycle limits count cycles reserved by the current run, not the directory number; earlier run counters and observations remain unchanged. Older databases recover cycle ownership from their existing runs, attempts and phases. Prompts include earlier cycle summaries and links to their evidence histories. Explicit cycle inspection selects that cycle's recorded backend, including in public clones.
 
 The accepted handoff is persisted before publication. If a network operation fails, `resume` rechecks its files and finalizes the pending phase without another model call. Receipt keys identify repository creation, GitHub checkpoints and content-specific HF uploads. Immutable protocol snapshots and Git commits preserve earlier hypotheses. The decisions JSONL retains every accepted backedge, even when the current phase row is replaced.
 
 The agent may reopen missing evidence during distillation. A changed hypothesis after results creates a separate cycle, not an edited historical preregistration. New confirmation still requires untouched evaluation data; the fixed digits benchmark must not be reused to claim novel confirmation after adaptive changes.
+
+An accepted hypothesis-revision decision is saved before checking the cycle allowance. If that allowance is exhausted, an explicit extension resumes the saved transition without another review invocation. The incomplete earlier cycle remains incomplete; its observations are not relabeled as a completed study.
 
 The controller performs bounded targeted repair and transport retries. On budget exhaustion or persistent failure, status remains incomplete and artifacts survive. `reports/run-*.json` is a sanitized execution summary; raw transcripts are excluded. Resume retains the selected provider/model and consumed budgets. Use new ordinary runs for intentional model comparisons.
 

@@ -35,6 +35,15 @@ def make_prompt(run: dict, phase: str, cycle: Path, previous: list, errors: list
     import sys
     project = Path(run['config']['project'])
     relative = cycle.relative_to(project).as_posix()
+    prior_cycles = []
+    for directory in sorted((project/'cycles').glob('*')):
+        history = directory/'research/decisions.jsonl'
+        if directory.name.isdigit() and int(directory.name)<int(cycle.name) and history.exists():
+            decisions = [json.loads(line) for line in history.read_text(encoding='utf-8').splitlines() if line.strip()]
+            if decisions:
+                last = decisions[-1]
+                prior_cycles.append({'history':history.relative_to(project).as_posix(),
+                    'summary':last.get('summary',''),'learning':last.get('learning','')})
     fixture = ''
     if run['config']['profile'].startswith('digits'):
         import sys
@@ -77,6 +86,8 @@ Instructions: {INSTRUCTIONS[phase]}
 {fixture}
 Previous completed phase summaries:
 {json.dumps([{'phase':p['name'],'summary':p['result']['summary'],'learning':p['result'].get('learning','')} for p in previous],ensure_ascii=False)}
+Earlier cycle findings (read their histories and reports before extending them; prior results are already observed):
+{json.dumps(prior_cycles,ensure_ascii=False)}
 Corrections required from prior attempt: {json.dumps(errors,ensure_ascii=False)}
 Return the structured phase result. File paths can be relative to the cycle or project; use project-relative paths if both would exist.
 Use this handoff shape, replacing its descriptive placeholders with actual observations: {json.dumps(example,ensure_ascii=False)}

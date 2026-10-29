@@ -16,6 +16,7 @@ from .util import now
 
 class Store:
     def __init__(self, project: Path):
+        self.project = project
         directory = project / '.eureka'
         directory.mkdir(parents=True, exist_ok=True)
         self.lock = threading.RLock()
@@ -36,23 +37,58 @@ class Store:
               PRIMARY KEY(run_id,cycle,name));
             CREATE TABLE IF NOT EXISTS receipts (
               run_id TEXT, key TEXT, value TEXT, updated TEXT, PRIMARY KEY(run_id,key));
+            CREATE TABLE IF NOT EXISTS cycles (number INTEGER PRIMARY KEY, run_id TEXT);
         ''')
+        # Preserve ownership when opening databases created before cycle allocation.
+        with self.db:
+            self.db.execute('INSERT OR IGNORE INTO cycles SELECT cycle,run_id FROM phases')
+            self.db.execute('INSERT OR IGNORE INTO cycles SELECT cycle,run_id FROM attempts')
+            self.db.execute('INSERT OR IGNORE INTO cycles SELECT cycle,id FROM runs')
+
+    def reserve_cycle(self, run_id: str) -> int:
+        """Reserve a project-wide number inside the caller's write transaction.
+
+        Existing directories also count, including public clones without SQLite.
+        https://www.sqlite.org/lang_transaction.html#deferred_immediate_and_exclusive_transactions
+        """
+        directories = [int(path.name) for path in (self.project/'cycles').glob('*')
+                       if path.is_dir() and path.name.isdigit()]
+        recorded = self.db.execute('SELECT COALESCE(MAX(number),0) FROM cycles').fetchone()[0]
+        number = max([recorded,*directories])+1
+        self.db.execute('INSERT INTO cycles VALUES(?,?)',(number,run_id))
+        return number
 
     def create(self, config: RunConfig, task: str, policy_hash: str) -> str:
         run_id = uuid.uuid4().hex[:12]
         with self.lock, self.db:
-            self.db.execute('INSERT INTO runs(id,created,updated,config,task,policy_hash,status) VALUES(?,?,?,?,?,?,?)',
-                            (run_id, now(), now(), json.dumps(config.to_dict()), task, policy_hash, 'ready'))
+            self.db.execute('BEGIN IMMEDIATE')
+            cycle = self.reserve_cycle(run_id)
+            self.db.execute('INSERT INTO runs(id,created,updated,config,task,policy_hash,status,cycle) VALUES(?,?,?,?,?,?,?,?)',
+                            (run_id, now(), now(), json.dumps(config.to_dict()), task, policy_hash, 'ready',cycle))
         return run_id
 
-    def get(self, run_id: str | None = None) -> dict:
+    def advance_cycle(self, run_id: str, *, message=''):
+        """Keep earlier observations and reservations when continuing research."""
+        with self.lock, self.db:
+            self.db.execute('BEGIN IMMEDIATE')
+            self.get(run_id)
+            number = self.reserve_cycle(run_id)
+            self.update(run_id,cycle=number,phase_index=0,message=message)
+
+    def get(self, run_id: str | None = None, *, cycle: int | None = None) -> dict:
         with self.lock:
-            row = self.db.execute('SELECT * FROM runs WHERE id=?', (run_id,)).fetchone() if run_id else (
-                self.db.execute('SELECT * FROM runs ORDER BY created DESC LIMIT 1').fetchone())
-        if row is None:
-            raise ValueError('No matching run. Use eureka run first.')
-        value = dict(row)
-        value['config'] = json.loads(value['config'])
+            if run_id:
+                row = self.db.execute('SELECT * FROM runs WHERE id=?',(run_id,)).fetchone()
+            elif cycle is not None:
+                row = self.db.execute('SELECT runs.* FROM runs JOIN cycles ON runs.id=cycles.run_id WHERE cycles.number=?',
+                                      (cycle,)).fetchone()
+            else:
+                row = self.db.execute('SELECT * FROM runs ORDER BY created DESC,rowid DESC LIMIT 1').fetchone()
+            if row is None:
+                raise ValueError('No matching run. Use eureka run first.')
+            value = dict(row)
+            value['config'] = json.loads(value['config'])
+            value['cycles_started'] = self.db.execute('SELECT COUNT(*) FROM cycles WHERE run_id=?',(value['id'],)).fetchone()[0]
         return value
 
     def update(self, run_id, **values):
@@ -67,15 +103,16 @@ class Store:
                             (*values.values(),run_id))
 
     def acquire(self, run_id: str):
-        """Use PID plus creation time so a recycled PID cannot impersonate an owner."""
+        """Serialize project writers; PID creation time rejects recycled owners."""
         with self.lock, self.db:
             self.db.execute('BEGIN IMMEDIATE')
-            row = self.get(run_id)
-            try:
-                if row['owner_pid'] and abs(psutil.Process(row['owner_pid']).create_time()-row['owner_start']) < .01:
-                    raise RuntimeError('This run already has a live controller')
-            except psutil.NoSuchProcess:
-                pass
+            self.get(run_id)
+            for row in self.db.execute('SELECT owner_pid,owner_start FROM runs WHERE owner_pid<>0'):
+                try:
+                    if abs(psutil.Process(row['owner_pid']).create_time()-row['owner_start']) < .01:
+                        raise RuntimeError('This project already has a live controller')
+                except psutil.NoSuchProcess:
+                    pass
             process = psutil.Process()
             self.update(run_id, owner_pid=process.pid, owner_start=process.create_time(), status='running', stop=0, message='')
 
