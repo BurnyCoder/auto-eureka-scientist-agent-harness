@@ -78,6 +78,8 @@ class Controller:
             self.store.update(self.run_id,elapsed=self.consumed+time.monotonic()-self.started)
 
     async def check_command(self, cycle: Path):
+        # Preserve the agent's cited output before a repeat check or our receipt replaces it.
+        snapshot_evidence(cycle)
         check = read_json(cycle/'research/checks.json')
         cwd = cycle if check.get('cwd') == 'cycle' else self.project
         result = await execute(check['command'],'',cwd,self.project/'.eureka'/self.run_id/'checks',
