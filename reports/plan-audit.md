@@ -1,6 +1,6 @@
 # Implementation and execution audit
 
-This audit separates implemented capabilities from evidence of completed executions. The original Haiku run did not complete its bounded protocol; Luna completed controller phases but needed disclosed post-run provenance repairs. The user's new instruction authorizes an extension and additional models, recorded prospectively in [the addendum](validation-extension-preregistration.md). Results will be generated from saved execution summaries, not inferred from intent.
+This audit separates implemented capabilities from evidence of completed executions. The original Haiku run did not complete its bounded protocol; Luna completed controller phases but needed disclosed post-run provenance repairs. The user authorized an extension and additional models, recorded prospectively in [the addendum](validation-extension-preregistration.md). The [generated outcomes](validation-summary.md) come from saved execution summaries, not intent.
 
 ## Confirmed defects and changes
 
@@ -18,10 +18,16 @@ General orchestration is implemented, while live scientific validation is specif
 
 The supervised digits study has loss curves but no reward objective. Writer-level generalization and concept-swapping experiments are not supported by this protocol. The harness has no trainable weights; validation checkpoint bundles are uploaded. The shared Hugging Face collection follows the user's revised instruction. Public raw transcripts remain excluded to avoid publishing credentials or private tool output; sanitized summaries and reproducible artifacts are published.
 
-Final acceptance requires additional observed runs and public artifact checks; code changes alone do not mark that work complete. Any manual repair and any unmet requirement must remain explicit in the final report.
+Observed phase completion and public artifact verification are recorded separately in [the final checks](final-checks.md). Code changes alone do not mark an execution complete. Parent repairs and residual limits remain explicit in the final report.
 
 ## Findings during extended execution
 
 Haiku's resumed phases passed their artifact checks, but parent review still found semantic overclaims about detection limits, endpoint norms and post-hoc NLL. Those were corrected with an explicit post-run disclosure; structural completion is not semantic validation. The renderer now adds a model-layer diagram from protocol widths alongside the harness architecture.
 
 The first Sonnet invocation exposed another adapter defect: native WebFetch summarization used Haiku despite subagent pinning. The phase was rejected and the call retained. Claude's [model configuration](https://code.claude.com/docs/en/model-config#environment-variables) documents a separate full model identifier for background functionality. A selected alias can now be pinned explicitly; its session, subagents and background model settings receive the same identifier. Subsequent observed model identities must still pass validation. This development run retains its mixed-model failure and cannot be described as an entirely pure Sonnet execution from inception.
+
+Sonnet's completed public artifacts passed phase and checkpoint verification. Parent review narrowed implementation and mechanism claims, withdrew an unsupported sampling-noise explanation and corrected checklist entries that treated controller-owned work as inapplicable. PDF layout and public explorer interactions were checked independently. These interventions are disclosed in the [trial's parent review](https://github.com/BurnyCoder/eureka-digits-sonnet/blob/main/reports/parent-review.md).
+
+Sol exposed a separate controller ordering defect: its successful core recheck overwrote an agent-cited audit before snapshotting it. A real-subprocess regression reproduced the failure. The controller now snapshots first, and the original audit was recovered only after matching its previously recorded hash exactly. The [repair report](core-check-evidence-repair.md) and [recovery receipt](verification/sol-core-evidence-recovery.json) preserve this parent intervention; no new inference or training was needed for the recovery.
+
+Sol's substantive review found ambiguous example provenance and a paper reproduction reference. The parent incorporated experiment/split labels into the shared explorer template and linked the cycle's actual reproduction guide in the renderer, so regeneration retains those fixes. The existing offline suite and Sol's actual inline-script DOM probe passed against the shared template. This probe tests logic; public browser and PDF inspection remain separate acceptance evidence. Sol's authored interpretation retains its own portable links, full settings and long-table layout repair.

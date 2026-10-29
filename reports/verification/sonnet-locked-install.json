@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-29T21:59:29.525+00:00",
+  "project": "tmp\\sonnet-public-clone",
+  "install": "uv sync --locked --extra cuda",
+  "lockfile_sha256": "87ee65345377da209f0a78770c46937d586a45999023f1bf32e3e942df831ec0",
+  "check_command": ".venv/Scripts/python.exe cycles/001/study.py check",
+  "check_exit_code": 0,
+  "check_status": "passed",
+  "environment": ".venv",
+  "scope": "Fresh public project clone using its own locked environment; no fitting."
+}

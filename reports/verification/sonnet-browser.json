@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-29T21:25:03.824+00:00",
+  "url": "https://burnycoder.github.io/eureka-digits-sonnet/",
+  "filters_checked": [
+    "experiment",
+    "method",
+    "seed",
+    "split",
+    "outcome"
+  ],
+  "combined_record": "regularized_s1",
+  "empty_intersection_checked": true,
+  "reset_restored_all_records": true,
+  "screenshot_sha256": "964f78fc2844c90aecd0f1f711785ac324a7fdb1a4218ec6d90187a3da14d0a1"
+}
