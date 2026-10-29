@@ -279,7 +279,14 @@ Codex wrote the harness and study fixture; {backend} performed this cycle and au
     for record in experiments(cycle):
         text = f"# {record['id']}\n\nMethod: {record['method']}. Analysis: {record['analysis_kind']}.\n\n"
         text += markdown_table({'experiments':[next(r for r in summary['experiments'] if r['id']==record['id'])]})
-        text += '\n\n## Method, provenance, and learning\n\n'+methodology+'\n\n'+record.get('expected_observation','See protocol.')+'\n\n'+record.get('limitations','See consolidated limitations.')
+        # Global MLP hyperparameters must not be attributed to simple baseline methods.
+        if record['method']=='logistic':
+            specific = f"Multinomial logistic regression: C={protocol.get('logistic_C')}, max_iter={protocol.get('logistic_max_iter')}. Neural architecture, AdamW, batches and epochs do not apply. See the [scikit-learn estimator](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html)."
+        elif record['method']=='class_prior':
+            specific = 'Class-prior baseline fitted on training labels. Neural architecture, optimizer, batches and epochs do not apply. The committed study source defines prediction behavior.'
+        else:
+            specific = methodology
+        text += '\n\n## Method, provenance, and learning\n\n'+specific+'\n\n'+record.get('expected_observation','See protocol.')+'\n\n'+record.get('limitations','See consolidated limitations.')
         text += f"\n\nProtocol SHA256: `{record.get('protocol_sha256')}`. Code SHA256: `{record.get('code_sha256')}`.\n"
         (reports/f"experiment-{record['id']}.md").write_text(text,encoding='utf-8')
     root_readme = project/'README.md'

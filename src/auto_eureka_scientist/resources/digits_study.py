@@ -155,7 +155,7 @@ def experiment(root, protocol, method, seed, split, device, *, pilot=False):
         np.testing.assert_array_equal(predicted,restored)
     indices = splits[split]
     record = {'id':identifier,'method':method,'seed':seed,'split':split,
-              'analysis_kind':'exploratory' if pilot or method in ('sensitivity','shuffled_labels','logistic','class_prior') else 'confirmatory',
+            'analysis_kind':'exploratory' if pilot or method in ('sensitivity','shuffled_labels','logistic','class_prior') else protocol.get('analysis_kind','confirmatory'),
               'started_at':started_at,'finished_at':timestamp(),'seconds':time.perf_counter()-started,
               'accuracy':float(np.mean(predicted[indices] == y[indices])),
               'y_true':y[indices].tolist(),'y_pred':predicted[indices].tolist(),'example_ids':indices.tolist(),

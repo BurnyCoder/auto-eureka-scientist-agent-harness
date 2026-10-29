@@ -53,6 +53,8 @@ def verify_claims(claims: list, experiments: list, sources: list, artifacts=()) 
         duplicates = sorted(key for key,count in Counter(item['id'] for item in items).items() if count>1)
         errors.append(f'Evidence identifiers must be unique across all ledgers; duplicated: {duplicates}')
     for claim in claims:
+        if claim.get('analysis_kind') not in ('exploratory','confirmatory','not_applicable'):
+            errors.append(f'Claim {claim.get("id")}: invalid analysis_kind')
         if not claim.get('text') or not claim.get('limitations') or not claim.get('evidence'):
             errors.append(f"Claim {claim.get('id')}: text, limitations, and evidence required")
         for reference in claim.get('evidence',[]):
@@ -71,15 +73,32 @@ def artifact_evidence(cycle: Path) -> tuple[list, list]:
     for record in records:
         if not record.get('id') or record.get('analysis_kind') not in ('exploratory','confirmatory','not_applicable'):
             errors.append(f'Artifact evidence {record.get("id")}: analysis_kind must be exploratory, confirmatory, or not_applicable; got {record.get("analysis_kind")}')
-        path = cycle.parents[1]/record.get('path','')
-        if not path.resolve().is_relative_to(cycle.parents[1].resolve()):
-            errors.append(f'Artifact evidence path is outside its project: {record.get("id")}')
+        try:
+            path = resolve_artifact(cycle,record.get('path',''))
+        except ValueError as exc:
+            errors.append(str(exc))
             continue
         if not path.is_file():
             errors.append(f'Artifact evidence file missing: {record.get("path")}')
         elif record.get('sha256') != digest(path):
             errors.append(f'Artifact evidence hash mismatch: {record.get("id")}')
     return [r for r in records if r.get('id')], errors
+
+
+def resolve_artifact(cycle: Path, reference: str) -> Path:
+    """Accept cycle or project relative paths, but never guess between two existing files.
+
+    This is artifact identity validation, not a restriction on the CLI's available tools.
+    https://docs.python.org/3/library/pathlib.html#pathlib.Path.resolve
+    """
+    project = cycle.parents[1].resolve()
+    candidates = {(base/reference).resolve() for base in (project,cycle)}
+    if any(not path.is_relative_to(project) for path in candidates):
+        raise ValueError(f'Artifact path is outside its project: {reference}')
+    existing = [path for path in candidates if path.exists()]
+    if len(existing)>1:
+        raise ValueError(f'Ambiguous artifact path; use project-relative path: {reference}')
+    return existing[0] if existing else project/reference
 
 
 def snapshot_evidence(cycle: Path, *, allow_unverified=False):
@@ -95,6 +114,12 @@ def snapshot_evidence(cycle: Path, *, allow_unverified=False):
     project = cycle.parents[1]
     records = read_json(ledger)
     import subprocess
+    for record in records:
+        try:
+            record['path'] = resolve_artifact(cycle,record.get('path','')).relative_to(project.resolve()).as_posix()
+        except ValueError:
+            if not allow_unverified:
+                raise
     paths = [r.get('path','').replace('\\','/') for r in records
              if (project/r.get('path','')).resolve().is_relative_to(project.resolve())]
     result = subprocess.run(['git','check-ignore','-z','--stdin'],cwd=project,
@@ -182,6 +207,10 @@ def verify_results(cycle: Path) -> list[str]:
     if not registration_path.exists():
         return ['Missing committed preregistration receipt']
     registration = read_json(registration_path)
+    protocol = read_json(cycle/'research/protocol.json')
+    core_receipt = cycle/'research/core-code.json'
+    if core_receipt.exists() and (not (cycle/'study.py').exists() or digest(cycle/'study.py')!=read_json(core_receipt)['sha256']):
+        errors.append('Current study source differs from the published core; preserve the trained source version')
     if digest(cycle/'research/protocol.json') != registration['protocol_sha256']:
         errors.append('Protocol changed after registration; preserve it and register a new research cycle')
     for experiment in records:
@@ -190,8 +219,10 @@ def verify_results(cycle: Path) -> list[str]:
             errors.append(f"{experiment.get('id')}: protocol hash mismatch")
         if not experiment.get('started_at') or experiment['started_at'] < registration['registered_at']:
             errors.append(f"{experiment.get('id')}: missing or pre-registration start time")
-        if not experiment.get('method') or not experiment.get('analysis_kind'):
-            errors.append('Experiments require method and analysis_kind')
+        if not experiment.get('method') or experiment.get('analysis_kind') not in ('exploratory','confirmatory'):
+            errors.append('Experiments require method and a valid analysis_kind')
+        if protocol.get('analysis_kind')=='exploratory' and experiment.get('analysis_kind')=='confirmatory':
+            errors.append(f'{experiment.get("id")}: an exploratory protocol cannot produce confirmatory observations')
         code_receipt = cycle/'research/core-code.json'
         if code_receipt.exists() and experiment.get('code_sha256') != read_json(code_receipt)['sha256']:
             errors.append(f"{experiment.get('id')}: training code differs from published core")
