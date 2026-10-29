@@ -4,7 +4,7 @@ from pathlib import Path
 
 from .contracts import PHASES, PHASE_SCHEMA, validate_handoff
 from .policy import NEEL, policy_bytes, requirements
-from .science import experiments, retrieve_sources, validate_protocol, verify_claims, verify_results
+from .science import artifact_evidence, experiments, retrieve_sources, validate_protocol, verify_claims, verify_results
 from .util import digest, read_json
 
 
@@ -59,8 +59,9 @@ You may read .eureka logs for this project. The controller handles those publica
 Use installed tools directly; no sandbox or permission prompts are imposed by the harness.
 Do not ask the user to proceed. On an actual blocker, return status blocked and a concrete explanation.
 Research protocol histories and result files must be preserved; never delete negative results.
-Only per-experiment records belong in results/*.json; put derived summaries and auxiliary analyses in research/ or reports/.
+Put derived summaries and auxiliary analyses in research/ or reports/. Only JSON objects declaring id or method count as experiment records; aggregates never count as additional experiments.
 On a repair, reuse valid existing artifacts and measurements. Correct the listed failures; do not repeat training merely to repair a handoff path.
+Claim evidence references must resolve to source or experiment IDs. For local code, audit logs, or derived analyses, add research/evidence.json as an array of {{id,path,sha256,analysis_kind}} with project-relative paths and actual SHA256 hashes, then cite those IDs. A path alone without this ledger is not registered evidence. Post-hoc audits and derived analyses remain exploratory; claims relying on them must be exploratory too. Use not_applicable only for non-empirical documentation.
 Required deliverables: {json.dumps(DELIVERABLES[phase])}
 Instructions: {INSTRUCTIONS[phase]}
 {fixture}
@@ -115,7 +116,9 @@ def verify_phase(phase: str, cycle: Path, result: dict, *, fetch=False) -> list[
             else:
                 errors.extend(verify_results(cycle))
         if phase in ('analysis','review','publish'):
-            errors.extend(verify_claims(read_json(cycle/'research/claims.json'),experiments(cycle),read_json(cycle/'research/sources.json')))
+            local_evidence, evidence_errors = artifact_evidence(cycle)
+            errors.extend(evidence_errors)
+            errors.extend(verify_claims(read_json(cycle/'research/claims.json'),experiments(cycle),read_json(cycle/'research/sources.json'),local_evidence))
             checklist = {item['id']:item for item in read_json(cycle/'research/requirements.json')}
             for requirement in requirements():
                 item = checklist.get(requirement['id'],{})
