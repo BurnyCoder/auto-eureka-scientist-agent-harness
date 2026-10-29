@@ -11,6 +11,7 @@ import statistics
 import xml.etree.ElementTree as ET
 
 from auto_eureka_scientist.reporting import metrics, markdown_table, summarize_records, figures
+from auto_eureka_scientist.architecture import architecture_panel, render_architecture
 from auto_eureka_scientist.science import experiments
 from auto_eureka_scientist.util import read_json, write_json
 
@@ -52,6 +53,9 @@ def collect(root: Path):
 
 def build(root: Path, pdf: bool):
     trials = collect(root)
+    render_architecture(root/'reports/figures')
+    for extension in ('.png','.svg'):
+        shutil.copy2(root/'reports/figures'/f'architecture{extension}',root/'docs/images'/f'architecture{extension}')
     extended = next((trial for trial in trials if trial['name']=='haiku-extended'),None)
     # Keep both execution checkpoints, but do not repeat identical scientific tables/figures.
     repeated = {trial['name'] for trial in trials if trial['name']=='haiku-original'
@@ -104,7 +108,7 @@ def build(root: Path, pdf: bool):
     for trial in scientific_trials:
         paper_body = paper_body.replace(markdown_table(trial['summary']),markdown_table(trial['summary'],compact=True))
         figure_root = root/'reports/figures'/trial['name']
-        figures(figure_root,trial['records'])
+        figures(figure_root,trial['records'],harness_diagram=False)
         for name,caption in [('accuracy','Recorded accuracies'),('examples','First saved test examples per method')]:
             paper_body += f"\n\n## {trial['name']}: {caption}\n\n![{caption}](figures/{trial['name']}/figures/{name}.png)\n\n*{caption}; regenerated from saved predictions.*\n"
     paper = '''---
@@ -128,9 +132,25 @@ The architecture draws on [Anthropic's harness design](https://www.anthropic.com
 
 The original bounded trials follow reports/validation-preregistration.md. The user-authorized Haiku continuation and Sonnet/GPT-6.1 Sol replications follow reports/validation-extension-preregistration.md. Original and extended Haiku rows are successive observations of the same run, not independent trials. Sonnet and Sol use known evaluation data and are explicitly exploratory engineering replications. The scientific definitions retain the fixed weight-decay comparison, simple baselines, shuffled training labels, registered seeds and descriptive sensitivity. Test-example bootstrap intervals condition on the trained models. The shared implementation is a confound for any claim about independent algorithm discovery.
 
+\\clearpage
+
+![Research cycle, publication gates and optional return to a new cycle.](figures/architecture-phases.png){width=95%}
+
+*Operational phases. Distillation and review may reopen earlier work; changed hypotheses preserve earlier observations in a separate cycle.*
+
+\\clearpage
+
+![Execution loop, durable memory and bounded recovery.](figures/architecture-runtime.png){width=100%}
+
+*Execution architecture. The selected CLI produces evidence; the controller verifies, persists and publishes it. See [architecture and recovery](https://github.com/BurnyCoder/auto-eureka-scientist-agent-harness/blob/main/docs/architecture.md) for implementation details.*
+
+\\clearpage
+
 # Results, claims, discussion, and implications
 
 '''+paper_body+'''
+
+\\clearpage
 
 # Conclusion
 
@@ -158,12 +178,17 @@ Codex wrote this harness codebase and report from the exact specification suppli
     readme.write_text(content,encoding='utf-8')
     site = root/'site'
     site.mkdir(exist_ok=True)
+    (site/'figures').mkdir(exist_ok=True)
+    for diagram in (root/'reports/figures').glob('architecture*.svg'):
+        shutil.copy2(diagram,site/'figures'/diagram.name)
     # Root Pages links to independent trial explorers; it does not combine test outcomes.
     rows = ''.join(f'<tr><td>{t["name"]}</td><td>{t["run"]["status"].replace("_"," ")}</td><td>{len(t["run"]["completed_phases"])}</td><td>{t["run"]["calls"]}</td><td><a href="{t["explorer"]}">Explore evidence</a></td></tr>' for t in trials)
     (site/'index.html').write_text('''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Auto Eureka Scientist</title>
 <style>body{font:17px/1.6 system-ui;max-width:980px;margin:auto;padding:40px;color:#18313c;background:#f5f7f8}h1{font-size:3rem;line-height:1.1}table{width:100%;border-collapse:collapse;background:white}td,th{padding:14px;text-align:left;border-bottom:1px solid #ccdce3}a{color:#006a98}.tag{letter-spacing:.14em;color:#54727f;font-size:.8rem}.scroll{overflow:auto}@media(max-width:600px){body{padding:18px}td,th{padding:10px}}</style>
 <div class="tag">DURABLE RESEARCH / OBSERVABLE EVIDENCE</div><h1>Auto Eureka Scientist</h1>
 <p>One selected coding CLI, persistent scientific artifacts, and explicit completion checks.</p>
+'''+architecture_panel()+'''
+<h2>Recorded validation</h2>
 <p>These executions share fixed scientific definitions. Their outcomes do not establish general scientific reliability or rank the providers.</p>
 <p>The original and extended Haiku rows describe the same run before and after an explicitly authorized budget increase. The original cutoff is preserved. Luna required post-run provenance repairs. Sonnet and GPT-6.1 Sol are exploratory replications with prior results known. Read the report for failures and interventions.</p>
 <p>Parent review corrected scientific overclaims in Haiku and Sonnet. Sonnet's first call was rejected for background Haiku usage; later accepted calls used its explicit Sonnet pin. Sol required recovery of an audit overwritten by the controller. Completed phases do not mean an untouched autonomous run.</p>

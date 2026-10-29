@@ -6,22 +6,11 @@ The motivation is inspectable execution: an agent's claim that it finished is in
 
 The original Haiku trial stopped at its time limit with missing phases. Luna completed its controller phases but needed mechanical provenance repairs. The user then authorized a larger budget, simpler handoffs, and separate Sonnet and GPT-6.1 Sol replications. The [generated validation report](reports/validation-summary.md) separates the original cutoff from extended results; [audit disclosures](reports/validation-interpretation.md) explain interventions and limitations. The [original protocol](reports/validation-preregistration.md) and [prospective extension](reports/validation-extension-preregistration.md) remain separate.
 
-![Results explorer with filters and recorded experiment scores](docs/images/explorer.png)
+[![Architecture: eight research phases, execution loop, durable evidence and publication](docs/images/architecture.svg)](docs/images/architecture.svg)
+
+[Explore the interactive architecture](https://burnycoder.github.io/auto-eureka-scientist-agent-harness/#architecture-heading) · [Full-size PNG](docs/images/architecture.png) · [Architecture and recovery](docs/architecture.md)
 
 [Results hub](https://burnycoder.github.io/auto-eureka-scientist-agent-harness/) · [Validation paper](reports/validation-paper.pdf) · [Reproduce published artifacts](docs/reproduction.md) · [Haiku explorer](https://burnycoder.github.io/eureka-digits-haiku/) · [Luna explorer](https://burnycoder.github.io/eureka-digits-luna/) · [Sonnet explorer](https://burnycoder.github.io/eureka-digits-sonnet/) · [Sol explorer](https://burnycoder.github.io/eureka-digits-sol/)
-
-```mermaid
-flowchart LR
-  T[Task + canonical policy] --> O[Durable phase controller]
-  O --> C[Selected Claude Code OR Codex CLI]
-  C --> E[Files, predictions, source records]
-  E --> V[Evidence checks]
-  V -->|accepted| S[(SQLite + publication receipts)]
-  V -->|concrete failure| O
-  S --> R[Generated reports, PDF, figures, explorer]
-  R --> P[GitHub + Pages + Hugging Face]
-  P -->|next phase or cycle| O
-```
 
 ## Installation
 

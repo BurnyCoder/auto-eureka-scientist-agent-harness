@@ -87,7 +87,7 @@ def markdown_table(summary: dict, *, compact=False) -> str:
     return '\n'.join(lines)
 
 
-def figures(cycle: Path, records=None):
+def figures(cycle: Path, records=None, *, harness_diagram=True):
     """Plot recorded scores, histories and deterministic prediction examples."""
     import matplotlib
     matplotlib.use('Agg')
@@ -117,15 +117,9 @@ def figures(cycle: Path, records=None):
     fig.tight_layout()
     fig.savefig(cycle/'figures/loss.png',dpi=160)
     plt.close(fig)
-    fig,ax = plt.subplots(figsize=(10,2))
-    ax.axis('off')
-    labels = ['Task + policy','Selected CLI','Evidence checks','Reports + models']
-    for i,label in enumerate(labels):
-        ax.text(.12+i*.25,.5,label,ha='center',va='center',bbox={'boxstyle':'round','facecolor':'#e7f0f5','edgecolor':'#0072B2'},fontsize=9)
-        if i<3:
-            ax.annotate('',xy=(.25+i*.25,.5),xytext=(.22+i*.25,.5),arrowprops={'arrowstyle':'->'})
-    fig.savefig(cycle/'figures/architecture.png',dpi=160,bbox_inches='tight')
-    plt.close(fig)
+    if harness_diagram:
+        from .architecture import render_architecture
+        render_architecture(cycle/'figures')
     protocol_path = cycle/'research/protocol.json'
     protocol = read_json(protocol_path) if protocol_path.exists() else {}
     layers = protocol.get('architecture')
@@ -221,7 +215,8 @@ def render(project: Path, cycle: Path, *, backend='Codex', pdf=True, timeout=180
     methodology = '\n'.join(f'- **{key}**: {json.dumps(protocol[key],ensure_ascii=False)}' for key in
                              ('analysis_kind','prior_results_known','objective','question','architecture','optimizer','learning_rate','batch_size','epochs','methods','seeds','data_boundaries','analysis_plan','hyperparameter_rationale') if key in protocol)
     def figure(name,caption):
-        return f'![{caption}](../figures/{name}.png)\n\n*{caption}.*' if (cycle/f'figures/{name}.png').exists() else f'{caption}: no applicable measurement recorded.'
+        sizing = '{width=95%}' if name=='architecture-phases' else ''
+        return f'![{caption}](../figures/{name}.png){sizing}\n\n*{caption}.*' if (cycle/f'figures/{name}.png').exists() else f'{caption}: no applicable measurement recorded.'
     paper = f'''---
 title: "{project.name}: reproducible research report"
 author: 'Libor “Burny” Burian'
@@ -246,8 +241,6 @@ The objective is reproducible evidence and an inspectable research process. This
 # Background and method
 
 {methodology}
-
-{figure('architecture','Research architecture')}
 
 {figure('model-architecture','Registered model architecture')}
 
@@ -289,6 +282,14 @@ Exploratory outcomes do not become confirmatory by inclusion in this document. M
 
 The committed protocol, per-experiment JSON files, saved predictions, loss histories, and checkpoints are the source of all numerical tables and figures. Rebuild using `eureka render`. See [the reproduction guide]({artifact_link(cycle/'docs/reproduction.md')}) for execution commands and environment details.
 
+\\clearpage
+
+{figure('architecture-phases','Research cycle and publication gates')}
+
+\\clearpage
+
+{figure('architecture-runtime','Execution loop, durable memory and recovery')}
+
 # AI statement
 
 Codex wrote the harness and study fixture; {backend} performed this cycle and drafted its interpretation. Any subsequent parent corrections are documented in the linked audit reports. The harness generated this paper from recorded artifacts. A human supplied the exact specification. Human cleanup and rewriting are in progress.
@@ -312,6 +313,9 @@ Codex wrote the harness and study fixture; {backend} performed this cycle and dr
     original = root_readme.read_text(encoding='utf-8') if root_readme.exists() else '# '+project.name+'\n'
     start,end = '<!-- EUREKA:RESULTS:START -->','<!-- EUREKA:RESULTS:END -->'
     block = f'{start}\n## Recorded results\n\n{status_text}\n\n{table}\n\n{primary_text}\n\nSee [full report](cycles/{cycle.name}/reports/summary.md).\n{end}'
+    if (cycle/'figures/architecture.svg').exists():
+        diagram = f'cycles/{cycle.name}/figures/architecture.svg'
+        block = block.replace(end,f'\n## Research architecture\n\n[![Research phases, execution and durable evidence]({diagram})]({diagram})\n{end}')
     if start in original and end in original:
         original = original[:original.index(start)]+block+original[original.index(end)+len(end):]
     else:
@@ -330,10 +334,14 @@ Codex wrote the harness and study fixture; {backend} performed this cycle and dr
     if not repository_url:
         site_paper = site_paper.replace('](../',f'](../cycles/{cycle.name}/')
     (site/'paper.md').write_text(site_paper,encoding='utf-8')
-    for figure_path in (cycle/'figures').glob('*.png'):
+    for figure_path in (cycle/'figures').glob('*'):
+        if figure_path.suffix not in ('.png','.svg'):
+            continue
         (site/'figures').mkdir(exist_ok=True)
         shutil.copy2(figure_path,site/'figures'/figure_path.name)
-    (site/'index.html').write_bytes(files('auto_eureka_scientist').joinpath('resources/explorer.html').read_bytes())
+    from .architecture import architecture_panel
+    explorer = files('auto_eureka_scientist').joinpath('resources/explorer.html').read_text(encoding='utf-8')
+    (site/'index.html').write_text(explorer.replace('<!-- ARCHITECTURE_PANEL -->',architecture_panel()),encoding='utf-8')
     write_json(site/'data.json',{'title':project.name,'cycle':cycle.name,**summary,
                                'run_status':run_status,
                                'records':[{**r,'outcome':r.get('outcome','measured')} for r in experiments(cycle)],
