@@ -24,7 +24,7 @@ Exploration gains information; do not pretend a mature hypothesis exists. Keep h
 Seek alternative explanations, including ordinary bugs, leakage, and stronger simple baselines.
 Before experiments record predictions that distinguish explanations and what would falsify them.
 Choose informative, inexpensive probes; explain learning per unit time and switching costs.
-Record project goal, subgoal, immediate objective, predictions, actual observations, and lessons.
+Record project goal, subgoal, immediate objective, expected learning, estimated effort, selection rationale, predictions, actual observations, and lessons.
 Distill early: outline a few precise claims, then abstract, outline, introduction, figures, full draft.
 Writing can expose missing evidence and reopen research. Inform, do not overclaim or hide negative results.
 Exploratory findings cannot retroactively become confirmatory. Amend protocols prospectively and use

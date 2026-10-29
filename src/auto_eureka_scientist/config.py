@@ -21,6 +21,7 @@ class RunConfig:
     repository: str = ''
     executable: str = ''
     reasoning: str = 'high'
+    hf_collection: str = ''
 
     def __post_init__(self):
         self.project = str(Path(self.project).resolve())
@@ -34,17 +35,16 @@ class RunConfig:
                 raise ValueError(f'{key} must be positive')
         if self.mode == 'budget' and self.max_minutes is None and self.max_calls is None:
             raise ValueError('budget mode requires max_minutes or max_calls')
-        if self.profile not in ('research', 'digits'):
+        if self.profile not in ('research', 'digits', 'digits-replication'):
             raise ValueError('unknown profile')
-        if self.profile == 'digits':
-            allowed = self.model == 'gpt-6-luna' if self.backend == 'codex' else (
-                self.model == 'haiku' or self.model.startswith('claude-haiku-'))
+        if self.profile.startswith('digits'):
+            allowed = self.model in ('gpt-6-luna','gpt-6.1-sol') if self.backend == 'codex' else (
+                self.model in ('haiku','sonnet') or self.model.startswith(('claude-haiku-','claude-sonnet-')))
             if not allowed:
-                raise ValueError('digits validation permits only Haiku or Luna')
+                raise ValueError('digits validation permits Haiku, Sonnet, Luna or the authorized GPT-6.1 Sol')
             self.max_minutes = 60 if self.max_minutes is None else self.max_minutes
             self.max_calls = 20 if self.max_calls is None else self.max_calls
-            if self.max_minutes > 60 or self.max_calls > 20:
-                raise ValueError('digits validation is capped at 60 minutes and 20 calls')
+            # Defaults retain the historical trial protocol; explicit user limits may extend it.
 
     def to_dict(self):
         return asdict(self)

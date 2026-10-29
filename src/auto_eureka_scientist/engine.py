@@ -107,7 +107,7 @@ class Controller:
             model_files = list((cycle/'models').glob('*.safetensors'))+list((cycle/'models').glob('*.npz'))
             if model_files:
                 models = self.publisher.models(cycle,phase)
-            elif self.config.profile == 'digits':
+            elif self.config.profile.startswith('digits'):
                 raise ValueError('Digits validation requires a real checkpoint')
             else:
                 explanation = next((item['reason'] for item in handoff['not_applicable'] if item['requirement']=='model_uploads'),'')
@@ -159,7 +159,7 @@ class Controller:
             if terminal:
                 response = parse_response(self.config.backend,logs)
                 errors = [e for e in (response.error,model_error(self.config,response)) if e]
-                errors += verify_phase(phase,cycle,response.value) if not errors else []
+                errors += self.check_outputs(phase,cycle,response.value,response.searched) if not errors else []
                 if not errors:
                     if phase=='core':
                         await self.check_command(cycle)
@@ -169,13 +169,14 @@ class Controller:
                              'handoff':response.value,'model_identity_status':'reported' if response.models else 'not exposed'}
                     self.store.finish_attempt(attempt['id'],'accepted',audit)
                     write_json(logs/'outcome.json',audit)
-                    self.store.receipt(self.run_id,key,{'handoff':response.value})
+                    self.store.receipt(self.run_id,key,{'handoff':response.value,'searched':response.searched})
                 else:
                     self.store.finish_attempt(attempt['id'],'failed',{'errors':errors,'models':response.models,
                                               'usage':response.usage,'handoff':response.value,'recovered_from_terminal_event':True})
         pending = self.store.receipt(self.run_id,key)
         if pending and not pending.get('consumed'):
-            errors = verify_phase(phase,cycle,pending['handoff'])
+            searched = pending.get('searched',any(json.loads(a['result'] or '{}').get('searched') for a in previous))
+            errors = self.check_outputs(phase,cycle,pending['handoff'],searched)
             if not errors:
                 await self.finalize(phase,cycle,pending['handoff'])
                 self.store.receipt(self.run_id,key,{'consumed':True})
@@ -205,26 +206,19 @@ class Controller:
                 self.store.finish_attempt(attempt,execution.reason,{'execution':asdict(execution)})
                 raise InterruptedError(execution.reason)
             if not errors:
-                errors = verify_phase(phase,cycle,response.value,fetch=phase=='research')
+                errors = self.check_outputs(phase,cycle,response.value,response.searched)
                 if not errors and phase=='core':
                     try:
                         await self.check_command(cycle)
                     except ValueError as exc:
                         errors.append(str(exc))
-                if self.config.profile=='digits' and phase=='research' and not response.searched:
-                    errors.append('Digits trial research requires an observed native web search/fetch tool event')
-                if self.config.profile=='digits' and phase=='experiments':
-                    required = {f'{method}_s{seed}' for method in ('regularized','unregularized','sensitivity','shuffled_labels') for seed in (0,1,2)}|{'logistic_s0','class_prior_s0','pilot_regularized_s0'}
-                    missing = required-{r.get('id') for r in experiments(cycle) if isinstance(r,dict)}
-                    if missing:
-                        errors.append(f'Missing registered comparisons: {sorted(missing)}')
             audit = {'execution':asdict(execution),'errors':errors,'models':response.models,
                      'model_identity_status':'reported' if response.models else 'not exposed by CLI; requested identifier only',
                      'usage':response.usage,'searched':response.searched,'handoff':response.value}
             write_json(logs/'outcome.json',audit)
             self.store.finish_attempt(attempt,'failed' if errors else 'accepted',audit)
             if not errors:
-                self.store.receipt(self.run_id,key,{'handoff':response.value})
+                self.store.receipt(self.run_id,key,{'handoff':response.value,'searched':response.searched})
                 await self.finalize(phase,cycle,response.value)
                 self.store.receipt(self.run_id,key,{'consumed':True})
                 return response.value
@@ -242,6 +236,19 @@ class Controller:
                 if repairs>2:
                     raise RuntimeError('Targeted repairs exhausted: '+'; '.join(errors))
 
+    def check_outputs(self, phase, cycle, handoff, searched):
+        """Use the same research checks for fresh responses and crash recovery."""
+        errors = verify_phase(phase,cycle,handoff,fetch=phase=='research')
+        if self.config.profile.startswith('digits'):
+            if phase=='research' and not searched:
+                errors.append('Digits trial research requires an observed native web search/fetch tool event')
+            if phase=='experiments':
+                required = {f'{method}_s{seed}' for method in ('regularized','unregularized','sensitivity','shuffled_labels') for seed in (0,1,2)}|{'logistic_s0','class_prior_s0','pilot_regularized_s0'}
+                missing = required-{r.get('id') for r in experiments(cycle)}
+                if missing:
+                    errors.append(f'Missing registered comparisons: {sorted(missing)}')
+        return errors
+
     async def run(self):
         self.store.acquire(self.run_id)
         heartbeat = threading.Thread(target=self.heartbeat,daemon=True)
@@ -255,7 +262,7 @@ class Controller:
             self.publisher.bootstrap()
             while True:
                 row = self.store.get(self.run_id)
-                cycle = prepare_cycle(self.project,row['cycle'],self.config.profile)
+                cycle = prepare_cycle(self.project,row['cycle'],self.config.profile,self.config.to_dict())
                 if row['phase_index'] == 0:
                     self.publisher.branch(row['cycle'],'core')
                 if row['phase_index'] >= len(PHASES):
@@ -320,5 +327,6 @@ class Controller:
             'id':self.run_id,'backend':self.config.backend,'requested_model':self.config.model,
             'status':run['status'],'message':run['message'],'calls':run['calls'],'active_seconds':run['elapsed'],
             'limits':{'minutes':self.config.max_minutes,'calls':self.config.max_calls},
+            'configuration_history':self.store.receipt(self.run_id,'configuration_history') or {'changes':[]},
             'policy_sha256':run['policy_hash'],'completed_phases':[p['name'] for p in self.store.phases(self.run_id)],
             'attempts':attempts})

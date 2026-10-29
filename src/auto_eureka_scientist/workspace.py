@@ -52,18 +52,32 @@ def initialize(project: Path, *, profile='research', task='', harness_revision='
         write_json(config_path,{'profile':profile,'task':task,'harness_revision':harness_revision})
 
 
-def prepare_cycle(project: Path, cycle_number: int, profile: str) -> Path:
+def prepare_cycle(project: Path, cycle_number: int, profile: str, limits: dict | None = None) -> Path:
     cycle = project/'cycles'/f'{cycle_number:03d}'
     for directory in ('research','reports','results','models','figures','docs'):
         (cycle/directory).mkdir(parents=True,exist_ok=True)
     checklist = cycle/'research/requirements.json'
     if not checklist.exists():
         write_json(checklist,[{**item,'status':'pending','evidence':[],'reason':''} for item in requirements()])
-    if profile == 'digits':
+    if profile.startswith('digits'):
         for source,target in [('digits_protocol.json','research/protocol.json'),('digits_study.py','study.py')]:
             destination = cycle/target
             if not destination.exists():
                 destination.write_bytes(files('auto_eureka_scientist').joinpath('resources',source).read_bytes())
+                if source=='digits_protocol.json' and profile=='digits-replication':
+                    protocol = read_json(destination)
+                    protocol.update(analysis_kind='exploratory',prior_results_known=True,
+                        objective='Replicate a known fixed study to evaluate engineering completion; do not claim new scientific confirmation.',
+                        measurements=['verified phase completion','saved predictive accuracy','descriptive paired accuracy difference'],
+                        prior_evidence=['https://github.com/BurnyCoder/eureka-digits-haiku',
+                                        'https://github.com/BurnyCoder/eureka-digits-luna'])
+                    protocol['data_boundaries'] += ' Prior results on this evaluation set are known. All replication observations and conclusions are exploratory; no untouched-data claim is made.'
+                    write_json(destination,protocol)
+        protocol_path = cycle/'research/protocol.json'
+        if limits and not (cycle/'research/registration.json').exists():
+            protocol = read_json(protocol_path)
+            protocol['budget'] = f"{limits['max_minutes']} active minutes and {limits['max_calls']} CLI invocations; explicit future changes are recorded separately, never silently extended."
+            write_json(protocol_path,protocol)
         pyproject = project/'pyproject.toml'
         if not pyproject.exists():
             pyproject.write_text('''[project]

@@ -79,6 +79,18 @@ class Store:
             process = psutil.Process()
             self.update(run_id, owner_pid=process.pid, owner_start=process.create_time(), status='running', stop=0, message='')
 
+    def reconfigure(self, run_id: str, config: RunConfig):
+        """Record explicit resume changes without resetting calls, time or earlier outcomes."""
+        with self.lock, self.db:
+            run = self.get(run_id)
+            updated = config.to_dict()
+            if run['config'] != updated:
+                history = self.receipt(run_id,'configuration_history') or {'changes':[]}
+                history['changes'].append({'at':now(),'previous':run['config'],'updated':updated,
+                    'calls':run['calls'],'active_seconds':run['elapsed'],'previous_status':run['status']})
+                self.receipt(run_id,'configuration_history',history)
+                self.update(run_id,config=updated)
+
     def begin_attempt(self, run_id: str, phase: str, prompt: str) -> int:
         with self.lock, self.db:
             run = self.get(run_id)
