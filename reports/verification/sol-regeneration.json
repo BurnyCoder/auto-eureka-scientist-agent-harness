@@ -1,0 +1,28 @@
+{
+  "recorded_at": "2026-10-29T22:26:02.477+00:00",
+  "command": ".venv/Scripts/python.exe workspaces/eureka-digits-sol/regenerate.py",
+  "observed_exit_code": 0,
+  "script_sha256": "b5ed1c0d2d9353ffa45d7f3ad431c664c195e647fab91bf7839db814a2fec2d1",
+  "scope": "Parent single-command rebuild using existing pilot/comparison/final builders and shared renderer; no fitting or coding-model call.",
+  "scientific_inputs_unchanged": {
+    "cycles/001/study.py": "a16454eb60949757d367bb81811a539d026eefa940575476e732e4c73cfe9358",
+    "cycles/001/research/protocol.json": "b5047a8549930ea1abedc111de1fca3f05034826805d4645473912bb5365456b",
+    "cycles/001/results/class_prior_s0.json": "2407f4e1af014f78a9c8d257894ea01cb4f0bf32d3f7d2530f31bc6661578905",
+    "cycles/001/results/logistic_s0.json": "e17c0db3243905c68cf446edf8fbfa79c2d0befb1f9216341e2d10061ced30de",
+    "cycles/001/results/pilot_regularized_s0.json": "63225b97526bfa20fbaafe24ff54ad599334ed522a59ec63d94c3354377d6efd",
+    "cycles/001/results/regularized_s0.json": "a240da038cb9c221cb3ba7d7bfaa9df169fb53e41ca6f2fa36bc1768e1d37ca2",
+    "cycles/001/results/regularized_s1.json": "29aa87ee0f3c708c1ffb44537dbb2744120234f1bfd7fb47777196602ede9f3a",
+    "cycles/001/results/regularized_s2.json": "78221178fd5b098eb38069a322e33dcbdab2e3ab1978712c08f30725f1e63686",
+    "cycles/001/results/sensitivity_s0.json": "b0e3c20712ead38b3c77839222833747b2654f49f89f68d159f68eb352e9c2a8",
+    "cycles/001/results/sensitivity_s1.json": "295b4a5d1fa091308e3e129d8ca77ecf580d0ea2184639796f38bdbc13a5af11",
+    "cycles/001/results/sensitivity_s2.json": "3aa4e2d61d12ef151df3ce485607569f38481d2cb92933b0a9396ff873dfd07b",
+    "cycles/001/results/shuffled_labels_s0.json": "34b3a5571df254e8af24cec9cebf4b5ab6d023421ef364bdeacb089d30d4fb72",
+    "cycles/001/results/shuffled_labels_s1.json": "ccc587d2c6570579c88935c35a16d369c7b6178fd69094f205dbe5b2455421c7",
+    "cycles/001/results/shuffled_labels_s2.json": "d45c9dfa1e1b724df823f2e157361f4ca001cc0925a2ed6430c0b743142223db",
+    "cycles/001/results/unregularized_s0.json": "457963af210da33b70548965a72ae102c6a58d808a39428422f6f8d3c5ed308f",
+    "cycles/001/results/unregularized_s1.json": "a9c63d8e00b191a5e523b1eb81efd11c20c66d8798d138a43c977735f1a0bec7",
+    "cycles/001/results/unregularized_s2.json": "385961fe035d502c9f2109239947fb958688d7931eac73afabdfe8e020889ed5"
+  },
+  "generated_metrics_sha256": "072c14e521c39c5392463269a4042c2b34b4bc37b58b6af409c4d5d441340554",
+  "generated_paper_sha256": "695d0d1bbe2d3c0be1f8254fd00b04a95330553d0bcafd158f9f8854e326372f"
+}
