@@ -1,5 +1,5 @@
 """An independent arithmetic example checks the paired conditional bootstrap."""
-from auto_eureka_scientist.reporting import metrics
+from auto_eureka_scientist.reporting import metrics, render
 from auto_eureka_scientist.util import digest, write_json
 import pytest
 from auto_eureka_scientist.util import read_json
@@ -29,3 +29,16 @@ def test_bootstrap_uses_matched_predictions_and_keeps_negative_results(tmp_path)
         write_json(path,record)
     with pytest.raises(ValueError,match='across training seeds'):
         metrics(tmp_path)
+
+
+def test_partial_run_does_not_publish_unaccepted_draft_claims(tmp_path,monkeypatch):
+    cycle = tmp_path/'cycles/001'
+    write_json(cycle/'research/protocol.json',{'question':'A research question'})
+    write_json(cycle/'research/claims.json',[{'id':'draft','text':'UNVERIFIED CLAIM','evidence':[],'limitations':'Unreviewed'}])
+    write_json(tmp_path/'reports/run-partial.json',{'status':'budget_exhausted','completed_phases':['research']})
+    monkeypatch.setattr('auto_eureka_scientist.reporting.figures',lambda path:None)
+    render(tmp_path,cycle,pdf=False)
+    assert 'UNVERIFIED CLAIM' not in (cycle/'reports/paper.md').read_text(encoding='utf-8')
+    assert 'budget_exhausted' in (cycle/'reports/paper.md').read_text(encoding='utf-8')
+    assert read_json(tmp_path/'site/data.json')['claims']==[]
+    assert read_json(cycle/'research/claims.json')[0]['text']=='UNVERIFIED CLAIM'

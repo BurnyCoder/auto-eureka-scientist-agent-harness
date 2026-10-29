@@ -133,16 +133,24 @@ def render(project: Path, cycle: Path, *, backend='Codex', pdf=True, timeout=180
     references = '\n'.join(f"- [{s['id']}: {s.get('title',s['id'])}]({s['url']})" for s in sources)
     protocol = read_json(cycle/'research/protocol.json')
     primary = summary['primary']
+    seed_spread = f"{primary['seed_sample_sd']:.6f}" if primary and primary['seed_sample_sd'] is not None else 'not estimable from the recorded seeds'
     primary_text = ('The registered primary comparison is pending; no confirmatory conclusion is available.' if primary is None else
                     f"The mean paired accuracy difference is {primary['mean_difference']:.6f}, with conditional 95% bootstrap interval "
                     f"[{primary['ci95'][0]:.6f}, {primary['ci95'][1]:.6f}]. The registered decision is **{primary['conclusion']}**. "
-                    f"The sample standard deviation across seed effects is {primary['seed_sample_sd']:.6f}. "
+                    f"The sample standard deviation across seed effects is {seed_spread}. "
                     f"The interval uses {primary['bootstrap_resamples']} paired resamples of test examples and conditions on the trained models.")
     interpretation_path = reports/'interpretation.md'
     interpretation = interpretation_path.read_text(encoding='utf-8') if interpretation_path.exists() else (
         'This is a preliminary artifact generated before final interpretation. All available outcomes are retained; '
         'a completed experiment is not evidence that the favored hypothesis is true.')
     claims = read_json(cycle/'research/claims.json') if (cycle/'research/claims.json').exists() else []
+    if (run_status and run_status['status'] not in ('running','complete')
+            and 'analysis' not in run_status['completed_phases']):
+        interpretation = ('The analysis phase was not accepted before this run stopped. Its draft interpretation '
+                          'and claim ledger are preserved in the repository, but are excluded from this generated '
+                          'paper because their evidence contracts remain unresolved. The tables and primary '
+                          'calculation above are regenerated from saved predictions; review remains incomplete.')
+        claims = []
     source_urls = {s['id']:s['url'] for s in sources}
     ledger = cycle/'research/evidence.json'
     if ledger.exists():
@@ -240,8 +248,8 @@ Codex wrote the harness and study fixture; {backend} performed this cycle and au
     root_readme.write_text(original,encoding='utf-8')
     model_dir = cycle/'models'
     model_dir.mkdir(exist_ok=True)
-    (model_dir/'README.md').write_text('---\nlicense: mit\nlibrary_name: pytorch\ntags:\n- reproducibility\n- digits\n---\n\n# '+project.name+'\n\n'
-                                     'Experimental checkpoints, not a production OCR system. Input: flattened digits, normalized by the documented pixel range.\n\n'+table+'\n\n'+primary_text+'\n\n'+methodology+'\n\n'+references,encoding='utf-8')
+    (model_dir/'README.md').write_text('---\ntags:\n- reproducibility\n---\n\n# '+project.name+'\n\n'
+                                     'Experimental checkpoints. Input definitions, preprocessing and usage limitations are specified by the registered protocol and reproduction guide.\n\n'+table+'\n\n'+primary_text+'\n\n'+methodology+'\n\n'+references,encoding='utf-8')
     if (cycle/'study.py').exists():
         shutil.copy2(cycle/'study.py',model_dir/'study.py')
         shutil.copy2(cycle/'research/protocol.json',model_dir/'protocol.json')
