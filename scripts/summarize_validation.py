@@ -67,6 +67,9 @@ def build(root: Path, pdf: bool):
     authored = interpretation.read_text(encoding='utf-8') if interpretation.exists() else 'Validation is in progress. Public links are verified separately; constructing a URL is not proof of publication.'
     body += '\n## Interpretation and limitations\n\n'+authored+'\n'
     (root/'reports/validation-summary.md').write_text(body,encoding='utf-8')
+    paper_body = body
+    for trial in trials:
+        paper_body = paper_body.replace(markdown_table(trial['summary']),markdown_table(trial['summary'],compact=True))
     paper = '''---
 title: "Auto Eureka Scientist: bounded CLI harness validation"
 author: 'Libor “Burny” Burian'
@@ -90,7 +93,7 @@ Each trial uses the same supplied digits fixture and prospective protocol in rep
 
 # Results, claims, discussion, and implications
 
-'''+body+'''
+'''+paper_body+'''
 
 # Conclusion
 
