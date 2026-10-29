@@ -24,6 +24,7 @@ def metrics(cycle: Path) -> dict:
         'A small single-task study does not establish general model or harness superiority.']}
     protocol = read_json(cycle/'research/protocol.json') if (cycle/'research/protocol.json').exists() else {}
     paired = []
+    shared_ids = None
     import numpy as np
     for seed in protocol.get('seeds',[]):
         selected = {r['method']:r for r in records if r.get('seed') == seed and r.get('split') == 'test'}
@@ -31,6 +32,9 @@ def metrics(cycle: Path) -> dict:
             left,right = selected['regularized'],selected['unregularized']
             if left['example_ids'] != right['example_ids'] or left['y_true'] != right['y_true']:
                 raise ValueError('Primary comparison requires identical paired examples and labels')
+            if shared_ids is not None and shared_ids!=(left['example_ids'],left['y_true']):
+                raise ValueError('Bootstrap requires identical example order across training seeds')
+            shared_ids = (left['example_ids'],left['y_true'])
             truth = np.asarray(left['y_true'])
             paired.append((np.asarray(left['y_pred']) == truth).astype(float)-(np.asarray(right['y_pred']) == truth))
     if paired and len(paired) == len(protocol['seeds']):
@@ -189,7 +193,7 @@ The committed protocol, per-experiment JSON files, saved predictions, loss histo
 
 # AI statement
 
-{backend} wrote this codebase and paper from the exact specification supplied by a human. Human cleanup and rewriting are in progress.
+Codex wrote the harness and supplied study fixture. {backend} executed this cycle's research phases and authored its interpretation; the harness generated the paper from recorded artifacts. A human provided the exact specification that was executed. Human cleanup and rewriting are in progress.
 '''
     (reports/'paper.md').write_text(paper,encoding='utf-8')
     (reports/'summary.md').write_text('# All experiments\n\n'+table+'\n\n'+primary_text+'\n\n'+methodology+'\n\n'+interpretation+'\n\n## Sources\n\n'+references+'\n',encoding='utf-8')

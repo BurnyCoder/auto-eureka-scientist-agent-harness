@@ -34,6 +34,8 @@ async def test_pipeline_recovers_without_duplicate_model_call(tmp_path,monkeypat
     initialize(project)
     (project/'transient-once').touch()
     (project/'revisit-once').touch()
+    if backend=='claude':
+        (project/'check-fails-once').touch()
     fake = Path(__file__).with_name('fake_cli.py')
     monkeypatch.setattr(engine,'invocation',lambda config,logs,env:([sys.executable,str(fake),*(['--codex-fixture'] if backend=='codex' else [])],None))
     monkeypatch.setattr('auto_eureka_scientist.phases.retrieve_sources',lambda cycle:[])
@@ -45,6 +47,7 @@ async def test_pipeline_recovers_without_duplicate_model_call(tmp_path,monkeypat
     first = await Controller(store,run_id,publisher=publisher,echo=False).run()
     assert first['status']=='blocked' and 'publication outage' in first['message']
     calls_at_failure = first['calls']
+    assert calls_at_failure==(6 if backend=='claude' else 5)
     second = await Controller(store,run_id,publisher=publisher,echo=False).run()
     assert second['status']=='complete',second['message']
     assert second['calls']==calls_at_failure+7  # experiments, analysis, review; revisit those; publish
