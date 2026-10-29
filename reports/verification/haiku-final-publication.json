@@ -1,0 +1,19 @@
+{
+  "github": {
+    "sha": "6f82ace83643fe2b4329ff18dce34d364cc00506",
+    "pr": "https://github.com/BurnyCoder/eureka-digits-haiku/pull/6",
+    "url": "https://github.com/BurnyCoder/eureka-digits-haiku",
+    "at": "2026-10-29T20:07:36.631+00:00"
+  },
+  "models": {
+    "repository": "BurnyCoder/eureka-digits-haiku-models",
+    "url": "https://huggingface.co/BurnyCoder/eureka-digits-haiku-models",
+    "collection": "https://huggingface.co/collections/BurnyCoder/eureka-digits-haiku-6ae38bdd8bdaca1527379a69",
+    "upload": {
+      "url": "https://huggingface.co/BurnyCoder/eureka-digits-haiku-models/commit/e68ae027e3ffc9258fc7f73b29e61c4ba2f51243"
+    },
+    "verified": true,
+    "at": "2026-10-29T20:01:34.179+00:00"
+  },
+  "scope": "post-run bookkeeping; no new model invocation"
+}

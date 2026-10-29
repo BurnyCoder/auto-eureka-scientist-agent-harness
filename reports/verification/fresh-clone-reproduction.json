@@ -1,0 +1,48 @@
+{
+  "at": "2026-10-29T20:12:09.791+00:00",
+  "harness_commit": "5f4af6be5b4cda8f5da3e140ec8c1f63c29c38d0",
+  "private_run_state_required": false,
+  "model_calls": false,
+  "fresh_locked_install": true,
+  "offline_tests": {
+    "tests": 27,
+    "failures": 0,
+    "errors": 0
+  },
+  "canonical_policy_sha256": "6a9addc31e8fe730400c32e935c1a62fc7b9f12b615a997f84c0e6025cd3e922",
+  "numerical_regeneration_without_workspaces": true,
+  "figures_identical": true,
+  "published_files": [
+    {
+      "url": "https://burnycoder.github.io/eureka-digits-haiku/paper.pdf",
+      "status": 200,
+      "sha256": "faba2c3c345968475058e4a2fd8c972ebd70a3c47e6598ca6a8b87322009f770",
+      "matches_public_clone": true
+    },
+    {
+      "url": "https://burnycoder.github.io/eureka-digits-haiku/figures/examples.png",
+      "status": 200,
+      "sha256": "f8b611f3935618abbd6dd09c8d27806b842b752aec7ff72b9fe5d0c5c5f30123",
+      "matches_public_clone": true
+    },
+    {
+      "url": "https://burnycoder.github.io/eureka-digits-luna/paper.pdf",
+      "status": 200,
+      "sha256": "c54b5c294556c7e8a32a8be8a3875ef76b41d4554d2261c5c9b0282ba6b6f4a8",
+      "matches_public_clone": true
+    },
+    {
+      "url": "https://burnycoder.github.io/eureka-digits-luna/figures/examples.png",
+      "status": 200,
+      "sha256": "f8b611f3935618abbd6dd09c8d27806b842b752aec7ff72b9fe5d0c5c5f30123",
+      "matches_public_clone": true
+    },
+    {
+      "url": "https://burnycoder.github.io/auto-eureka-scientist-agent-harness/validation-paper.pdf",
+      "status": 200,
+      "sha256": "01c22525682c6d580e262239dbe05f6fd0410d8a1d5dccab8e90f0c4f9225e26",
+      "matches_public_clone": true
+    }
+  ],
+  "passed": true
+}
