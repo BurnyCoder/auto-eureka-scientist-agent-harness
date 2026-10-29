@@ -11,6 +11,7 @@ One review of the implemented controller, adapters, persistence, scientific fixt
 - Bootstrap pairing must align examples across seeds as well as across methods. The analysis now rejects mismatched cross-seed order, and prediction checks reject duplicated/misaligned IDs.
 - The class-prior checkpoint path originally marked reload verification without performing the read. The fixture now reloads it and verifies predictions. Baselines report CPU execution rather than inheriting the available neural-device label. Both changes were completed before any training.
 - The paper attribution now distinguishes the Codex-authored harness/fixture from the selected backend's research phases and interpretation.
+- The live Haiku pilot exposed the provider-message parser issue in the already-running controller. Its terminal event and corrected artifacts were intact. Recovery now recognizes a completed terminal event, reparses and verifies the handoff, and resumes publication without another inference. A fake-process regression reproduces a parser crash at this exact boundary. Historical attempts lacking a saved process exit record retain unknown execution metadata.
 
 ## Scientific assessment and limits
 

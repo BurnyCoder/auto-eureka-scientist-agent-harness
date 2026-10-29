@@ -6,6 +6,7 @@ The controller verifies observable contracts, not the truth of arbitrary researc
 import asyncio
 from dataclasses import asdict
 import hashlib
+import json
 from pathlib import Path
 import re
 import threading
@@ -126,6 +127,39 @@ class Controller:
 
     async def phase(self, phase: str, cycle: Path):
         key = f'pending:{self.store.get(self.run_id)["cycle"]}:{phase}'
+        # A controller may crash after the CLI has finished but before its result commits.
+        # Recover only a complete provider terminal event, then revalidate the files.
+        unfinished = [a for a in self.store.attempts(self.run_id) if a['cycle']==self.store.get(self.run_id)['cycle']
+                      and a['phase']==phase and a['status']=='running']
+        if unfinished and not self.store.receipt(self.run_id,key):
+            attempt = unfinished[-1]
+            logs = self.project/'.eureka'/self.run_id/f'{attempt["id"]:04d}-{phase}'
+            raw = logs/'stdout.jsonl'
+            terminal = False
+            if raw.exists():
+                with raw.open(encoding='utf-8') as stream:
+                    for line in stream:
+                        try:
+                            event = json.loads(line)
+                        except ValueError:
+                            continue
+                        if isinstance(event,dict) and (event.get('type')=='turn.completed' or
+                            (event.get('type')=='result' and not event.get('is_error'))):
+                            terminal = True
+            if terminal:
+                response = parse_response(self.config.backend,logs)
+                errors = [e for e in (response.error,model_error(self.config,response)) if e]
+                errors += verify_phase(phase,cycle,response.value) if not errors else []
+                if not errors:
+                    if phase=='core':
+                        await self.check_command(cycle)
+                    execution = read_json(logs/'execution.json') if (logs/'execution.json').exists() else None
+                    audit = {'recovered_from_terminal_event':True,'execution':execution,'errors':[],
+                             'models':response.models,'usage':response.usage,'searched':response.searched,
+                             'handoff':response.value,'model_identity_status':'reported' if response.models else 'not exposed'}
+                    self.store.finish_attempt(attempt['id'],'accepted',audit)
+                    write_json(logs/'outcome.json',audit)
+                    self.store.receipt(self.run_id,key,{'handoff':response.value})
         pending = self.store.receipt(self.run_id,key)
         if pending and not pending.get('consumed'):
             errors = verify_phase(phase,cycle,pending['handoff'])
@@ -149,6 +183,7 @@ class Controller:
             log(f'{self.run_id}: cycle {run["cycle"]}, {phase}, CLI call {run["calls"]+1}')
             execution = await execute(argv,prompt,self.project,logs,time.monotonic()+self.remaining(),
                                       lambda:bool(self.store.get(self.run_id)['stop']),env=env,echo=self.echo)
+            write_json(logs/'execution.json',asdict(execution))
             response = parse_response(self.config.backend,logs)
             errors = [error for error in (response.error,model_error(self.config,response)) if error]
             if execution.returncode:
