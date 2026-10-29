@@ -148,7 +148,9 @@ Codex wrote this harness codebase and report from the exact specification suppli
     if pdf:
         subprocess.run(['pandoc','validation-paper.md','--from=markdown-implicit_figures','--standalone','--pdf-engine=pdflatex','-o','validation-paper.pdf'],cwd=root/'reports',check=True,timeout=180)
         shutil.copy2(root/'reports/validation-paper.pdf',site/'validation-paper.pdf')
-    write_json(site/'validation.json',trials)
+    # Keep raw observations once in reports/validation-data; the hub needs summaries only.
+    write_json(site/'validation.json',[{key:trial[key] for key in ('name','summary','repository','explorer','models')}
+                                      for trial in trials])
 
 
 if __name__=='__main__':
