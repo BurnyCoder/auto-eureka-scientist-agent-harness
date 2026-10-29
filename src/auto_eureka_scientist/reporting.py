@@ -126,6 +126,23 @@ def figures(cycle: Path, records=None):
             ax.annotate('',xy=(.25+i*.25,.5),xytext=(.22+i*.25,.5),arrowprops={'arrowstyle':'->'})
     fig.savefig(cycle/'figures/architecture.png',dpi=160,bbox_inches='tight')
     plt.close(fig)
+    protocol_path = cycle/'research/protocol.json'
+    protocol = read_json(protocol_path) if protocol_path.exists() else {}
+    layers = protocol.get('architecture')
+    if isinstance(layers,list) and layers:
+        # Layer widths come from the registered model, independently of the harness diagram.
+        fig,ax = plt.subplots(figsize=(9,2.5))
+        ax.axis('off')
+        for i,width in enumerate(layers):
+            x = (i+.5)/len(layers)
+            kind = 'Input features' if i==0 else 'Output logits' if i==len(layers)-1 else protocol.get('activation','Hidden')+' hidden units'
+            ax.text(x,.55,f'{kind}\n{width}',ha='center',va='center',
+                    bbox={'boxstyle':'round','facecolor':'#e7f0f5','edgecolor':'#0072B2'})
+            if i:
+                ax.annotate('',xy=(x-.09,.55),xytext=(x-1/len(layers)+.09,.55),arrowprops={'arrowstyle':'->'})
+        ax.set_title('Registered model architecture')
+        fig.savefig(cycle/'figures/model-architecture.png',dpi=160,bbox_inches='tight')
+        plt.close(fig)
     # Select in saved order, without inspecting correctness or choosing favorable cases.
     examples = {}
     for record in records:
@@ -232,6 +249,8 @@ The objective is reproducible evidence and an inspectable research process. This
 
 {figure('architecture','Research architecture')}
 
+{figure('model-architecture','Registered model architecture')}
+
 # Results
 
 {markdown_table(summary,compact=True)}
@@ -272,7 +291,7 @@ The committed protocol, per-experiment JSON files, saved predictions, loss histo
 
 # AI statement
 
-Codex wrote the harness and study fixture; {backend} performed this cycle and authored its interpretation. The harness generated this paper from recorded artifacts. A human supplied the exact specification. Human cleanup and rewriting are in progress.
+Codex wrote the harness and study fixture; {backend} performed this cycle and drafted its interpretation. Any subsequent parent corrections are documented in the linked audit reports. The harness generated this paper from recorded artifacts. A human supplied the exact specification. Human cleanup and rewriting are in progress.
 '''
     (reports/'paper.md').write_text(paper,encoding='utf-8')
     (reports/'summary.md').write_text('# All experiments\n\n'+status_text+'\n\n'+table+'\n\n'+primary_text+'\n\n'+methodology+'\n\n'+interpretation+'\n\n## Sources\n\n'+references+'\n',encoding='utf-8')
