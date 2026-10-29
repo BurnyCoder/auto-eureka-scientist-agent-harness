@@ -1,6 +1,8 @@
 """An independent arithmetic example checks the paired conditional bootstrap."""
 from auto_eureka_scientist.reporting import metrics
 from auto_eureka_scientist.util import digest, write_json
+import pytest
+from auto_eureka_scientist.util import read_json
 
 
 def test_bootstrap_uses_matched_predictions_and_keeps_negative_results(tmp_path):
@@ -19,3 +21,10 @@ def test_bootstrap_uses_matched_predictions_and_keeps_negative_results(tmp_path)
     assert summary['primary']['mean_difference'] == -.75
     assert summary['primary']['conclusion'] == 'contradicts improvement'
     assert len(summary['experiments']) == 6
+    for method in ('regularized','unregularized'):
+        path = tmp_path/f'results/{method}2.json'
+        record = read_json(path)
+        record['example_ids'] = [13,12,11,10]
+        write_json(path,record)
+    with pytest.raises(ValueError,match='across training seeds'):
+        metrics(tmp_path)

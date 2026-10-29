@@ -26,7 +26,10 @@ if phase=='preregister':
                'objective':'Observe recovery','measurements':['completion'],'analysis_plan':'Keep failures',
                'data_boundaries':'No held-out data claimed','budget':'offline'})
 if phase=='core':
-    write_json(cycle/'research/checks.json',{'command':[sys.executable,'-c','print("checks passed")'],'cwd':'cycle'})
+    failing = (root/'check-fails-once').exists()
+    (root/'check-fails-once').unlink(missing_ok=True)
+    check = 'raise SystemExit(1)' if failing else 'print("checks passed")'
+    write_json(cycle/'research/checks.json',{'command':[sys.executable,'-c',check],'cwd':'cycle'})
 if phase in ('pilot','experiments'):
     registration = read_json(cycle/'research/registration.json')
     write_json(cycle/f'results/{phase}.json',{'id':phase,'method':'fixture','outcome':'negative',

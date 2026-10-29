@@ -41,6 +41,8 @@ def test_error_event_overrides_zero_exit_and_partial_success(tmp_path):
     log.write_text(json.dumps({'type':'result','is_error':True,'result':'rate limit reached'})+'\n')
     response = parse_response('claude', tmp_path)
     assert response.error and 'rate limit' in response.error
+    log.write_text(json.dumps({'type':'error','message':None,'error':'model not available'})+'\n')
+    assert 'not available' in parse_response('codex',tmp_path).error
 
 
 def test_state_persists_counters_and_publication_receipts(tmp_path):

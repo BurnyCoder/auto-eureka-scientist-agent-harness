@@ -36,6 +36,9 @@ def check_predictions(experiment: dict) -> list[str]:
     if not true or len(true) != len(predicted):
         return [f"{experiment.get('id','experiment')}: missing/alignment-invalid predictions"]
     actual = sum(a == b for a,b in zip(true,predicted))/len(true)
+    identifiers = experiment.get('example_ids')
+    if identifiers is not None and (len(identifiers)!=len(true) or len(set(identifiers))!=len(identifiers)):
+        return [f"{experiment.get('id')}: duplicate or misaligned example IDs"]
     if not math.isfinite(experiment['accuracy']) or not math.isclose(actual,experiment['accuracy'],abs_tol=1e-12):
         return [f"{experiment.get('id','experiment')}: accuracy does not match predictions"]
     return []
@@ -96,6 +99,8 @@ def experiments(cycle: Path) -> list[dict]:
 def verify_results(cycle: Path) -> list[str]:
     errors = []
     records = experiments(cycle)
+    if len({record.get('id') for record in records})!=len(records):
+        errors.append('Duplicate experiment identifiers')
     registration_path = cycle/'research/registration.json'
     if not registration_path.exists():
         return ['Missing committed preregistration receipt']
