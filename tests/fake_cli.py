@@ -11,7 +11,7 @@ from auto_eureka_scientist.util import now, read_json, write_json
 prompt = sys.stdin.read()
 phase = re.search(r'Current phase: (\w+)\.',prompt).group(1)
 root = Path.cwd()
-cycle = root/'cycles/001'
+cycle = root/re.search(r'All phase artifact paths below are relative to (cycles/\d+)\.',prompt).group(1)
 if (root/'transient-once').exists():
     (root/'transient-once').unlink()
     print(json.dumps({'type':'error','error':'503 temporarily unavailable'}),flush=True)
@@ -44,7 +44,10 @@ revisit = ''
 if phase=='review' and (root/'revisit-once').exists():
     (root/'revisit-once').unlink()
     decision,revisit = 'revisit','experiments'
-result = {'status':'complete','summary':f'Fixture {phase}','artifacts':[f'cycles/001/{p}' for p in DELIVERABLES[phase]],
+if phase=='review' and (root/'revisit-hypothesis-once').exists():
+    (root/'revisit-hypothesis-once').unlink()
+    decision,revisit = 'revisit','research'
+result = {'status':'complete','summary':f'Fixture {phase}','artifacts':[(cycle/p).relative_to(root).as_posix() for p in DELIVERABLES[phase]],
           'evidence':[],'issues':[],'stage':'exploration','analysis_kind':'exploratory','objective':'Test recovery',
           'predictions':['No inference needed to recover a publication'],'alternatives':['A duplicate call is a bug'],
           'observations':['See durable fixture artifacts'],'learning':'Negative outcomes can complete',

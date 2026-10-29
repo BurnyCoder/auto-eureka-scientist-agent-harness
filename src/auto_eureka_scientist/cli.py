@@ -13,7 +13,7 @@ from .policy import policy_hash
 from .reporting import render
 from .state import Store
 from .util import command, read_json
-from .workspace import initialize, prepare_cycle
+from .workspace import initialize
 
 
 def parser():
@@ -106,13 +106,14 @@ def inspect_artifacts(args):
     if (project/'.eureka/state.sqlite3').exists():
         store = Store(project)
         try:
-            recorded = store.get(args.run_id)
+            recorded = store.get(args.run_id,cycle=args.cycle)
         except ValueError:
             if args.run_id:
                 raise
         finally:
             store.close()
-    cycles = sorted(path for path in (project/'cycles').glob('*') if path.is_dir() and path.name.isdigit())
+    cycles = sorted((path for path in (project/'cycles').glob('*') if path.is_dir() and path.name.isdigit()),
+                    key=lambda path:int(path.name))
     if not cycles:
         raise ValueError('No recorded cycle directory')
     number = args.cycle or (recorded['cycle'] if recorded else int(cycles[-1].name))
@@ -125,9 +126,15 @@ def inspect_artifacts(args):
         errors = verify_phase(args.phase,cycle,handoff)
         return {'phase':args.phase,'errors':errors,'complete':not errors,'draft_only':True}
     if args.command=='render':
-        summaries = sorted((project/'reports').glob('run-*.json'))
+        summaries = [read_json(path) for path in (project/'reports').glob('run-*.json')]
+        matching = [summary for summary in summaries if number in
+                    {summary.get('cycle'),*(attempt.get('cycle') for attempt in summary.get('attempts',[]))}]
+        if not matching and len(summaries)==1:
+            matching = summaries  # Legacy single-run exports may omit cycle numbers.
+        backends = {summary.get('backend') for summary in matching}
+        exported_backend = next(iter(backends)) if len(backends)==1 else None
         backend = getattr(args,'backend',None) or (recorded['config']['backend'] if recorded else
-                   read_json(summaries[-1]).get('backend') if summaries else None)
+                   exported_backend)
         return render(project,cycle,backend={'claude':'Claude Code','codex':'Codex'}.get(backend,'an unrecorded backend'),pdf=not args.no_pdf)
     if recorded:
         store = Store(project)
@@ -157,13 +164,11 @@ def main():
         elif args.command=='init':
             task = args.task.read_text(encoding='utf-8-sig') if args.task else ''
             initialize(project,profile=args.profile,task=task)
-            prepare_cycle(project,1,args.profile)
             result = {'project':str(project),'profile':args.profile,'status':'initialized'}
         elif args.command=='run':
             config = configuration(args)
             task = args.task.read_text(encoding='utf-8-sig')
             initialize(project,profile=config.profile,task=task)
-            prepare_cycle(project,1,config.profile,config.to_dict())
             store = Store(project)
             run_id = store.create(config,task,policy_hash())
             result = asyncio.run(Controller(store,run_id).run())
@@ -178,7 +183,7 @@ def main():
                 store.reconfigure(run['id'],config)
                 result = asyncio.run(Controller(store,run['id']).run())
             elif args.command=='status':
-                result = {key:run[key] for key in ('id','status','cycle','phase_index','calls','elapsed','message','config')}
+                result = {key:run[key] for key in ('id','status','cycle','cycles_started','phase_index','calls','elapsed','message','config')}
                 result['next_phase'] = PHASES[run['phase_index']] if run['phase_index']<len(PHASES) else None
             elif args.command=='stop':
                 store.update(run['id'],stop=1)

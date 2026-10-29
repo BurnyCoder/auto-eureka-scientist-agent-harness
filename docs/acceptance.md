@@ -18,6 +18,7 @@ This map distinguishes implemented behavior from observed live acceptance. The [
 | Tests/debugging/review | Fake CLI unit/integration tests; trial review artifacts; final verification report |
 | GitHub/PRs/Pages/HF | `publication.py`, idempotent receipts and public URLs |
 | uv/local environment/.env | Project setup, lockfile, `.env.example`, ignored local config |
+| Existing-project continuation and stopping modes | Project-wide cycle reservations, per-run cycle counts, saved revision transitions; `tests/test_continuation.py` and [continuation audit](../reports/continuation-audit.md) |
 | Scope and local GPU | Selected project cwd; recorded actual CUDA/CPU device |
 | Generated numbers and consistency | `eureka render` derives tables/figures/model cards/site from saved predictions |
 | Final checks and visual inspection | Public-clone, checkpoint, PDF and browser receipts under `reports/verification/`; failures and repairs retained |

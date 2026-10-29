@@ -1,0 +1,253 @@
+{
+  "at": "2026-10-29T23:08:56.712+00:00",
+  "source_revision": "dd122e885896f8532dd1361d38e335b2202d8350",
+  "source_files": {
+    "pyproject.toml": "8a27e13343c1c5961d045d69dc6dce8e7ebdcf3c6d40b61016dfcea83f337c62",
+    "src/auto_eureka_scientist/__init__.py": "6d1926ef0f50b1ebab601ce29de077ef8b9d5ed5cdf72cac529daf39c5938d43",
+    "src/auto_eureka_scientist/adapters.py": "31f583710bdfc94c70f936b8304818796bc508301f9bd2dd8d1987e68fd536c7",
+    "src/auto_eureka_scientist/cli.py": "8fed8653918e866e70070f53a08ffaeb843315072d6bab5b8df60ed87ee3d23d",
+    "src/auto_eureka_scientist/config.py": "d88b9133c917c6b9e547597cb840da15fde6f570b54a4b4dabd5378d4ba1f69d",
+    "src/auto_eureka_scientist/contracts.py": "7aebb6cd73264b13e38b57a7c4fb8867af59ab573b8c3569b41c870e2789ebc8",
+    "src/auto_eureka_scientist/engine.py": "203b779bc84e363bb7e842a7571f0b4bdf09dbd80b9fcfca19ec5ba9c588c9c7",
+    "src/auto_eureka_scientist/execution.py": "9c772dd24d7f8b106b7752c40a5c72ec23d5a62baf6f91eec73086cfb75f04dd",
+    "src/auto_eureka_scientist/phases.py": "582bba7749dfe5b9572b356e381d1d4f53b6b254cb31858c4249a5eda0dd9dc1",
+    "src/auto_eureka_scientist/policy.py": "8993b8dd067e263dd0e29e4670e0922acd25ff1d022fa73554337b2b6cf24f04",
+    "src/auto_eureka_scientist/publication.py": "48f5e0cc064f37088ca913fe1a4fc1b7576307360c68e467d8996758afb64a6d",
+    "src/auto_eureka_scientist/reporting.py": "e9f0a7aa3a68370ae5f02015108003235dfb0b971f542187b26d7d931080f451",
+    "src/auto_eureka_scientist/resources/digits_protocol.json": "5edcfb3fcda62035f6ea4013f88ebca59b7d75977f49d155af208a2bb50ec257",
+    "src/auto_eureka_scientist/resources/digits_study.py": "a16454eb60949757d367bb81811a539d026eefa940575476e732e4c73cfe9358",
+    "src/auto_eureka_scientist/resources/explorer.html": "5b8fdd0678455d252daaff6d8072228b8b7900d05d2cef3c8794916d71f08dc2",
+    "src/auto_eureka_scientist/resources/full.txt": "6a9addc31e8fe730400c32e935c1a62fc7b9f12b615a997f84c0e6025cd3e922",
+    "src/auto_eureka_scientist/science.py": "c7ccb3bfd2d08a54b4b9d8569c9269392217de488222454fbe7baad2dc238500",
+    "src/auto_eureka_scientist/state.py": "917b72c7ba213725c649216b978b7a90274092c7629a194b23bad1748941717c",
+    "src/auto_eureka_scientist/util.py": "28aab00b3c893277f7aef2efda70fc1b52a78f66f004df44ced4cd9a66554390",
+    "src/auto_eureka_scientist/workspace.py": "8c82f651a92f88e2852bc4b6e278544656bce0781b9eb451a90c218589c83610",
+    "tests/fake_cli.py": "7a995f28d12dcc952e28cddfdff93dbc2a8f3501912bcf8bbf23f55a7a48d5c6",
+    "tests/test_continuation.py": "80092ee94f48d9faec1ff77dc5455dfc407dcc07a786ef5446b85a529d7d0ad0",
+    "tests/test_contracts.py": "ebb731b78d7c8f17ca9102f2681c565b4c212033832c1069949f7c71d8c7d106",
+    "tests/test_controller.py": "9b9e4187a9c2a9210198c716ffbe4ba4e541d01bde3e5a0f0130db937bd7eaad",
+    "tests/test_execution.py": "edf5a60bbe3ce448098b3741cfa54272bc125c79dc94a4e991aef8df8c85e0b0",
+    "tests/test_git_bytes.py": "9d24bfe0e0f06fd09e0bea30b931095aed6d0c18dbc9a9b21d61c65466705590",
+    "tests/test_pipeline.py": "1b6d6d0047193d8740bd6b84ed6dddd684ffabe218a6f73727b28822de2b1f52",
+    "tests/test_plan_audit.py": "c9fb5a013a30d66920dd50a240816aca8504ed819e8f13d0f8ae2881192bc42c",
+    "tests/test_public_clone.py": "39f6d512b56d80c420d022d9134d98a6c90ef04eb8eae5b2676bd61fd00ff5f7",
+    "tests/test_reporting.py": "980e545b0a2317e63d1f550511f195036c80a12e36128f507442c92a1a95a09e",
+    "tests/test_science.py": "735e18fec585e776a0c1deb2dcca15d081e0122bcbea8d218d9d82ff4666334d",
+    "uv.lock": "4dfecaae5c8acc35116baf12616e485cb1d4aa26eae5878a20b43c477bda1668"
+  },
+  "fresh_locked_install": true,
+  "private_state_or_model_calls_required": false,
+  "offline_tests": {
+    "tests": 47,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "test_report": "reports/continuation-fresh-clone-tests.xml",
+  "regeneration_without_workspaces": true,
+  "figures_identical": true,
+  "canonical_policy_sha256": "6a9addc31e8fe730400c32e935c1a62fc7b9f12b615a997f84c0e6025cd3e922",
+  "published_files": [
+    {
+      "url": "https://burnycoder.github.io/eureka-digits-haiku/paper.pdf",
+      "status": 200,
+      "sha256": "2bc2e0d39abd42d7e6e04b4b0d9bcb4b18da727971206523aba1bcbcb11f0916",
+      "matches_verified_artifact": true,
+      "expected_source": "verified trial clone"
+    },
+    {
+      "url": "https://burnycoder.github.io/eureka-digits-haiku/figures/examples.png",
+      "status": 200,
+      "sha256": "f8b611f3935618abbd6dd09c8d27806b842b752aec7ff72b9fe5d0c5c5f30123",
+      "matches_verified_artifact": true,
+      "expected_source": "verified trial clone"
+    },
+    {
+      "url": "https://burnycoder.github.io/eureka-digits-haiku/data.json",
+      "status": 200,
+      "sha256": "62902751122b7b748ef7f7c2707bb785ede3007559712371bdb791f405ceef21",
+      "matches_verified_artifact": true,
+      "expected_source": "verified trial clone"
+    },
+    {
+      "url": "https://burnycoder.github.io/eureka-digits-luna/paper.pdf",
+      "status": 200,
+      "sha256": "c54b5c294556c7e8a32a8be8a3875ef76b41d4554d2261c5c9b0282ba6b6f4a8",
+      "matches_verified_artifact": true,
+      "expected_source": "verified trial clone"
+    },
+    {
+      "url": "https://burnycoder.github.io/eureka-digits-luna/figures/examples.png",
+      "status": 200,
+      "sha256": "f8b611f3935618abbd6dd09c8d27806b842b752aec7ff72b9fe5d0c5c5f30123",
+      "matches_verified_artifact": true,
+      "expected_source": "verified trial clone"
+    },
+    {
+      "url": "https://burnycoder.github.io/eureka-digits-luna/data.json",
+      "status": 200,
+      "sha256": "be24f85779c14ac0cb43d1d6a65878120517e8d65041cdd69deeda52a3b2add7",
+      "matches_verified_artifact": true,
+      "expected_source": "verified trial clone"
+    },
+    {
+      "url": "https://burnycoder.github.io/eureka-digits-sonnet/paper.pdf",
+      "status": 200,
+      "sha256": "abc1fb68b764345985705b20dc07a58ca4b314274702cb43f1cbe43ead0ba786",
+      "matches_verified_artifact": true,
+      "expected_source": "verified trial clone"
+    },
+    {
+      "url": "https://burnycoder.github.io/eureka-digits-sonnet/figures/examples.png",
+      "status": 200,
+      "sha256": "f8b611f3935618abbd6dd09c8d27806b842b752aec7ff72b9fe5d0c5c5f30123",
+      "matches_verified_artifact": true,
+      "expected_source": "verified trial clone"
+    },
+    {
+      "url": "https://burnycoder.github.io/eureka-digits-sonnet/data.json",
+      "status": 200,
+      "sha256": "6d4c5af03334a94361bf374185be9b91b4c5feab2779e41ea4c1b4a5c10dc539",
+      "matches_verified_artifact": true,
+      "expected_source": "verified trial clone"
+    },
+    {
+      "url": "https://burnycoder.github.io/eureka-digits-sol/paper.pdf",
+      "status": 200,
+      "sha256": "695d0d1bbe2d3c0be1f8254fd00b04a95330553d0bcafd158f9f8854e326372f",
+      "matches_verified_artifact": true,
+      "expected_source": "verified trial clone"
+    },
+    {
+      "url": "https://burnycoder.github.io/eureka-digits-sol/figures/examples.png",
+      "status": 200,
+      "sha256": "f8b611f3935618abbd6dd09c8d27806b842b752aec7ff72b9fe5d0c5c5f30123",
+      "matches_verified_artifact": true,
+      "expected_source": "verified trial clone"
+    },
+    {
+      "url": "https://burnycoder.github.io/eureka-digits-sol/data.json",
+      "status": 200,
+      "sha256": "4569c1d1083631ea2070abd38e51f5352b4d37036c9871444633376ecbc8dade",
+      "matches_verified_artifact": true,
+      "expected_source": "verified trial clone"
+    },
+    {
+      "url": "https://burnycoder.github.io/auto-eureka-scientist-agent-harness/",
+      "status": 200,
+      "sha256": "fd180cd7caf32e46d3b407417951dcc4be6c668cc958eb6d25275daa15a4cfae",
+      "matches_verified_artifact": true,
+      "expected_source": "committed Git blob"
+    }
+  ],
+  "phase_checks": {
+    "haiku": {
+      "cycle": 1,
+      "phases": {
+        "research": [],
+        "preregister": [],
+        "core": [],
+        "pilot": [],
+        "experiments": [],
+        "analysis": [],
+        "review": [],
+        "publish": []
+      },
+      "complete": true,
+      "state_source": "public artifact history"
+    },
+    "luna": {
+      "cycle": 1,
+      "phases": {
+        "research": [],
+        "preregister": [],
+        "core": [],
+        "pilot": [],
+        "experiments": [],
+        "analysis": [],
+        "review": [],
+        "publish": []
+      },
+      "complete": true,
+      "state_source": "public artifact history"
+    },
+    "sonnet": {
+      "cycle": 1,
+      "phases": {
+        "research": [],
+        "preregister": [],
+        "core": [],
+        "pilot": [],
+        "experiments": [],
+        "analysis": [],
+        "review": [],
+        "publish": []
+      },
+      "complete": true,
+      "state_source": "public artifact history"
+    },
+    "sol": {
+      "cycle": 1,
+      "phases": {
+        "research": [],
+        "preregister": [],
+        "core": [],
+        "pilot": [],
+        "experiments": [],
+        "analysis": [],
+        "review": [],
+        "publish": []
+      },
+      "complete": true,
+      "state_source": "public artifact history"
+    }
+  },
+  "hugging_face_collection": {
+    "slug": "BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75",
+    "members": [
+      "BurnyCoder/eureka-digits-haiku-models",
+      "BurnyCoder/eureka-digits-luna-models",
+      "BurnyCoder/eureka-digits-sol-models",
+      "BurnyCoder/eureka-digits-sonnet-models"
+    ]
+  },
+  "environment_checks": {
+    "git": true,
+    "uv": true,
+    "github": true,
+    "huggingface": true,
+    "pandoc": true,
+    "latex": true,
+    "gpu": true,
+    "claude": true,
+    "claude_auth": true,
+    "codex": true,
+    "codex_auth": true
+  },
+  "pdf": {
+    "sha256": "191d670f031003aeb9fb1e9b68aacbbcf30b6a0b8b0108358199a08257771196",
+    "pages": 10,
+    "pixel_changes_from_previous_visual_review": {
+      "page-01.png": [
+        297,
+        852,
+        303,
+        862
+      ],
+      "page-02.png": null,
+      "page-03.png": null,
+      "page-04.png": null,
+      "page-05.png": null,
+      "page-06.png": null,
+      "page-07.png": null,
+      "page-08.png": null,
+      "page-09.png": null,
+      "page-10.png": null
+    },
+    "changed_pages_visually_inspected": [
+      "page-01.png"
+    ],
+    "outcome": "The generated offline-test count changed. No clipping, overlap or layout shift observed."
+  },
+  "passed": true
+}

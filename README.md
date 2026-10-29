@@ -56,6 +56,8 @@ uv run --extra research eureka render --project workspaces/my-study
 
 `init` can attach an existing directory and preserves existing instructions and README. `run` also initializes missing project scaffolding. It creates a new recorded run; `resume` continues the latest run or `--run-id`, retaining backend, model, elapsed time, and consumed calls. Explicit limits can extend a run: `eureka resume --project workspaces/my-study --max-minutes 180 --max-calls 60`. These are total limits, not extra allowances. Configuration history records the change without resetting counters. Preserve a bounded trial's cutoff result separately when extending it.
 
+New runs use a fresh cycle directory after the project's existing cycles, including when attaching a public clone. Earlier results and preregistrations are retained and referenced in the next research prompt. Only one controller writes a project at a time. `--max-cycles` counts cycles started by the current run; `verify --cycle N` and `render --cycle N` inspect the selected cycle.
+
 `cycle` stops after a completed cycle. `continuous` starts separately recorded cycles until stopped or a limit is met. `budget` requires `--max-minutes` or `--max-calls`. Optional `--max-cycles` also limits continuous/budget operation. Time means active controller wall time, including checks and publication; downtime between resumes does not consume it. Every CLI invocation, including failures and retries, consumes a call. There are at most two targeted repairs and two transient retries per phase execution. Persistent failure leaves resumable state. `stop` and Ctrl+C terminate owned CLI processes. A hard OS crash can require manual inspection of orphaned processes.
 
 Publication is enabled by default; `--no-publish` records local receipts for local work. `--owner` and `--repository` select GitHub destinations. Public runs create a public repository, commit the preregistration, merge core and pilot PRs, upload checkpoints, and deploy a static explorer. Only the controller owns Git/publication operations during the run. Authentication/access failures are resumable and never treated as completed publication.
@@ -134,7 +136,7 @@ License: MIT for this implementation. Referenced projects retain their own licen
 | sonnet | complete | 8 | 9 | 13.25 | claude-haiku-5-5, claude-sonnet-5-5 |
 | sol | complete | 8 | 8 | 49.13 | not exposed |
 
-[Full report](reports/validation-summary.md). The saved offline test report records 40 tests, 0 failures and 0 errors.
+[Full report](reports/validation-summary.md). The saved offline test report records 47 tests, 0 failures and 0 errors.
 
 Saved test accuracies by method. SD describes the recorded seed variation, not a confidence interval.
 
