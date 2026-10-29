@@ -1,6 +1,6 @@
 # Research contracts
 
-Each cycle contains `research/`, `results/`, `reports/`, `models/`, `figures/`, and `docs/`. Handoff paths are project-relative; checklist paths may be cycle-relative. The phase prompt lists required files and required ledger fields. `eureka verify` rechecks accepted phase outputs against current files.
+Each cycle contains `research/`, `results/`, `reports/`, `models/`, `figures/`, and `docs/`. Artifact paths may be cycle-relative or project-relative when unambiguous; project-relative paths resolve collisions explicitly. The phase prompt lists required files and a complete handoff example. `eureka verify` rechecks accepted outputs; `verify --phase analysis` checks draft files without accepting a phase or consuming a model call.
 
 The strict handoff records status, summary, artifacts, evidence, issues, research stage, exploratory/confirmatory classification, objective, predictions, competing alternatives, observations, learning, rationale, continuation/backedge, and explained inapplicability. These fields implement reflection inside an existing phase call. A structurally valid handoff alone is not accepted completion.
 
@@ -14,7 +14,7 @@ Public clones can run `eureka render --project <clone>` without private SQLite s
 
 Claims cite source/experiment IDs and disclose limitations. A confirmatory claim cannot use an exploratory experiment as confirmation. Prior source evidence is distinguishable from current measurements by ledger membership. Mathematical validity, causal attribution, implementation semantics, and source support still need substantive review. Checks detect specific contradictions and omissions; they do not make arbitrary agent text scientifically true.
 
-Local code and audit artifacts can be cited through `research/evidence.json`: an array of `{id,path,sha256,analysis_kind}` with project-relative paths. The verifier checks file existence, content hashes, unique IDs and exploratory/confirmatory compatibility. Post-hoc derived analyses and audits remain exploratory. This ledger does not infer scientific support from file existence.
+Local code and audit artifacts can be cited through `research/evidence.json`: an array of `{id,path,sha256,analysis_kind}`. The verifier checks file existence, content hashes, unique IDs and exploratory/confirmatory compatibility. Cite existing experiment and source IDs directly; duplicating them in the artifact ledger is unnecessary. Post-hoc derived analyses and audits remain exploratory. This ledger does not infer scientific support from file existence.
 
 Accepted public evidence is copied into immutable content-addressed snapshots before subsequent phases edit or regenerate it. The ledger retains `original_path`; ignored local transcripts and model downloads are not copied into Git snapshots. Scientific cycle and site files disable Git newline conversion, so byte hashes survive publication and fresh checkouts. The controller rechecks artifacts after publication and before final acceptance. Rendered site Markdown uses copied figure assets and public repository links for evidence.
 
