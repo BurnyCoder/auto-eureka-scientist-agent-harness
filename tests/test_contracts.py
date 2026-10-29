@@ -8,12 +8,22 @@ from auto_eureka_scientist.config import RunConfig
 from auto_eureka_scientist.adapters import invocation, parse_response
 from auto_eureka_scientist.state import Store
 from auto_eureka_scientist.policy import policy_bytes, requirements
+from auto_eureka_scientist.phases import make_prompt
 
 
 def test_policy_is_preserved():
     original = Path(__file__).parents[1] / 'prompts/full.txt'
     assert policy_bytes() == original.read_bytes()
     assert len(requirements()) == original.read_text(encoding='utf-8').count('\n## ') + 1
+
+
+def test_every_phase_prompt_contains_the_entire_canonical_policy(tmp_path):
+    from auto_eureka_scientist.contracts import PHASES
+    run = {'config':RunConfig(str(tmp_path),'claude').to_dict(),'task':'A research question'}
+    for phase in PHASES:
+        prompt = make_prompt(run,phase,tmp_path/'cycles/001',[],[])
+        assert policy_bytes().decode('utf-8-sig') in prompt
+        assert 'revisit_phase' in prompt and 'not_applicable' in prompt
 
 
 def test_models_are_configurable_but_validation_is_pinned(tmp_path):

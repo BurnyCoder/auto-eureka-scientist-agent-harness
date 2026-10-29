@@ -68,6 +68,8 @@ Previous completed phase summaries:
 {json.dumps([{'phase':p['name'],'summary':p['result']['summary'],'learning':p['result'].get('learning','')} for p in previous],ensure_ascii=False)}
 Corrections required from prior attempt: {json.dumps(errors,ensure_ascii=False)}
 Return the structured phase result specified by the supplied JSON schema. Artifact/evidence paths in the handoff must be project-relative.
+Include EVERY required key, including revisit_phase as an empty string when unused and not_applicable as an empty array when unused.
+Required keys: {', '.join(PHASE_SCHEMA['required'])}.
 Provide predictions, competing alternatives, observations and learning appropriate to this phase. Do not fabricate future observations.
 Use decision revisit with a named earlier phase if needed; use continue otherwise (finish in publish).
 '''
