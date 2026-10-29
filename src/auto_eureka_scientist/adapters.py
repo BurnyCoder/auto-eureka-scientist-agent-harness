@@ -64,7 +64,8 @@ def parse_response(backend: str, logs: Path) -> Response:
                 continue
             if not isinstance(event,dict):
                 continue
-            model = event.get('model') or event.get('message',{}).get('model')
+            message = event.get('message') if isinstance(event.get('message'),dict) else {}
+            model = event.get('model') or message.get('model')
             if model and model not in response.models:
                 response.models.append(model)
             if event.get('type') in ('error','turn.failed') or event.get('is_error'):
@@ -87,7 +88,7 @@ def parse_response(backend: str, logs: Path) -> Response:
                 messages.append(item.get('text',''))
             if item.get('type') == 'web_search':
                 response.searched = True
-            for block in event.get('message',{}).get('content',[]):
+            for block in message.get('content',[]):
                 if isinstance(block,dict) and block.get('name') in ('WebSearch','WebFetch'):
                     response.searched = True
     if backend == 'codex' and (logs/'response.json').exists():
