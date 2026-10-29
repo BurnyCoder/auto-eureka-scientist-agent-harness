@@ -68,7 +68,7 @@ def artifact_evidence(cycle: Path) -> tuple[list, list]:
     errors = []
     for record in records:
         if not record.get('id') or record.get('analysis_kind') not in ('exploratory','confirmatory','not_applicable'):
-            errors.append('Artifact evidence requires id and analysis_kind')
+            errors.append(f'Artifact evidence {record.get("id")}: analysis_kind must be exploratory, confirmatory, or not_applicable; got {record.get("analysis_kind")}')
         path = cycle.parents[1]/record.get('path','')
         if not path.is_file():
             errors.append(f'Artifact evidence file missing: {record.get("path")}')
@@ -144,8 +144,11 @@ def verify_results(cycle: Path) -> list[str]:
         if code_receipt.exists() and experiment.get('code_sha256') != read_json(code_receipt)['sha256']:
             errors.append(f"{experiment.get('id')}: training code differs from published core")
         checkpoint = experiment.get('checkpoint')
-        if checkpoint and (cycle/checkpoint).exists() and digest(cycle/checkpoint) != experiment.get('checkpoint_sha256'):
-            errors.append(f"{experiment.get('id')}: checkpoint hash mismatch")
+        if checkpoint:
+            if not (cycle/checkpoint).is_file():
+                errors.append(f"{experiment.get('id')}: checkpoint missing; download the published model bundle")
+            elif digest(cycle/checkpoint) != experiment.get('checkpoint_sha256'):
+                errors.append(f"{experiment.get('id')}: checkpoint hash mismatch")
         splits = experiment.get('split_ids',{})
         names = list(splits)
         for i,name in enumerate(names):
