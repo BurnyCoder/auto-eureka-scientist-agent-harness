@@ -23,6 +23,8 @@ def collect(root: Path):
         if backend is None:
             trial = read_json(destination/'haiku.json')
             trial['name'] = name
+            publication = read_json(root/'reports/verification/haiku-final-publication.json')
+            trial['explorer'] = trial['repository']+'/blob/'+publication['github']['sha']+'/site/paper.pdf'
             trial['summary'] = summarize_records(trial['records'],trial['protocol'])
             trials.append(trial)
             continue

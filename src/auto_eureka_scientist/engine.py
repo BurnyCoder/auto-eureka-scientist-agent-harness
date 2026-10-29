@@ -192,7 +192,7 @@ class Controller:
             logs = self.project/'.eureka'/self.run_id/f'{attempt:04d}-{phase}'
             argv,env = invocation(self.config,logs,environment(self.project))
             write_json(logs/'invocation.json',{'argv':argv,'prompt_sha256':prompt_hash,'at':now(),
-                                              'requested_model':self.config.model,'backend':self.config.backend})
+                                              'requested_model':self.config.model,'model_pin':self.config.model_pin,'backend':self.config.backend})
             log(f'{self.run_id}: cycle {run["cycle"]}, {phase}, CLI call {run["calls"]+1}')
             execution = await execute(argv,prompt,self.project,logs,time.monotonic()+self.remaining(),
                                       lambda:bool(self.store.get(self.run_id)['stop']),env=env,echo=self.echo)
@@ -325,6 +325,7 @@ class Controller:
                              'usage':result.get('usage',{}),'searched':result.get('searched',False)})
         write_json(self.project/'reports'/f'run-{self.run_id}.json',{
             'id':self.run_id,'backend':self.config.backend,'requested_model':self.config.model,
+            'model_pin':self.config.model_pin,
             'status':run['status'],'message':run['message'],'calls':run['calls'],'active_seconds':run['elapsed'],
             'limits':{'minutes':self.config.max_minutes,'calls':self.config.max_calls},
             'configuration_history':self.store.receipt(self.run_id,'configuration_history') or {'changes':[]},

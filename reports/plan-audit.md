@@ -19,3 +19,9 @@ General orchestration is implemented, while live scientific validation is specif
 The supervised digits study has loss curves but no reward objective. Writer-level generalization and concept-swapping experiments are not supported by this protocol. The harness has no trainable weights; validation checkpoint bundles are uploaded. The shared Hugging Face collection follows the user's revised instruction. Public raw transcripts remain excluded to avoid publishing credentials or private tool output; sanitized summaries and reproducible artifacts are published.
 
 Final acceptance requires additional observed runs and public artifact checks; code changes alone do not mark that work complete. Any manual repair and any unmet requirement must remain explicit in the final report.
+
+## Findings during extended execution
+
+Haiku's resumed phases passed their artifact checks, but parent review still found semantic overclaims about detection limits, endpoint norms and post-hoc NLL. Those were corrected with an explicit post-run disclosure; structural completion is not semantic validation. The renderer now adds a model-layer diagram from protocol widths alongside the harness architecture.
+
+The first Sonnet invocation exposed another adapter defect: native WebFetch summarization used Haiku despite subagent pinning. The phase was rejected and the call retained. Claude's [model configuration](https://code.claude.com/docs/en/model-config#environment-variables) documents a separate full model identifier for background functionality. A selected alias can now be pinned explicitly; its session, subagents and background model settings receive the same identifier. Subsequent observed model identities must still pass validation. This development run retains its mixed-model failure and cannot be described as an entirely pure Sonnet execution from inception.
