@@ -1,6 +1,6 @@
 """Rebuild the harness validation report from saved trial evidence, without inference.
 
-The supplied fixture is common to both trials; no provider-ranking statistic is inferred.
+The supplied scientific definitions are shared; no provider-ranking statistic is inferred.
 """
 from pathlib import Path
 import argparse
@@ -19,16 +19,22 @@ def collect(root: Path):
     trials = []
     destination = root/'reports/validation-data'
     destination.mkdir(parents=True,exist_ok=True)
-    for backend in ('haiku','luna'):
+    for name,backend in [('haiku-original',None),('haiku-extended','haiku'),('luna','luna'),('sonnet','sonnet'),('sol','sol')]:
+        if backend is None:
+            trial = read_json(destination/'haiku.json')
+            trial['name'] = name
+            trial['summary'] = summarize_records(trial['records'],trial['protocol'])
+            trials.append(trial)
+            continue
         project = root/'workspaces'/f'eureka-digits-{backend}'
         summaries = sorted((project/'reports').glob('run-*.json'))
-        saved = destination/f'{backend}.json'
+        saved = destination/f'{name}.json'
         if summaries:
             run = read_json(summaries[-1])
             cycle = project/'cycles/001'
             summary = metrics(cycle) if (cycle/'research/registration.json').exists() else {'experiments':[],'primary':None}
             records = experiments(cycle)
-            trial = {'name':backend,'run':run,'summary':summary,'records':records,'protocol':read_json(cycle/'research/protocol.json'),
+            trial = {'name':name,'run':run,'summary':summary,'records':records,'protocol':read_json(cycle/'research/protocol.json'),
                      'repository':f'https://github.com/BurnyCoder/{project.name}',
                      'explorer':f'https://BurnyCoder.github.io/{project.name}/',
                      'models':f'https://huggingface.co/BurnyCoder/{project.name}-models'}
@@ -109,7 +115,7 @@ Long-running research needs persistent evidence, prospective protocols and truth
 
 The architecture draws on [Anthropic's harness design](https://www.anthropic.com/research/effective-harnesses-for-long-running-agents) and [Neel Nanda's research process](https://www.alignmentforum.org/s/5GT3yoYM9gRmMEKqL). Statistical and reporting guidance comes from [Lones](https://arxiv.org/abs/2108.02497), [Lipton and Steinhardt](https://arxiv.org/abs/1807.03341), and the [NeurIPS checklist](https://neurips.cc/public/guides/PaperChecklist). Source/license decisions are documented in docs/sources.md.
 
-Each trial uses the same supplied digits fixture and prospective protocol in reports/validation-preregistration.md. The fixed weight-decay comparison includes simple baselines, shuffled training labels, multiple seeds and descriptive sensitivity. Test-example bootstrap intervals condition on the trained models. The shared implementation is a confound for any claim about independent algorithm discovery.
+The original bounded trials follow reports/validation-preregistration.md. The user-authorized Haiku continuation and Sonnet/GPT-6.1 Sol replications follow reports/validation-extension-preregistration.md. Original and extended Haiku rows are successive observations of the same run, not independent trials. Sonnet and Sol use known evaluation data and are explicitly exploratory engineering replications. The scientific definitions retain the fixed weight-decay comparison, simple baselines, shuffled training labels, registered seeds and descriptive sensitivity. Test-example bootstrap intervals condition on the trained models. The shared implementation is a confound for any claim about independent algorithm discovery.
 
 # Results, claims, discussion, and implications
 
@@ -147,8 +153,8 @@ Codex wrote this harness codebase and report from the exact specification suppli
 <style>body{font:17px/1.6 system-ui;max-width:980px;margin:auto;padding:40px;color:#18313c;background:#f5f7f8}h1{font-size:3rem;line-height:1.1}table{width:100%;border-collapse:collapse;background:white}td,th{padding:14px;text-align:left;border-bottom:1px solid #ccdce3}a{color:#006a98}.tag{letter-spacing:.14em;color:#54727f;font-size:.8rem}.scroll{overflow:auto}@media(max-width:600px){body{padding:18px}td,th{padding:10px}}</style>
 <div class="tag">DURABLE RESEARCH / OBSERVABLE EVIDENCE</div><h1>Auto Eureka Scientist</h1>
 <p>One selected coding CLI, persistent scientific artifacts, and explicit completion checks.</p>
-<p>These independent bounded trials use the same fixed study implementation. Their outcomes do not establish general scientific reliability or rank the providers.</p>
-<p>The table shows recorded controller outcomes. Luna's public artifacts required mechanical provenance repairs after its run; Haiku's missing phases remain incomplete. The report preserves the failures and repair disclosures.</p>
+<p>These executions share fixed scientific definitions. Their outcomes do not establish general scientific reliability or rank the providers.</p>
+<p>The original and extended Haiku rows describe the same run before and after an explicitly authorized budget increase. The original cutoff is preserved. Luna required post-run provenance repairs. Sonnet and GPT-6.1 Sol are exploratory replications with prior results known. Read the report for failures and interventions.</p>
 <div class="scroll"><table><thead><tr><th>Trial</th><th>Status</th><th>Phases</th><th>Calls</th><th>Evidence</th></tr></thead><tbody>'''+rows+'''</tbody></table></div>
 <p><a href="validation-paper.pdf">Validation paper</a> · <a href="validation-summary.md">Full report</a> · <a href="https://github.com/BurnyCoder/auto-eureka-scientist-agent-harness">Code and prospective protocol</a> · <a href="https://www.alignmentforum.org/s/5GT3yoYM9gRmMEKqL">Neel Nanda's research process</a></p></html>''',encoding='utf-8')
     shutil.copy2(root/'reports/validation-summary.md',site/'validation-summary.md')

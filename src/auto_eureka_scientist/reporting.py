@@ -202,7 +202,7 @@ def render(project: Path, cycle: Path, *, backend='Codex', pdf=True, timeout=180
         return f'[{identifier}]({url})'
     claim_text = '\n'.join(f"- **{c['id']}**: {c['text']} Evidence: {', '.join(evidence_link(ref) for ref in c['evidence'])}. Limitations: {c['limitations']}" for c in claims) or 'Claims have not yet been distilled.'
     methodology = '\n'.join(f'- **{key}**: {json.dumps(protocol[key],ensure_ascii=False)}' for key in
-                             ('question','architecture','optimizer','learning_rate','batch_size','epochs','methods','seeds','data_boundaries','analysis_plan','hyperparameter_rationale') if key in protocol)
+                             ('analysis_kind','prior_results_known','objective','question','architecture','optimizer','learning_rate','batch_size','epochs','methods','seeds','data_boundaries','analysis_plan','hyperparameter_rationale') if key in protocol)
     def figure(name,caption):
         return f'![{caption}](../figures/{name}.png)\n\n*{caption}.*' if (cycle/f'figures/{name}.png').exists() else f'{caption}: no applicable measurement recorded.'
     paper = f'''---
