@@ -9,7 +9,7 @@ from importlib.resources import files
 import json
 import shutil
 
-from .science import experiments, verify_results
+from .science import check_predictions, experiments, snapshot_evidence, verify_results
 from .util import command, read_json, write_json
 
 
@@ -18,11 +18,21 @@ def metrics(cycle: Path) -> dict:
     errors = verify_results(cycle) if records else []
     if errors:
         raise ValueError('; '.join(errors))
+    protocol = read_json(cycle/'research/protocol.json') if (cycle/'research/protocol.json').exists() else {}
+    return summarize_records(records,protocol)
+
+
+def summarize_records(records: list, protocol: dict) -> dict:
+    """Recompute numerical summaries from raw observations, including public snapshots."""
+    errors = [error for record in records for error in check_predictions(record)]
+    if len({record['id'] for record in records})!=len(records):
+        errors.append('Duplicate experiment identifiers')
+    if errors:
+        raise ValueError('; '.join(errors))
     rows = [{key:item.get(key) for key in ('id','method','seed','split','analysis_kind','accuracy','seconds','device','checkpoint','checkpoint_reload_verified')} for item in records]
     result = {'experiments':rows,'primary':None,'limitations':[
         'Conditional test-example intervals do not estimate variation over new training seeds, writers, or datasets.',
         'A small single-task study does not establish general model or harness superiority.']}
-    protocol = read_json(cycle/'research/protocol.json') if (cycle/'research/protocol.json').exists() else {}
     paired = []
     shared_ids = None
     import numpy as np
@@ -118,11 +128,14 @@ def figures(cycle: Path):
 
 def render(project: Path, cycle: Path, *, backend='Codex', pdf=True, timeout=180, cancelled=None) -> dict:
     """One command rebuilds reports, figures, paper, model card, and browser data."""
-    summary = metrics(cycle)
     reports = cycle/'reports'
     reports.mkdir(parents=True,exist_ok=True)
     snapshots = sorted((project/'reports').glob('run-*.json'),key=lambda path:path.stat().st_mtime)
     run_status = read_json(snapshots[-1]) if snapshots else None
+    unaccepted = (run_status and run_status['status'] not in ('running','complete')
+                  and 'analysis' not in run_status['completed_phases'])
+    snapshot_evidence(cycle,allow_unverified=bool(unaccepted))
+    summary = metrics(cycle)
     status_text = (f"Recorded harness status: **{run_status['status']}**; {len(run_status['completed_phases'])} operational phases accepted. "
                    'Measurements below do not imply completion of unaccepted phases.' if run_status else
                    'Research is in progress; no final run-status snapshot is available.')
@@ -144,20 +157,26 @@ def render(project: Path, cycle: Path, *, backend='Codex', pdf=True, timeout=180
         'This is a preliminary artifact generated before final interpretation. All available outcomes are retained; '
         'a completed experiment is not evidence that the favored hypothesis is true.')
     claims = read_json(cycle/'research/claims.json') if (cycle/'research/claims.json').exists() else []
-    if (run_status and run_status['status'] not in ('running','complete')
-            and 'analysis' not in run_status['completed_phases']):
+    if unaccepted:
         interpretation = ('The analysis phase was not accepted before this run stopped. Its draft interpretation '
                           'and claim ledger are preserved in the repository, but are excluded from this generated '
                           'paper because their evidence contracts remain unresolved. The tables and primary '
                           'calculation above are regenerated from saved predictions; review remains incomplete.')
         claims = []
     source_urls = {s['id']:s['url'] for s in sources}
+    publication = cycle/'research/core-publication.json'
+    repository_url = read_json(publication).get('url','') if publication.exists() else ''
+    def artifact_link(path):
+        import os
+        from urllib.parse import quote
+        if repository_url:
+            return repository_url+'/blob/main/'+quote(path.relative_to(project).as_posix(),safe='/')
+        return Path(os.path.relpath(path,reports)).as_posix()
     ledger = cycle/'research/evidence.json'
     if ledger.exists():
-        import os
-        source_urls.update({r['id']:Path(os.path.relpath(project/r['path'],reports)).as_posix() for r in read_json(ledger)})
+        source_urls.update({r['id']:artifact_link(project/r['path']) for r in read_json(ledger)})
     def evidence_link(identifier):
-        url = source_urls.get(identifier,f'../results/{identifier}.json')
+        url = source_urls.get(identifier,artifact_link(cycle/f'results/{identifier}.json'))
         return f'[{identifier}]({url})'
     claim_text = '\n'.join(f"- **{c['id']}**: {c['text']} Evidence: {', '.join(evidence_link(ref) for ref in c['evidence'])}. Limitations: {c['limitations']}" for c in claims) or 'Claims have not yet been distilled.'
     methodology = '\n'.join(f'- **{key}**: {json.dumps(protocol[key],ensure_ascii=False)}' for key in
@@ -255,7 +274,13 @@ Codex wrote the harness and study fixture; {backend} performed this cycle and au
         shutil.copy2(cycle/'research/protocol.json',model_dir/'protocol.json')
     site = project/'site'
     site.mkdir(exist_ok=True)
-    shutil.copy2(reports/'paper.md',site/'paper.md')
+    site_paper = paper.replace('](../figures/','](figures/')
+    if not repository_url:
+        site_paper = site_paper.replace('](../',f'](../cycles/{cycle.name}/')
+    (site/'paper.md').write_text(site_paper,encoding='utf-8')
+    for figure_path in (cycle/'figures').glob('*.png'):
+        (site/'figures').mkdir(exist_ok=True)
+        shutil.copy2(figure_path,site/'figures'/figure_path.name)
     (site/'index.html').write_bytes(files('auto_eureka_scientist').joinpath('resources/explorer.html').read_bytes())
     write_json(site/'data.json',{'title':project.name,'cycle':cycle.name,**summary,
                                'run_status':run_status,

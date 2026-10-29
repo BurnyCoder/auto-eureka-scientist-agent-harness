@@ -3,6 +3,7 @@ from auto_eureka_scientist.reporting import metrics, render
 from auto_eureka_scientist.util import digest, write_json
 import pytest
 from auto_eureka_scientist.util import read_json
+from auto_eureka_scientist.science import artifact_evidence
 
 
 def test_bootstrap_uses_matched_predictions_and_keeps_negative_results(tmp_path):
@@ -42,3 +43,22 @@ def test_partial_run_does_not_publish_unaccepted_draft_claims(tmp_path,monkeypat
     assert 'budget_exhausted' in (cycle/'reports/paper.md').read_text(encoding='utf-8')
     assert read_json(tmp_path/'site/data.json')['claims']==[]
     assert read_json(cycle/'research/claims.json')[0]['text']=='UNVERIFIED CLAIM'
+
+
+def test_reviewed_generated_files_survive_later_rendering(tmp_path,monkeypatch):
+    cycle = tmp_path/'cycles/001'
+    write_json(cycle/'research/protocol.json',{'question':'A research question'})
+    (tmp_path/'site').mkdir()
+    original = tmp_path/'site/index.html'
+    original.write_text('Reviewed website version',encoding='utf-8')
+    fingerprint = digest(original)
+    write_json(cycle/'research/evidence.json',[{'id':'reviewed-site','path':'site/index.html','sha256':fingerprint,'analysis_kind':'not_applicable'}])
+    monkeypatch.setattr('auto_eureka_scientist.reporting.figures',lambda path:None)
+    render(tmp_path,cycle,pdf=False)
+    records, errors = artifact_evidence(cycle)
+    assert not errors
+    assert records[0]['original_path']=='site/index.html'
+    assert (tmp_path/records[0]['path']).read_text(encoding='utf-8')=='Reviewed website version'
+    assert digest(original)!=fingerprint
+    render(tmp_path,cycle,pdf=False)
+    assert not artifact_evidence(cycle)[1]
