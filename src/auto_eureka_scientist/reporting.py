@@ -121,6 +121,11 @@ def render(project: Path, cycle: Path, *, backend='Codex', pdf=True, timeout=180
     summary = metrics(cycle)
     reports = cycle/'reports'
     reports.mkdir(parents=True,exist_ok=True)
+    snapshots = sorted((project/'reports').glob('run-*.json'),key=lambda path:path.stat().st_mtime)
+    run_status = read_json(snapshots[-1]) if snapshots else None
+    status_text = (f"Recorded harness status: **{run_status['status']}**; {len(run_status['completed_phases'])} operational phases accepted. "
+                   'Measurements below do not imply completion of unaccepted phases.' if run_status else
+                   'Research is in progress; no final run-status snapshot is available.')
     write_json(reports/'metrics.json',summary)
     table = markdown_table(summary)
     figures(cycle)
@@ -161,6 +166,8 @@ fontsize: 10pt
 # Abstract
 
 This report records a bounded research cycle executed through {backend}. {primary_text}
+
+{status_text}
 
 # Context, motivation, and introduction
 
@@ -215,7 +222,7 @@ The committed protocol, per-experiment JSON files, saved predictions, loss histo
 Codex wrote the harness and study fixture; {backend} performed this cycle and authored its interpretation. The harness generated this paper from recorded artifacts. A human supplied the exact specification. Human cleanup and rewriting are in progress.
 '''
     (reports/'paper.md').write_text(paper,encoding='utf-8')
-    (reports/'summary.md').write_text('# All experiments\n\n'+table+'\n\n'+primary_text+'\n\n'+methodology+'\n\n'+interpretation+'\n\n## Sources\n\n'+references+'\n',encoding='utf-8')
+    (reports/'summary.md').write_text('# All experiments\n\n'+status_text+'\n\n'+table+'\n\n'+primary_text+'\n\n'+methodology+'\n\n'+interpretation+'\n\n## Sources\n\n'+references+'\n',encoding='utf-8')
     for record in experiments(cycle):
         text = f"# {record['id']}\n\nMethod: {record['method']}. Analysis: {record['analysis_kind']}.\n\n"
         text += markdown_table({'experiments':[next(r for r in summary['experiments'] if r['id']==record['id'])]})
@@ -225,7 +232,7 @@ Codex wrote the harness and study fixture; {backend} performed this cycle and au
     root_readme = project/'README.md'
     original = root_readme.read_text(encoding='utf-8') if root_readme.exists() else '# '+project.name+'\n'
     start,end = '<!-- EUREKA:RESULTS:START -->','<!-- EUREKA:RESULTS:END -->'
-    block = f'{start}\n## Recorded results\n\n{table}\n\n{primary_text}\n\nSee [full report](cycles/{cycle.name}/reports/summary.md).\n{end}'
+    block = f'{start}\n## Recorded results\n\n{status_text}\n\n{table}\n\n{primary_text}\n\nSee [full report](cycles/{cycle.name}/reports/summary.md).\n{end}'
     if start in original and end in original:
         original = original[:original.index(start)]+block+original[original.index(end)+len(end):]
     else:
@@ -243,6 +250,7 @@ Codex wrote the harness and study fixture; {backend} performed this cycle and au
     shutil.copy2(reports/'paper.md',site/'paper.md')
     (site/'index.html').write_bytes(files('auto_eureka_scientist').joinpath('resources/explorer.html').read_bytes())
     write_json(site/'data.json',{'title':project.name,'cycle':cycle.name,**summary,
+                               'run_status':run_status,
                                'records':[{**r,'outcome':r.get('outcome','measured')} for r in experiments(cycle)],
                                'sources':sources,'claims':claims})
     if pdf:
