@@ -1,0 +1,119 @@
+{
+  "at": "2026-10-29T19:12:01.225+00:00",
+  "project": "eureka-digits-haiku",
+  "python": "3.14.2",
+  "torch": "2.14.1+cu130",
+  "verification_device": "cpu",
+  "source_sha256": "34415a875e7f61954cf3813486f46a189d6b647f2e9682552d16db88a6d67d39",
+  "records": [
+    {
+      "id": "class_prior_s0",
+      "checkpoint_sha256": "69a03e6a16427f3f361001066d0aef20c645f1109ce51a744e8319065edda79a",
+      "hash_matches": true,
+      "predictions_match": true,
+      "labels_match": true
+    },
+    {
+      "id": "logistic_s0",
+      "checkpoint_sha256": "5f6f6257d4ecbc4b66f80fdc6c90bdf032a2f35a008cd2ba395db6af5d5b6c27",
+      "hash_matches": true,
+      "predictions_match": true,
+      "labels_match": true
+    },
+    {
+      "id": "pilot_regularized_s0",
+      "checkpoint_sha256": "a57cb6e24f5e7d2a3e83da8efd97233a4b7e0e5b8492f89b3cbe6064cb86cc3d",
+      "hash_matches": true,
+      "predictions_match": true,
+      "labels_match": true
+    },
+    {
+      "id": "regularized_s0",
+      "checkpoint_sha256": "a57cb6e24f5e7d2a3e83da8efd97233a4b7e0e5b8492f89b3cbe6064cb86cc3d",
+      "hash_matches": true,
+      "predictions_match": true,
+      "labels_match": true
+    },
+    {
+      "id": "regularized_s1",
+      "checkpoint_sha256": "6d6004f99a91584a2ffbedc1747cf80919909f5010133568624a035d8fe6ac95",
+      "hash_matches": true,
+      "predictions_match": true,
+      "labels_match": true
+    },
+    {
+      "id": "regularized_s2",
+      "checkpoint_sha256": "973a19ffaad8399256d974e76d6eb0ebd42f9f6a926c6fa089799968ef458537",
+      "hash_matches": true,
+      "predictions_match": true,
+      "labels_match": true
+    },
+    {
+      "id": "sensitivity_s0",
+      "checkpoint_sha256": "d12e34e4c990874be8603a5d0ac6cb06f5648db4245afaed83ab7182cb94e220",
+      "hash_matches": true,
+      "predictions_match": true,
+      "labels_match": true
+    },
+    {
+      "id": "sensitivity_s1",
+      "checkpoint_sha256": "3c5ae5b269a45bd5c74baf47384f13a469d5475e88be331db1510202ff14d930",
+      "hash_matches": true,
+      "predictions_match": true,
+      "labels_match": true
+    },
+    {
+      "id": "sensitivity_s2",
+      "checkpoint_sha256": "86900e93b81224dd2bcf1413be63694a0488d16bfe7d25b1bd3e631c36bd90d3",
+      "hash_matches": true,
+      "predictions_match": true,
+      "labels_match": true
+    },
+    {
+      "id": "shuffled_labels_s0",
+      "checkpoint_sha256": "66f8ea92d43937a7e09f420751597b3c60c560aa35ecc27aea45b21a287223dc",
+      "hash_matches": true,
+      "predictions_match": true,
+      "labels_match": true
+    },
+    {
+      "id": "shuffled_labels_s1",
+      "checkpoint_sha256": "960a5428d49a66052acb46f8238b37f059ef37d868b7fcc082631feab864dee7",
+      "hash_matches": true,
+      "predictions_match": true,
+      "labels_match": true
+    },
+    {
+      "id": "shuffled_labels_s2",
+      "checkpoint_sha256": "cea6d947279edfed5d90d9a1df01c0c034f06341a0435366d4b63924d4f04b66",
+      "hash_matches": true,
+      "predictions_match": true,
+      "labels_match": true
+    },
+    {
+      "id": "unregularized_s0",
+      "checkpoint_sha256": "6e09e36eb29b0f2e691039f76708d6306dc3483e82726d6ac9f5cdf971d009f2",
+      "hash_matches": true,
+      "predictions_match": true,
+      "labels_match": true
+    },
+    {
+      "id": "unregularized_s1",
+      "checkpoint_sha256": "865d50b44158576353bbeb744304210c29ed5642e3b9b6f4235b9e2f48395b77",
+      "hash_matches": true,
+      "predictions_match": true,
+      "labels_match": true
+    },
+    {
+      "id": "unregularized_s2",
+      "checkpoint_sha256": "227cf9c01e4e3da3838bb3be23cea540ca1e2d4b69ebebbabc637e5ed7f3e7fe",
+      "hash_matches": true,
+      "predictions_match": true,
+      "labels_match": true
+    }
+  ],
+  "numerical_regeneration_matches": true,
+  "research_errors": [],
+  "urls": [],
+  "passed": true
+}

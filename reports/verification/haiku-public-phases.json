@@ -1,0 +1,12 @@
+{
+  "cycle": 1,
+  "phases": {
+    "research": [],
+    "preregister": [],
+    "core": [],
+    "pilot": [],
+    "experiments": []
+  },
+  "complete": false,
+  "state_source": "public artifact history"
+}

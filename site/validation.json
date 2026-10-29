@@ -1,0 +1,426 @@
+[
+  {
+    "name": "haiku",
+    "summary": {
+      "experiments": [
+        {
+          "id": "class_prior_s0",
+          "method": "class_prior",
+          "seed": 0,
+          "split": "test",
+          "analysis_kind": "exploratory",
+          "accuracy": 0.10277777777777777,
+          "seconds": 0.025630899996031076,
+          "device": "cpu",
+          "checkpoint": "models/class_prior.npz",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "logistic_s0",
+          "method": "logistic",
+          "seed": 0,
+          "split": "test",
+          "analysis_kind": "exploratory",
+          "accuracy": 0.9555555555555556,
+          "seconds": 0.10662989999400452,
+          "device": "cpu",
+          "checkpoint": "models/logistic.npz",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "pilot_regularized_s0",
+          "method": "regularized",
+          "seed": 0,
+          "split": "validation",
+          "analysis_kind": "exploratory",
+          "accuracy": 0.9665738161559888,
+          "seconds": 6.805040200008079,
+          "device": "cuda",
+          "checkpoint": "models/regularized-s0.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "regularized_s0",
+          "method": "regularized",
+          "seed": 0,
+          "split": "test",
+          "analysis_kind": "confirmatory",
+          "accuracy": 0.9638888888888889,
+          "seconds": 0.48622590000741184,
+          "device": "cuda",
+          "checkpoint": "models/regularized-s0.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "regularized_s1",
+          "method": "regularized",
+          "seed": 1,
+          "split": "test",
+          "analysis_kind": "confirmatory",
+          "accuracy": 0.9694444444444444,
+          "seconds": 6.630275700008497,
+          "device": "cuda",
+          "checkpoint": "models/regularized-s1.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "regularized_s2",
+          "method": "regularized",
+          "seed": 2,
+          "split": "test",
+          "analysis_kind": "confirmatory",
+          "accuracy": 0.9694444444444444,
+          "seconds": 2.5530826000031084,
+          "device": "cuda",
+          "checkpoint": "models/regularized-s2.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "sensitivity_s0",
+          "method": "sensitivity",
+          "seed": 0,
+          "split": "test",
+          "analysis_kind": "exploratory",
+          "accuracy": 0.9638888888888889,
+          "seconds": 2.524724500020966,
+          "device": "cuda",
+          "checkpoint": "models/sensitivity-s0.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "sensitivity_s1",
+          "method": "sensitivity",
+          "seed": 1,
+          "split": "test",
+          "analysis_kind": "exploratory",
+          "accuracy": 0.9694444444444444,
+          "seconds": 2.583386000012979,
+          "device": "cuda",
+          "checkpoint": "models/sensitivity-s1.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "sensitivity_s2",
+          "method": "sensitivity",
+          "seed": 2,
+          "split": "test",
+          "analysis_kind": "exploratory",
+          "accuracy": 0.9694444444444444,
+          "seconds": 2.4813675999757834,
+          "device": "cuda",
+          "checkpoint": "models/sensitivity-s2.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "shuffled_labels_s0",
+          "method": "shuffled_labels",
+          "seed": 0,
+          "split": "test",
+          "analysis_kind": "exploratory",
+          "accuracy": 0.06111111111111111,
+          "seconds": 2.4654386999900453,
+          "device": "cuda",
+          "checkpoint": "models/shuffled_labels-s0.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "shuffled_labels_s1",
+          "method": "shuffled_labels",
+          "seed": 1,
+          "split": "test",
+          "analysis_kind": "exploratory",
+          "accuracy": 0.11666666666666667,
+          "seconds": 2.470294200000353,
+          "device": "cuda",
+          "checkpoint": "models/shuffled_labels-s1.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "shuffled_labels_s2",
+          "method": "shuffled_labels",
+          "seed": 2,
+          "split": "test",
+          "analysis_kind": "exploratory",
+          "accuracy": 0.10833333333333334,
+          "seconds": 2.3671253999928012,
+          "device": "cuda",
+          "checkpoint": "models/shuffled_labels-s2.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "unregularized_s0",
+          "method": "unregularized",
+          "seed": 0,
+          "split": "test",
+          "analysis_kind": "confirmatory",
+          "accuracy": 0.9638888888888889,
+          "seconds": 2.425622700015083,
+          "device": "cuda",
+          "checkpoint": "models/unregularized-s0.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "unregularized_s1",
+          "method": "unregularized",
+          "seed": 1,
+          "split": "test",
+          "analysis_kind": "confirmatory",
+          "accuracy": 0.9694444444444444,
+          "seconds": 2.3932084999978542,
+          "device": "cuda",
+          "checkpoint": "models/unregularized-s1.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "unregularized_s2",
+          "method": "unregularized",
+          "seed": 2,
+          "split": "test",
+          "analysis_kind": "confirmatory",
+          "accuracy": 0.9694444444444444,
+          "seconds": 2.500540799985174,
+          "device": "cuda",
+          "checkpoint": "models/unregularized-s2.safetensors",
+          "checkpoint_reload_verified": true
+        }
+      ],
+      "primary": {
+        "name": "Mean over registered seeds of test accuracy(weight_decay=0.01) minus test accuracy(weight_decay=0)",
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "bootstrap_resamples": 10000,
+        "seed_effects": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "seed_sample_sd": 0.0,
+        "conclusion": "inconclusive",
+        "uncertainty_unit": "test examples, conditional on the registered trained models"
+      },
+      "limitations": [
+        "Conditional test-example intervals do not estimate variation over new training seeds, writers, or datasets.",
+        "A small single-task study does not establish general model or harness superiority.",
+        "No discordant predictions were observed in the primary pairs. The empirical bootstrap interval collapses to zero; this is not an equivalence test or a guarantee about unseen examples."
+      ]
+    },
+    "repository": "https://github.com/BurnyCoder/eureka-digits-haiku",
+    "explorer": "https://BurnyCoder.github.io/eureka-digits-haiku/",
+    "models": "https://huggingface.co/BurnyCoder/eureka-digits-haiku-models"
+  },
+  {
+    "name": "luna",
+    "summary": {
+      "experiments": [
+        {
+          "id": "class_prior_s0",
+          "method": "class_prior",
+          "seed": 0,
+          "split": "test",
+          "analysis_kind": "exploratory",
+          "accuracy": 0.10277777777777777,
+          "seconds": 0.038445199956186116,
+          "device": "cpu",
+          "checkpoint": "models/class_prior.npz",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "logistic_s0",
+          "method": "logistic",
+          "seed": 0,
+          "split": "test",
+          "analysis_kind": "exploratory",
+          "accuracy": 0.9555555555555556,
+          "seconds": 0.10728050000034273,
+          "device": "cpu",
+          "checkpoint": "models/logistic.npz",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "pilot_regularized_s0",
+          "method": "regularized",
+          "seed": 0,
+          "split": "validation",
+          "analysis_kind": "exploratory",
+          "accuracy": 0.9665738161559888,
+          "seconds": 7.616152300033718,
+          "device": "cuda",
+          "checkpoint": "models/regularized-s0.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "regularized_s0",
+          "method": "regularized",
+          "seed": 0,
+          "split": "test",
+          "analysis_kind": "confirmatory",
+          "accuracy": 0.9638888888888889,
+          "seconds": 0.28775939997285604,
+          "device": "cuda",
+          "checkpoint": "models/regularized-s0.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "regularized_s1",
+          "method": "regularized",
+          "seed": 1,
+          "split": "test",
+          "analysis_kind": "confirmatory",
+          "accuracy": 0.9694444444444444,
+          "seconds": 6.001862000033725,
+          "device": "cuda",
+          "checkpoint": "models/regularized-s1.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "regularized_s2",
+          "method": "regularized",
+          "seed": 2,
+          "split": "test",
+          "analysis_kind": "confirmatory",
+          "accuracy": 0.9694444444444444,
+          "seconds": 2.1916946999845095,
+          "device": "cuda",
+          "checkpoint": "models/regularized-s2.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "sensitivity_s0",
+          "method": "sensitivity",
+          "seed": 0,
+          "split": "test",
+          "analysis_kind": "exploratory",
+          "accuracy": 0.9638888888888889,
+          "seconds": 2.3939105999888852,
+          "device": "cuda",
+          "checkpoint": "models/sensitivity-s0.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "sensitivity_s1",
+          "method": "sensitivity",
+          "seed": 1,
+          "split": "test",
+          "analysis_kind": "exploratory",
+          "accuracy": 0.9694444444444444,
+          "seconds": 2.3478323000017554,
+          "device": "cuda",
+          "checkpoint": "models/sensitivity-s1.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "sensitivity_s2",
+          "method": "sensitivity",
+          "seed": 2,
+          "split": "test",
+          "analysis_kind": "exploratory",
+          "accuracy": 0.9694444444444444,
+          "seconds": 2.257514299999457,
+          "device": "cuda",
+          "checkpoint": "models/sensitivity-s2.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "shuffled_labels_s0",
+          "method": "shuffled_labels",
+          "seed": 0,
+          "split": "test",
+          "analysis_kind": "exploratory",
+          "accuracy": 0.06111111111111111,
+          "seconds": 2.333101099997293,
+          "device": "cuda",
+          "checkpoint": "models/shuffled_labels-s0.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "shuffled_labels_s1",
+          "method": "shuffled_labels",
+          "seed": 1,
+          "split": "test",
+          "analysis_kind": "exploratory",
+          "accuracy": 0.11666666666666667,
+          "seconds": 2.352771599951666,
+          "device": "cuda",
+          "checkpoint": "models/shuffled_labels-s1.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "shuffled_labels_s2",
+          "method": "shuffled_labels",
+          "seed": 2,
+          "split": "test",
+          "analysis_kind": "exploratory",
+          "accuracy": 0.10833333333333334,
+          "seconds": 2.368681900028605,
+          "device": "cuda",
+          "checkpoint": "models/shuffled_labels-s2.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "unregularized_s0",
+          "method": "unregularized",
+          "seed": 0,
+          "split": "test",
+          "analysis_kind": "confirmatory",
+          "accuracy": 0.9638888888888889,
+          "seconds": 2.234836300020106,
+          "device": "cuda",
+          "checkpoint": "models/unregularized-s0.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "unregularized_s1",
+          "method": "unregularized",
+          "seed": 1,
+          "split": "test",
+          "analysis_kind": "confirmatory",
+          "accuracy": 0.9694444444444444,
+          "seconds": 2.373517800006084,
+          "device": "cuda",
+          "checkpoint": "models/unregularized-s1.safetensors",
+          "checkpoint_reload_verified": true
+        },
+        {
+          "id": "unregularized_s2",
+          "method": "unregularized",
+          "seed": 2,
+          "split": "test",
+          "analysis_kind": "confirmatory",
+          "accuracy": 0.9694444444444444,
+          "seconds": 2.3234926000004634,
+          "device": "cuda",
+          "checkpoint": "models/unregularized-s2.safetensors",
+          "checkpoint_reload_verified": true
+        }
+      ],
+      "primary": {
+        "name": "Mean over registered seeds of test accuracy(weight_decay=0.01) minus test accuracy(weight_decay=0)",
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "bootstrap_resamples": 10000,
+        "seed_effects": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "seed_sample_sd": 0.0,
+        "conclusion": "inconclusive",
+        "uncertainty_unit": "test examples, conditional on the registered trained models"
+      },
+      "limitations": [
+        "Conditional test-example intervals do not estimate variation over new training seeds, writers, or datasets.",
+        "A small single-task study does not establish general model or harness superiority.",
+        "No discordant predictions were observed in the primary pairs. The empirical bootstrap interval collapses to zero; this is not an equivalence test or a guarantee about unseen examples."
+      ]
+    },
+    "repository": "https://github.com/BurnyCoder/eureka-digits-luna",
+    "explorer": "https://BurnyCoder.github.io/eureka-digits-luna/",
+    "models": "https://huggingface.co/BurnyCoder/eureka-digits-luna-models"
+  }
+]
