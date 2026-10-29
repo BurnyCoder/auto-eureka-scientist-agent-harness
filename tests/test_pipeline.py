@@ -61,7 +61,9 @@ async def test_pipeline_recovers_without_duplicate_model_call(tmp_path,monkeypat
     second = await Controller(store,run_id,publisher=publisher,echo=False).run()
     assert second['status']=='complete',second['message']
     assert second['calls']==calls_at_failure+7  # experiments, analysis, review; revisit those; publish
-    assert publisher.published==['core','pilot','publish']
+    assert publisher.published==['core','pilot','publish','summary']
+    import json
+    assert json.loads((project/'reports'/f'run-{run_id}.json').read_text())['status']=='complete'
     assert len(store.phases(run_id))==8
     assert (project/'cycles/001/results/pilot.json').exists()
     history = (project/'cycles/001/research/decisions.jsonl').read_text()
