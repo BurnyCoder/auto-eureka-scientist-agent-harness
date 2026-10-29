@@ -6,8 +6,10 @@ https://huggingface.co/docs/huggingface_hub/guides/cli
 """
 from pathlib import Path
 import json
+import hashlib
 import re
 import shutil
+import time
 
 from .util import command, digest, now, read_json, write_json
 
@@ -99,6 +101,7 @@ class Publisher:
                     pr = json.loads(self.call(['gh','pr','view',url,'--json','number,url,state']))
                 # Preserve preregistration commits in reachable history; do not squash them away.
                 if pr['state'] != 'MERGED':
+                    self.wait_for_checks(pr['number'],sha)
                     self.call(['gh','pr','merge',str(pr['number']),'--merge','--match-head-commit',sha])
                 self.call(['git','switch',repo['base']])
                 self.call(['git','pull','--ff-only','origin',repo['base']])
@@ -106,23 +109,52 @@ class Publisher:
         self.store.receipt(self.run_id,key,receipt)
         return receipt
 
+    def wait_for_checks(self, number: int, expected_sha: str):
+        """Wait for reported CI, retaining the head SHA used by the eventual merge.
+
+        https://cli.github.com/manual/gh_pr_view
+        Empty checks mean none are configured, not that remote CI ran successfully.
+        """
+        deadline = time.monotonic()+min(180,self.remaining())
+        while True:
+            info = json.loads(self.call(['gh','pr','view',str(number),'--json','headRefOid,statusCheckRollup']))
+            if info['headRefOid']!=expected_sha:
+                raise RuntimeError('PR head changed while verifying checks')
+            pending = []
+            for check in info.get('statusCheckRollup') or []:
+                state = check.get('conclusion') or check.get('state') or check.get('status')
+                if state in ('SUCCESS','NEUTRAL','SKIPPED'):
+                    continue
+                if state in ('PENDING','EXPECTED','QUEUED','IN_PROGRESS','WAITING','REQUESTED'):
+                    pending.append(check.get('name') or check.get('context'))
+                else:
+                    raise RuntimeError(f'PR checks did not pass: {check.get("name") or check.get("context")}: {state}')
+            if not pending:
+                return
+            if time.monotonic()>=deadline:
+                raise RuntimeError(f'PR checks still pending; resume publication: {pending}')
+            if self.store.get(self.run_id)['stop']:
+                raise InterruptedError('stop requested')
+            time.sleep(min(5,max(0,deadline-time.monotonic())))
+
     def models(self, cycle: Path, milestone: str) -> dict:
         if not self.config.publish:
             return {'local':True,'at':now()}
-        files = sorted(path for path in (cycle/'models').rglob('*') if path.is_file())
+        files = sorted(path for path in (cycle/'models').rglob('*') if path.is_file() and '.cache' not in path.parts and '.git' not in path.parts)
         if not files:
             raise RuntimeError('No model artifacts to publish')
-        fingerprint = digest(cycle/'reports/metrics.json')
-        key = f'hf:{cycle.name}:{milestone}:{fingerprint}'
+        manifest = {path.relative_to(cycle/'models').as_posix():digest(path) for path in files}
+        fingerprint = hashlib.sha256(json.dumps(manifest,sort_keys=True).encode()).hexdigest()
+        key = f'hf:{cycle.name}:{milestone}:{self.config.hf_collection}:{fingerprint}'
         if previous := self.store.receipt(self.run_id,key):
             return previous
         owner = self.config.owner or self.call(['gh','api','user','--jq','.login'])
         repo_id = f'{owner}/{self.project.name}-models'
-        upload = json.loads(self.call(['hf','upload',repo_id,str(cycle/'models'),'.','--json']))
-        collection_key = 'hf:collection'
+        upload = json.loads(self.call(['hf','upload',repo_id,str(cycle/'models'),'.','--exclude','.cache/**','--json']))
+        collection_key = 'hf:collection:'+self.config.hf_collection if self.config.hf_collection else 'hf:collection'
         collection = self.store.receipt(self.run_id,collection_key)
         if not collection:
-            collection = json.loads(self.call(['hf','collections','create',self.project.name,'--namespace',owner,
+            collection = json.loads(self.call(['hf','collections','info',self.config.hf_collection,'--json'])) if self.config.hf_collection else json.loads(self.call(['hf','collections','create',self.project.name,'--namespace',owner,
                                               '--description','Reproducible research models and their recorded evaluation evidence',
                                               '--exists-ok','--json']))
             self.store.receipt(self.run_id,collection_key,collection)
@@ -133,7 +165,7 @@ class Publisher:
         info = json.loads(self.call(['hf','models','info',repo_id,'--json']))
         receipt = {'repository':repo_id,'url':f'https://huggingface.co/{repo_id}',
                    'collection':f'https://huggingface.co/collections/{slug}','upload':upload,
-                   'verified':bool(info),'at':now()}
+                   'verified':bool(info),'files':manifest,'at':now()}
         self.store.receipt(self.run_id,key,receipt)
         return receipt
 

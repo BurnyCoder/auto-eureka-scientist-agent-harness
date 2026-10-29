@@ -4,7 +4,7 @@ from pathlib import Path
 
 from .contracts import PHASES, PHASE_SCHEMA, validate_handoff
 from .policy import NEEL, policy_bytes, requirements
-from .science import artifact_evidence, experiments, retrieve_sources, validate_protocol, verify_claims, verify_results
+from .science import artifact_evidence, experiments, resolve_artifact, retrieve_sources, validate_protocol, verify_claims, verify_results
 from .util import digest, read_json
 
 
@@ -32,10 +32,11 @@ INSTRUCTIONS = {
 
 
 def make_prompt(run: dict, phase: str, cycle: Path, previous: list, errors: list[str]) -> str:
+    import sys
     project = Path(run['config']['project'])
     relative = cycle.relative_to(project).as_posix()
     fixture = ''
-    if run['config']['profile'] == 'digits':
+    if run['config']['profile'].startswith('digits'):
         import sys
         fixture = f'''\nDigits validation uses the supplied reproducible fixture. Preserve its fixed protocol and study.py scientific definitions.
 The current Python with research dependencies is {sys.executable}. Execute as an argument array or properly quoted shell paths.
@@ -45,6 +46,13 @@ The fixture provides actual training, leakage checks, predictions, safetensors, 
 You must inspect it and its outputs, research sources, author the scientific interpretation, and review its validity.
 Do not invoke any LLM API, agent CLI, alternative model, or collaborator yourself. The harness owns all inference calls.
 '''
+    example = {'status':'complete','summary':'Describe the completed work honestly.',
+               'artifacts':[f'{relative}/{path}' for path in DELIVERABLES[phase]],'evidence':[],'issues':[],
+               'stage':'distillation' if phase in ('analysis','review','publish') else 'exploration',
+               'analysis_kind':'exploratory','objective':'State this phase objective.',
+               'predictions':[],'alternatives':[],'observations':[],'learning':'State what changed.',
+               'rationale':'Explain the next action.','decision':'finish' if phase=='publish' else 'continue',
+               'revisit_phase':'','not_applicable':[]}
     return f'''{policy_bytes().decode('utf-8-sig')}
 
 --- HARNESS EXECUTION CONTRACT ---
@@ -61,17 +69,19 @@ Do not ask the user to proceed. On an actual blocker, return status blocked and 
 Research protocol histories and result files must be preserved; never delete negative results.
 Put derived summaries and auxiliary analyses in research/ or reports/. Only JSON objects declaring id or method count as experiment records; aggregates never count as additional experiments.
 On a repair, reuse valid existing artifacts and measurements. Correct the listed failures; do not repeat training merely to repair a handoff path.
-Claim evidence references must resolve to source or experiment IDs. For local code, audit logs, or derived analyses, add research/evidence.json as an array of {{id,path,sha256,analysis_kind}} with project-relative paths and actual SHA256 hashes, then cite those IDs. The ONLY allowed analysis_kind values are exploratory, confirmatory, and not_applicable. A path alone without this ledger is not registered evidence. Post-hoc audits and derived analyses remain exploratory; claims relying on them must be exploratory too. Use not_applicable only for non-empirical documentation.
+For claims, cite IDs already present in research/sources.json or results/*.json. You do not need to copy experiments into another ledger. For an additional local audit, use research/evidence.json, for example [{{"id":"audit-splits","path":"{relative}/research/split-audit.json","sha256":"actual file hash","analysis_kind":"exploratory"}}]. Keep IDs unique. Post-hoc audits and claims based on them are exploratory. Use not_applicable for non-empirical documentation only.
 Active seconds already used: {run.get('elapsed',0)}; total minute limit: {run['config'].get('max_minutes')}. CLI calls already used: {run.get('calls',0)}; total call limit: {run['config'].get('max_calls')}. Leave time for subsequent phases and publication; prioritize the immediate deliverables and cheap informative checks.
+These current limits include explicit user-authorized extensions. Earlier protocol budgets remain historical records; do not rewrite them or treat them as a reason to stop an authorized continuation.
 Required deliverables: {json.dumps(DELIVERABLES[phase])}
 Instructions: {INSTRUCTIONS[phase]}
 {fixture}
 Previous completed phase summaries:
 {json.dumps([{'phase':p['name'],'summary':p['result']['summary'],'learning':p['result'].get('learning','')} for p in previous],ensure_ascii=False)}
 Corrections required from prior attempt: {json.dumps(errors,ensure_ascii=False)}
-Return the structured phase result specified by the supplied JSON schema. Artifact/evidence paths in the handoff must be project-relative.
-Include EVERY required key, including revisit_phase as an empty string when unused and not_applicable as an empty array when unused.
-Required keys: {', '.join(PHASE_SCHEMA['required'])}.
+Return the structured phase result. File paths can be relative to the cycle or project; use project-relative paths if both would exist.
+Use this handoff shape, replacing its descriptive placeholders with actual observations: {json.dumps(example,ensure_ascii=False)}
+Before returning, check your files without another model call: "{sys.executable}" -m auto_eureka_scientist.cli verify --project "{project}" --cycle {run.get('cycle',int(cycle.name))} --phase {phase}
+This draft check does not accept the phase or modify its scientific conclusions. Address concrete reported errors, then return your handoff. Empty revisit_phase and not_applicable fields are optional for Claude.
 Provide predictions, competing alternatives, observations and learning appropriate to this phase. Do not fabricate future observations.
 Use decision revisit with a named earlier phase if needed; use continue otherwise (finish in publish).
 '''
@@ -87,8 +97,11 @@ def verify_phase(phase: str, cycle: Path, result: dict, *, fetch=False) -> list[
         errors += result['issues'] or [f"Agent returned {result['status']}"]
     project = cycle.parents[1]
     for artifact in result['artifacts']:
-        if not (project/artifact).exists():
-            errors.append(f'Handoff artifact missing (use project-relative paths): {artifact}')
+        try:
+            if not resolve_artifact(cycle,artifact).exists():
+                errors.append(f'Handoff artifact missing: {artifact}')
+        except ValueError as exc:
+            errors.append(str(exc))
     for name in DELIVERABLES[phase]:
         path = cycle/name
         if not path.is_file() or not path.stat().st_size:
@@ -130,7 +143,7 @@ def verify_phase(phase: str, cycle: Path, result: dict, *, fetch=False) -> list[
                     if not item.get('evidence'):
                         errors.append(f"{requirement['id']}: evidence required")
                     for evidence in item.get('evidence',[]):
-                        if not (cycle/evidence).exists() and not (cycle.parents[1]/evidence).exists():
+                        if not resolve_artifact(cycle,evidence).exists():
                             errors.append(f'Checklist evidence missing: {evidence}')
                 else:
                     errors.append(f"{requirement['id']}: requirement not addressed")

@@ -39,7 +39,7 @@ def test_resume_keeps_calls_elapsed_and_pending_handoff(tmp_path):
     store.close()
 
 
-def test_live_profile_never_extends_trial_limits(tmp_path):
-    with pytest.raises(ValueError,match='capped'):
-        RunConfig(str(tmp_path),'claude',profile='digits',max_calls=21)
+def test_live_profile_defaults_remain_bounded_without_silent_extension(tmp_path):
+    config = RunConfig(str(tmp_path),'claude',profile='digits')
+    assert config.max_calls==20 and config.max_minutes==60
 
