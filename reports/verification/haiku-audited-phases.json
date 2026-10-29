@@ -1,0 +1,11 @@
+{
+  "phases": {
+    "research": [],
+    "preregister": [],
+    "core": [],
+    "pilot": [],
+    "experiments": []
+  },
+  "complete": false,
+  "scope": "post-run artifact verification; model phase count unchanged"
+}

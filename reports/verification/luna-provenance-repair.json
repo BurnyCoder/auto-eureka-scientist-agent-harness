@@ -1,0 +1,122 @@
+{
+  "at": "2026-10-29T19:45:54.452+00:00",
+  "scope": "Post-run mechanical provenance repair; no new inference or changed scientific observations",
+  "repairs": [
+    {
+      "id": "ev-class_prior_s0",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "0a687d0214ffcce40775725e7056610dfdcae2e224805e7fa4281a690f2bfbc6"
+    },
+    {
+      "id": "ev-logistic_s0",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "1255652ea16e7d13c4d106af82b46dcd57a48b703dd94c30c0022871697c5cff"
+    },
+    {
+      "id": "ev-regularized_s0",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "0ea86b83e90fadec8c759ca1847f893c399c053d382add1fbbe7bdac10b2009a"
+    },
+    {
+      "id": "ev-regularized_s1",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "aff4b2f2ec0cddf479316b71faca52b169d4d4e7cc7d53b8753da820fcff6f84"
+    },
+    {
+      "id": "ev-regularized_s2",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "6898ff2b0887249ebf6d8501281d77b29e128b56fe3a942cbd4f15d159a04910"
+    },
+    {
+      "id": "ev-sensitivity_s0",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "ed8b9a9cb4455d8f1c2d62aa7d38a342e2412d66fe072026c1a09c7fd63a04bd"
+    },
+    {
+      "id": "ev-sensitivity_s1",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "d47c10f508291dee18ce9fbca454e78260013022071e9f69d04845b243ff6fe9"
+    },
+    {
+      "id": "ev-sensitivity_s2",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "cb184a77f0801f57e65a80fb79522dc8779198e973600eb236ee90f9cafee41f"
+    },
+    {
+      "id": "ev-shuffled_labels_s0",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "6dcc52e7d63125bd0d7c8b18e81b0550549d74a64b75f255e745c24a5ccf1de2"
+    },
+    {
+      "id": "ev-shuffled_labels_s1",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "5fb96639d66298e083ba3c25e536fb38edb344ba38b14539152826ca91f3203b"
+    },
+    {
+      "id": "ev-shuffled_labels_s2",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "5b2c7f4a9d8dab5e15caa206074b0311b339447ff50b5b0846d71eadf4c134bb"
+    },
+    {
+      "id": "ev-unregularized_s0",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "7e06940304c973c057ed416137d557e37543b1d17bfc44dd19f09f97333cdabd"
+    },
+    {
+      "id": "ev-unregularized_s1",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "571554facaad52089ff8d43fce3a4565b2e6a042bbb84ec29c73df9e737712fd"
+    },
+    {
+      "id": "ev-unregularized_s2",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "cb5932a06763bede9ff49e10efe4a4b2e53d12da442d5ab81b789e25cccf92fc"
+    },
+    {
+      "id": "ev-experiment-analysis",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "883742aa4f61aa0c28f53cb0fb6c7df1496c64d382281e8a24323703769f5b06"
+    },
+    {
+      "id": "ev-analysis-requirements",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "b8e8b90ef6f0578a58baf68400dfbb0244927f48508bd072e06e3915891f0846"
+    },
+    {
+      "id": "ev-analysis-claims",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "4546df3367a9ba97dc11a10bdf75ecc9369cffcada3500858338228e6b6fe2d4"
+    },
+    {
+      "id": "ev-analysis-interpretation",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "003e3fbb3f99e6b717ca7549270baf52f7567d778e2fc8ad53b29e8d67de747d"
+    },
+    {
+      "id": "ev-review-site-data",
+      "operation": "Linked preserved reviewed version; current generated output retained",
+      "verified_original_sha256": "dd957a82ce1984636f44dbeb6fc789dd4a284a81f94e8a8b1e2e8777d8ba5e0d"
+    },
+    {
+      "id": "ev-review-site-paper-source",
+      "operation": "Linked preserved reviewed version; current generated output retained",
+      "verified_original_sha256": "d7c1ce84adb43ccbe7c697f038216bcc44e2ec306fe187ac889c14fbd7113ddd"
+    },
+    {
+      "id": "ev-review-site-pdf",
+      "operation": "Linked preserved reviewed version; current generated output retained",
+      "verified_original_sha256": "157ab943e06ecb659099eeda63ea3c3ff3cf4382a1a52bf379ad15cf29726408"
+    },
+    {
+      "id": "ev-review-cycle-paper",
+      "operation": "Linked preserved reviewed version; current generated output retained",
+      "verified_original_sha256": "157ab943e06ecb659099eeda63ea3c3ff3cf4382a1a52bf379ad15cf29726408"
+    },
+    {
+      "id": "ev-review-check-current",
+      "operation": "Restored exact previously hashed bytes; only line endings changed",
+      "verified_original_sha256": "237a704dec6b71f1a867c92b9c260e6e03b5cc2c6d9f34d70122bbe56ecc9571"
+    }
+  ],
+  "all_expected_hashes_recovered": true
+}
