@@ -287,7 +287,7 @@ Exploratory outcomes do not become confirmatory by inclusion in this document. M
 
 # Appendix: reproducibility and provenance
 
-The committed protocol, per-experiment JSON files, saved predictions, loss histories, and checkpoints are the source of all numerical tables and figures. Rebuild using `eureka render`. See `docs/reproduction.md` for execution commands and environment details.
+The committed protocol, per-experiment JSON files, saved predictions, loss histories, and checkpoints are the source of all numerical tables and figures. Rebuild using `eureka render`. See [the reproduction guide]({artifact_link(cycle/'docs/reproduction.md')}) for execution commands and environment details.
 
 # AI statement
 
