@@ -22,6 +22,10 @@ uv run --extra ui --extra research --extra cuda eureka ui --project workspaces/m
 
 [Setup and controls](docs/console.md) · [Generated settings reference](docs/settings.md) · [Console acceptance evidence](reports/console-acceptance.md). New live console validation is restricted to Haiku and Luna; historical model results below retain their original scope.
 
+![Local research console showing completed offline fixture loops, controls, chat and artifacts](docs/images/console.png)
+
+Console screenshot from the offline fake-CLI acceptance workflow; its fixture outcomes are not scientific results.
+
 ## Installation
 
 Install [uv](https://docs.astral.sh/uv/), Python 3.14, Git, the [GitHub CLI](https://cli.github.com/), the [HF CLI](https://huggingface.co/docs/huggingface_hub/guides/cli), [Pandoc](https://pandoc.org/installing.html), and LaTeX with `pdflatex`. Install and authenticate the chosen [Claude Code](https://code.claude.com/docs/en/quickstart) or [Codex CLI](https://learn.chatgpt.com/docs/non-interactive-mode). The harness uses their existing logins; no API key is required by the harness.

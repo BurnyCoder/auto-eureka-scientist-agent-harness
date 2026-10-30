@@ -210,3 +210,5 @@ if __name__=='__main__':
     parser.add_argument('--no-pdf',action='store_true')
     args = parser.parse_args()
     build(Path(__file__).resolve().parents[1],not args.no_pdf)
+    from console_reference import generate
+    generate()

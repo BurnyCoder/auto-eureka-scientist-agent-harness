@@ -44,6 +44,9 @@ def generate():
         report+=['','| Live model | Status | Calls | Phase before / after | Reported identity |','|---|---|---:|---|---|']
         for check in data.get('live',[]):
             report.append(f'| {check["model"]} | {check["status"]} | {check["calls"]} | {check["phase_before"]} / {check["phase_after"]} | {", ".join(check.get("reported_models",[])) or "Not exposed"} |')
+        for check in data.get('live',[]):
+            for warning in check.get('warnings',[]):report+=['',f'{check["model"]}: {warning}']
+    report+=['','[Implementation issues, corrections and limitations](console-learnings.md) describe the observed failures without replacing earlier observations.','']
     report+=['','Live checks follow [the prospective console addendum](console-validation-preregistration.md). No earlier Sonnet or Sol result is relabeled as validation of this interface. Prior scientific findings remain unchanged.','',
         'Known limits: telemetry depends on host access and provider reporting; process CPU samples need more than one observation. A hard crash can lose up to one configured heartbeat interval of active-time accounting. External publication services can fail and need recovery. The console is a local operator interface, not an authentication boundary for a hostile local user.','']
     (ROOT/'reports/console-acceptance.md').write_text('\n'.join(report),encoding='utf-8')

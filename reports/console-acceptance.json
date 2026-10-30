@@ -1,0 +1,146 @@
+{
+  "browser": [
+    {
+      "check": "Finite queue completion",
+      "outcome": "complete; 2 completed loops, 2 started cycles, 17 charged calls",
+      "run_id": "75295aac67b1"
+    },
+    {
+      "check": "Ask while paused, then phase step/resume",
+      "outcome": "Question states: answered; UI retained accepted phases and charged the question",
+      "run_id": "75295aac67b1"
+    },
+    {
+      "check": "Indefinite loops with active-time bound",
+      "outcome": "max_loops=None; max_minutes=0.01; budget_exhausted; 0 completed loops",
+      "run_id": "de6667cb020e"
+    },
+    {
+      "check": "Settings and presets",
+      "outcome": "Search, changed-only view, configuration diff, theme, preset duplication and project defaults exercised; refreshed new-run form displayed saved max_loops=2"
+    },
+    {
+      "check": "Future queue and snapshots",
+      "outcome": "Duplicated and edited future spec; active revision remained frozen; next loop selected the edited queued spec"
+    },
+    {
+      "check": "Reload and server reconnection",
+      "outcome": "Browser reconnected and retained completed phases, counters, chat and selected run"
+    },
+    {
+      "check": "Artifact inspection",
+      "outcome": "Read-only final.md preview rendered saved fixture text"
+    },
+    {
+      "check": "Responsive interface",
+      "outcome": "Desktop panels and narrow-screen queue controls inspected; saved screenshot docs/images/console.png"
+    }
+  ],
+  "live": [
+    {
+      "at": "2026-10-30T01:29:50.801+00:00",
+      "run_id": "d9adfe4a9ec1",
+      "model": "haiku",
+      "backend": "claude",
+      "status": "answered",
+      "calls": 1,
+      "phase_before": 0,
+      "phase_after": 0,
+      "accepted_phases": 0,
+      "active_seconds": 10.959301800001413,
+      "reported_models": [
+        "claude-haiku-5-5"
+      ],
+      "usage": [
+        {
+          "input_tokens": 2,
+          "cache_creation_input_tokens": 45637,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 549,
+          "output_tokens_details": {
+            "thinking_tokens": 222
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 45637,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "global",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 549,
+              "cache_read_input_tokens": 0,
+              "cache_creation_input_tokens": 45637,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 45637
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard",
+          "fallback_credit": null,
+          "model_usage": {
+            "claude-haiku-5-5": {
+              "inputTokens": 2,
+              "outputTokens": 549,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 45637,
+              "webSearchRequests": 0,
+              "costUSD": 0.009402099999999998,
+              "contextWindow": 1000000,
+              "maxOutputTokens": 128000,
+              "thinkingTokens": 222,
+              "cacheCreationEphemeral5mInputTokens": 0,
+              "cacheCreationEphemeral1hInputTokens": 45637,
+              "canonicalModel": "claude-haiku-5-5",
+              "provider": "firstParty",
+              "costBasis": "list"
+            }
+          },
+          "reported_cost_usd": 0.009402099999999998
+        }
+      ],
+      "errors": [],
+      "run_status": "ready",
+      "run_message": "Requested maintenance completed",
+      "reply_nonempty": true,
+      "warnings": []
+    },
+    {
+      "at": "2026-10-30T01:33:48.297+00:00",
+      "run_id": "65bf7c4c1d4d",
+      "model": "gpt-6-luna",
+      "backend": "codex",
+      "status": "answered",
+      "calls": 1,
+      "phase_before": 0,
+      "phase_after": 0,
+      "accepted_phases": 0,
+      "active_seconds": 9.541476699989289,
+      "reported_models": [],
+      "usage": [
+        {
+          "input_tokens": 26729,
+          "cached_input_tokens": 0,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 136,
+          "reasoning_output_tokens": 84
+        }
+      ],
+      "errors": [],
+      "run_status": "ready",
+      "run_message": "Requested maintenance completed",
+      "reply_nonempty": true,
+      "warnings": [
+        "Optional MCP connector startup returned HTTP 403; the requested Q&A still completed."
+      ]
+    }
+  ],
+  "browser_recorded_at": "2026-10-30T01:44:55.747+00:00"
+}

@@ -58,7 +58,7 @@
       "description": "One cycle, repeating cycles, or budget-bounded execution.",
       "type": "string",
       "x-category": "Run",
-      "x-apply": "new run",
+      "x-apply": "immediate",
       "x-scope": "run",
       "x-advanced": false,
       "x-backends": [
