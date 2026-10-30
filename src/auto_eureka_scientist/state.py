@@ -12,9 +12,10 @@ import psutil
 
 from .config import RunConfig
 from .util import now
+from .interactive_state import InteractiveState
 
 
-class Store:
+class Store(InteractiveState):
     def __init__(self, project: Path):
         self.project = project
         directory = project / '.eureka'
@@ -44,6 +45,7 @@ class Store:
             self.db.execute('INSERT OR IGNORE INTO cycles SELECT cycle,run_id FROM phases')
             self.db.execute('INSERT OR IGNORE INTO cycles SELECT cycle,run_id FROM attempts')
             self.db.execute('INSERT OR IGNORE INTO cycles SELECT cycle,id FROM runs')
+        self.migrate_interactive()
 
     def reserve_cycle(self, run_id: str) -> int:
         """Reserve a project-wide number inside the caller's write transaction.
@@ -67,12 +69,19 @@ class Store:
                             (run_id, now(), now(), json.dumps(config.to_dict()), task, policy_hash, 'ready',cycle))
         return run_id
 
-    def advance_cycle(self, run_id: str, *, message=''):
+    def advance_cycle(self, run_id: str, *, message='', carry_spec=False):
         """Keep earlier observations and reservations when continuing research."""
         with self.lock, self.db:
             self.db.execute('BEGIN IMMEDIATE')
-            self.get(run_id)
+            previous = self.get(run_id)
             number = self.reserve_cycle(run_id)
+            if carry_spec:
+                row=self.db.execute('SELECT value FROM cycle_specs WHERE run_id=? AND cycle=?',(run_id,previous['cycle'])).fetchone()
+                if row:
+                    snapshot=json.loads(row[0])
+                    if carry_spec=='latest':
+                        snapshot=next((s for s in self.specs(run_id) if s['id']==snapshot['id']),snapshot)
+                    self.db.execute('INSERT INTO cycle_specs VALUES(?,?,?)',(run_id,number,json.dumps(snapshot,ensure_ascii=False)))
             self.update(run_id,cycle=number,phase_index=0,message=message)
 
     def get(self, run_id: str | None = None, *, cycle: int | None = None) -> dict:
@@ -89,6 +98,7 @@ class Store:
             value = dict(row)
             value['config'] = json.loads(value['config'])
             value['cycles_started'] = self.db.execute('SELECT COUNT(*) FROM cycles WHERE run_id=?',(value['id'],)).fetchone()[0]
+            value['loops_completed'] = self.db.execute("SELECT COUNT(*) FROM cycle_outcomes WHERE run_id=? AND status='complete'",(value['id'],)).fetchone()[0]
         return value
 
     def update(self, run_id, **values):
@@ -115,18 +125,32 @@ class Store:
                     pass
             process = psutil.Process()
             self.update(run_id, owner_pid=process.pid, owner_start=process.create_time(), status='running', stop=0, message='')
+        # With exclusive controller ownership established, retire exact process
+        # identities left by an interrupted worker. PID reuse never matches.
+        from .execution import terminate_tree
+        with self.lock:
+            owned=self.db.execute("SELECT data FROM events WHERE run_id=? AND type IN ('process.started','process.child') ORDER BY id DESC",(run_id,)).fetchall()
+        for record in owned:
+            identity=json.loads(record[0])
+            try:
+                child=psutil.Process(identity['pid'])
+                if abs(child.create_time()-identity['created'])<.01:
+                    terminate_tree(child.pid,grace=.1)
+            except (psutil.NoSuchProcess,psutil.AccessDenied): pass
 
     def reconfigure(self, run_id: str, config: RunConfig):
         """Record explicit resume changes without resetting calls, time or earlier outcomes."""
-        with self.lock, self.db:
+        with self.lock:
             run = self.get(run_id)
             updated = config.to_dict()
             if run['config'] != updated:
+                # CLI and HTTP patches share validation, boundaries and revision history.
+                self.patch_settings(run_id,{k:v for k,v in updated.items() if run['config'].get(k)!=v},
+                    expected_revision=run['revision'])
                 history = self.receipt(run_id,'configuration_history') or {'changes':[]}
                 history['changes'].append({'at':now(),'previous':run['config'],'updated':updated,
                     'calls':run['calls'],'active_seconds':run['elapsed'],'previous_status':run['status']})
                 self.receipt(run_id,'configuration_history',history)
-                self.update(run_id,config=updated)
 
     def begin_attempt(self, run_id: str, phase: str, prompt: str) -> int:
         with self.lock, self.db:
@@ -149,15 +173,37 @@ class Store:
             self.db.execute('INSERT OR REPLACE INTO phases VALUES(?,?,?,?,?,?)',
                             (run_id,self.get(run_id)['cycle'],name,json.dumps(result),json.dumps(artifacts),now()))
 
+    def navigate(self, run_id, next_index, *, revisit=False):
+        """Move the phase pointer and invalidate revisited projections in one commit.
+
+        Append-only decisions, events, attempts and artifact snapshots retain evidence.
+        A restart before this commit recovers the accepted handoff without a paid call.
+        """
+        from .contracts import PHASES
+        with self.lock, self.db:
+            self.db.execute('BEGIN IMMEDIATE')
+            cycle = self.get(run_id)['cycle']
+            if revisit:
+                for phase in PHASES[next_index:]:
+                    self.db.execute('DELETE FROM phases WHERE run_id=? AND cycle=? AND name=?',(run_id,cycle,phase))
+                    self.db.execute('DELETE FROM receipts WHERE run_id=? AND key=?',(run_id,f'pending:{cycle}:{phase}'))
+            self.db.execute('UPDATE runs SET phase_index=?,updated=? WHERE id=?',(next_index,now(),run_id))
+
     def phases(self, run_id, cycle=None):
         with self.lock:
             rows = self.db.execute('SELECT * FROM phases WHERE run_id=? AND cycle=? ORDER BY completed',
                                    (run_id,cycle or self.get(run_id)['cycle'])).fetchall()
         return [{**dict(row),'result':json.loads(row['result']),'artifacts':json.loads(row['artifacts'])} for row in rows]
 
-    def attempts(self, run_id):
+    def attempts(self, run_id, *, limit=None, cycle=None, phase=None):
         with self.lock:
-            return [dict(row) for row in self.db.execute('SELECT * FROM attempts WHERE run_id=? ORDER BY id',(run_id,))]
+            query='SELECT * FROM attempts WHERE run_id=?'; values=[run_id]
+            if cycle is not None: query+=' AND cycle=?'; values.append(cycle)
+            if phase is not None: query+=' AND phase=?'; values.append(phase)
+            query+=' ORDER BY id'+(' DESC LIMIT ?' if limit is not None else '')
+            if limit is not None: values.append(limit)
+            rows=[dict(row) for row in self.db.execute(query,values)]
+            return list(reversed(rows)) if limit is not None else rows
 
     def receipt(self, run_id: str, key: str, value: dict | None = None):
         with self.lock, self.db:
