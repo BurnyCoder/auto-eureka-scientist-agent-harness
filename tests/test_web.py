@@ -42,3 +42,24 @@ def test_settings_presets_validate_before_writing(client):
     assert client.put('/api/presets/careful',json={'schema_version':1,'settings':{'max_loops':3}}).status_code==200
     assert client.get('/api/presets/careful').json()['settings']['max_loops']==3
     assert client.put('/api/presets/secrets',json={'schema_version':1,'settings':{'API_KEY':'secret'}}).status_code==400
+
+
+def test_new_run_defaults_refresh_and_do_not_override_explicit_or_preset_values(client):
+    assert client.get('/api/meta').json()['defaults']['max_loops']==1
+    assert client.put('/api/defaults',json={'schema_version':1,'settings':{'max_loops':3}}).status_code==200
+    defaults=client.get('/api/meta').json()['defaults']
+    assert defaults['max_loops']==3 and defaults['mode']=='continuous'
+    client.put('/api/presets/endless',json={'schema_version':1,'settings':{'max_loops':None}})
+    run=client.post('/api/runs',json={'preset':'endless','settings':{'publish':False},'specs':[{'text':'A'}],'start':False}).json()['id']
+    assert client.get(f'/api/runs/{run}').json()['run']['config']['max_loops'] is None
+    run=client.post('/api/runs',json={'preset':'endless','settings':{'publish':False,'max_loops':2},'specs':[{'text':'B'}],'start':False}).json()['id']
+    assert client.get(f'/api/runs/{run}').json()['run']['config']['max_loops']==2
+
+
+def test_openapi_uses_registry_types_and_cycle_scope(client):
+    schemas=client.get('/openapi.json').json()['components']['schemas']
+    fields=schemas['RunInput']['properties']['settings']['properties']
+    assert fields['max_loops']['type']==['integer','null']
+    assert fields['max_loops']['x-apply']=='immediate'
+    overrides=schemas['Spec']['properties']['settings']['properties']
+    assert 'repair_retries' in overrides and 'model' not in overrides and 'max_calls' not in overrides

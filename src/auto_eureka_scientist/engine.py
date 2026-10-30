@@ -12,7 +12,7 @@ import re
 import threading
 import time
 
-from .adapters import invocation, model_error, parse_response
+from .adapters import invocation, model_error, parse_response, terminal_event
 from .config import RunConfig, environment
 from .contracts import PHASES
 from .execution import execute
@@ -168,19 +168,7 @@ class Controller(OperatorRuntime):
         if unfinished and not self.store.receipt(self.run_id,key):
             attempt = unfinished[-1]
             logs = self.project/'.eureka'/self.run_id/f'{attempt["id"]:04d}-{phase}'
-            raw = logs/'stdout.jsonl'
-            terminal = False
-            if raw.exists():
-                with raw.open(encoding='utf-8') as stream:
-                    for line in stream:
-                        try:
-                            event = json.loads(line)
-                        except ValueError:
-                            continue
-                        if isinstance(event,dict) and (event.get('type')=='turn.completed' or
-                            (event.get('type')=='result' and not event.get('is_error'))):
-                            terminal = True
-            if terminal:
+            if terminal_event(self.config.backend,logs):
                 response = parse_response(self.config.backend,logs)
                 errors = [e for e in (response.error,model_error(self.config,response)) if e]
                 errors += self.check_outputs(phase,cycle,response.value,response.searched) if not errors else []

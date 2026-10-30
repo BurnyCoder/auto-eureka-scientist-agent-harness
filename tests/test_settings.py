@@ -60,3 +60,33 @@ def test_backend_capabilities_and_nonfinite_limits_rejected(tmp_path):
     with pytest.raises(ValueError,match='finite'):
         parse_overrides(['max_minutes=NaN'])
     assert schema()['properties']['model_pin']['x-backends']==['claude']
+
+
+def test_console_defaults_preserve_saved_limits_and_explicit_overrides(tmp_path):
+    from auto_eureka_scientist.cli import parser,configuration
+    args=parser().parse_args(['ui','--project',str(tmp_path)])
+    config=configuration(args)
+    assert config.max_loops==1 and config.mode=='continuous'
+    (tmp_path/'.eureka').mkdir()
+    (tmp_path/'.eureka/settings.json').write_text(json.dumps({'schema_version':1,'settings':{'max_loops':3}}))
+    assert configuration(args).max_loops==3
+    args=parser().parse_args(['ui','--project',str(tmp_path),'--set','max_loops=null'])
+    assert configuration(args).max_loops is None
+
+
+def test_cli_resume_uses_shared_setting_history_and_immutability(tmp_path):
+    from auto_eureka_scientist.state import Store
+    store=Store(tmp_path)
+    try:
+        original=RunConfig(str(tmp_path),'claude',max_calls=2)
+        run=store.create(original,'Fixture','policy')
+        store.begin_attempt(run,'research','prompt')
+        store.reconfigure(run,RunConfig(**{**original.to_dict(),'max_calls':3}))
+        saved=store.get(run)
+        assert saved['revision']==1 and saved['calls']==1
+        change=store.db.execute('SELECT patch,timing,calls FROM settings_changes WHERE run_id=?',(run,)).fetchone()
+        assert json.loads(change['patch'])=={'max_calls':3}
+        assert json.loads(change['timing'])=={'max_calls':'immediate'} and change['calls']==1
+        with pytest.raises(ValueError,match='new run'):
+            store.reconfigure(run,RunConfig(**{**saved['config'],'publish':False}))
+    finally: store.close()

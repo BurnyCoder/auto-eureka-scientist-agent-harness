@@ -89,8 +89,8 @@ def doctor(project: Path, backend=None):
     return checks
 
 
-def configuration(args, previous=None):
-    project = args.project.resolve()
+def explicit_settings(args):
+    """Keep explicit inputs separate so console defaults can refresh without hiding overrides."""
     explicit={}
     if getattr(args,'config',None): explicit.update(import_settings(read_json(args.config)))
     for key in ('backend','profile','model','model_pin','mode','max_minutes','max_calls','max_cycles','max_loops',
@@ -100,11 +100,18 @@ def configuration(args, previous=None):
     explicit.update(parse_overrides(getattr(args,'overrides',[])))
     if 'max_loops' in explicit and explicit['max_loops'] and explicit['max_loops']>1 and 'mode' not in explicit:
         explicit['mode']='continuous'
+    return explicit
+
+
+def configuration(args, previous=None):
+    project = args.project.resolve()
+    explicit=explicit_settings(args)
     if previous:
         values={**previous,**explicit}
     else:
         defaults_path=project/'.eureka/settings.json'
         defaults=import_settings(read_json(defaults_path)) if defaults_path.exists() else {}
+        if args.command=='ui': defaults={'mode':'continuous','max_loops':1,**defaults}
         preset=load_preset(project,args.preset) if getattr(args,'preset',None) else {}
         values=resolve_settings(project,explicit,defaults=defaults,preset=preset)
     values['project']=str(project)
@@ -181,7 +188,7 @@ def main():
             try: from .web.server import serve
             except ImportError:
                 raise ValueError('Install the UI extra: uv run --extra ui eureka ui --project PATH') from None
-            serve(project,configuration(args))
+            serve(project,configuration(args),overrides=explicit_settings(args),preset=args.preset)
             return 0
         elif args.command=='_worker':
             store=Store(project)

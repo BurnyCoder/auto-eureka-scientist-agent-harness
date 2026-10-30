@@ -33,13 +33,13 @@ class Spec(Input):
     title: str = ''
     id: str | None = None
     enabled: bool = True
-    settings: dict = Field(default_factory=dict)
+    settings: dict = Field(default_factory=dict,json_schema_extra=schema(partial=True,scope='cycle'))
     parameters: dict = Field(default_factory=dict)
     revision: int | None = None
 
 
 class RunInput(Input):
-    settings: dict = Field(default_factory=dict)
+    settings: dict = Field(default_factory=dict,json_schema_extra=schema(partial=True))
     specs: list[Spec] = Field(min_length=1)
     preset: str | None = None
     start: bool = True
@@ -47,7 +47,7 @@ class RunInput(Input):
 
 
 class PatchInput(Input):
-    settings: dict
+    settings: dict = Field(json_schema_extra=schema(partial=True))
     revision: int
 
 
@@ -65,12 +65,21 @@ class MessageInput(Input):
     request_id: str = Field(default_factory=lambda:uuid.uuid4().hex)
 
 
-def create_app(project: Path,launch_config=None):
+def create_app(project: Path,launch_config=None,*,launch_overrides=None,launch_preset=None):
     project=Path(project).resolve()
     service=Service(project)
     token=secrets.token_urlsafe(32)
-    launch_config=launch_config or RunConfig(str(project),'claude',max_loops=1)
+    launch_config=launch_config or RunConfig(str(project),'claude',max_loops=1,mode='continuous')
     assets=files('auto_eureka_scientist').joinpath('resources','console')
+
+    def new_config(explicit=None,preset_name=None):
+        """Read current project defaults while preserving environment and explicit precedence."""
+        path=project/'.eureka/settings.json'
+        defaults={**launch_config.to_dict(),**(import_settings(read_json(path)) if path.exists() else {})}
+        selected=preset_name or launch_preset
+        preset=load_preset(project,selected) if selected else {}
+        return RunConfig(**resolve_settings(project,{**(launch_overrides or {}),**(explicit or {})},
+            defaults=defaults,preset=preset))
 
     @asynccontextmanager
     async def lifespan(app):
@@ -110,7 +119,7 @@ def create_app(project: Path,launch_config=None):
     @app.get('/api/meta')
     def meta():
         from ..contracts import PHASES
-        return {'token':token,'schema':schema(),'defaults':launch_config.to_dict(),'phases':PHASES,'project':str(project)}
+        return {'token':token,'schema':schema(),'defaults':new_config().to_dict(),'phases':PHASES,'project':str(project)}
 
     @app.get('/api/runs')
     def runs(): return service.store.list_runs()
@@ -126,11 +135,7 @@ def create_app(project: Path,launch_config=None):
             if saved:
                 if saved['payload']!=payload: raise ValueError('Run request identity conflict')
                 return {'id':saved['run_id']}
-            defaults_path=project/'.eureka/settings.json'
-            defaults=import_settings(read_json(defaults_path)) if defaults_path.exists() else launch_config.to_dict()
-            preset=load_preset(project,body.preset) if body.preset else {}
-            values=resolve_settings(project,body.settings,defaults=defaults,preset=preset)
-            config=RunConfig(**values)
+            config=new_config(body.settings,body.preset)
             entries=[s.model_dump(exclude_none=True) for s in body.specs]
             initialize(project,profile=config.profile,task=entries[0]['text'])
             run_id=service.store.create(config,entries[0]['text'],policy_hash())
@@ -254,11 +259,11 @@ def create_app(project: Path,launch_config=None):
     return app
 
 
-def serve(project,config):
+def serve(project,config,*,overrides=None,preset=None):
     import uvicorn
     import threading
     import webbrowser
     if config.open_browser:
         timer=threading.Timer(1.0,lambda:webbrowser.open(f'http://127.0.0.1:{config.port}'))
         timer.daemon=True; timer.start()
-    uvicorn.run(create_app(project,config),host='127.0.0.1',port=config.port)
+    uvicorn.run(create_app(project,launch_overrides=overrides,launch_preset=preset),host='127.0.0.1',port=config.port)

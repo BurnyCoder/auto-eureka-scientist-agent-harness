@@ -126,6 +126,23 @@ async def test_question_crash_recovers_without_second_call(fixture_run):
     assert store.messages(run)[0]['status']=='answered'
 
 
+@pytest.mark.asyncio
+async def test_question_crash_does_not_accept_unfinished_provider_turn(fixture_run):
+    store,publisher,make=fixture_run
+    run=make(backend='codex')
+    question=store.add_message(run,'Explain the recorded state',kind='ask')
+    result=await Controller(store,run,publisher=publisher,echo=False).run(maintenance=True)
+    message=store.messages(run)[0]
+    logs=store.project/'.eureka'/run/f'{message["attempt"]:04d}-chat'
+    raw=logs/'stdout.jsonl'
+    raw.write_text('\n'.join(line for line in raw.read_text(encoding='utf-8').splitlines()
+        if json.loads(line).get('type')!='turn.completed')+'\n',encoding='utf-8')
+    store.deliver_question(question['id'],message['attempt'])
+    recovered=await Controller(store,run,publisher=publisher,echo=False).run(maintenance=True)
+    assert recovered['calls']==result['calls']==1 and recovered['phase_index']==0
+    assert store.messages(run)[0]['status']=='failed'
+
+
 def test_shuffled_queue_and_cycle_overrides_survive_reopen(fixture_run):
     store,publisher,make=fixture_run
     run=make(queue_order='shuffle',queue_seed=42)

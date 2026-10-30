@@ -9,9 +9,9 @@ import json
 import time
 import asyncio
 
-from .adapters import invocation, parse_response, model_error
+from .adapters import invocation, parse_response, model_error, terminal_event
 from .config import RunConfig, environment
-from .contracts import object_schema
+from .contracts import PHASES, object_schema
 from .events import EventSink
 from .execution import execute
 from .policy import policy_bytes
@@ -119,6 +119,7 @@ class OperatorRuntime:
                 logs=self.project/'.eureka'/self.run_id/f'{message["attempt"]:04d}-chat'
                 response=parse_response(self.config.backend,logs)
                 error=response.error or model_error(self.config,response)
+                if not terminal_event(self.config.backend,logs): error=error or 'Interrupted question has no completed provider turn'
                 import jsonschema
                 try: jsonschema.validate(response.value,CHAT_SCHEMA)
                 except jsonschema.ValidationError: error=error or 'Interrupted question has no complete reply'
@@ -137,6 +138,7 @@ class OperatorRuntime:
                 'You may inspect referenced project artifacts to explain them. Distinguish recorded facts from inference.\n'
                 f'Current spec: {json.dumps(spec,ensure_ascii=False)}\n'
                 f'Run state: {json.dumps({k:run[k] for k in ("status","cycle","phase_index","calls","elapsed","message")})}\n'
+                f'Next phase: {PHASES[run["phase_index"]] if run["phase_index"]<len(PHASES) else "Final verification and completion"}\n'
                 f'Accepted phases: {json.dumps(self.store.phases(self.run_id),ensure_ascii=False)}\n'
                 f'Recent conversation: {context}\nQuestion: {message["text"]}\nReturn JSON with reply and references.')
             attempt=self.store.begin_attempt(self.run_id,'chat',hashlib.sha256(prompt.encode()).hexdigest())
