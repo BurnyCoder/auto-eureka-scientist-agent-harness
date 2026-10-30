@@ -21,6 +21,9 @@ def run(backend):
     project=root/'tmp'/('console-live-'+model)
     initialize(project,task='Prospective console Q&A transport smoke; no experiments.')
     service=Service(project)
+    if service.store.list_runs():
+        service.close()
+        raise ValueError('A console smoke is already recorded here. Inspect/resume that run for any disclosed repair; do not reset its allowance.')
     config=RunConfig(str(project),backend,model=model,publish=False,max_calls=2,max_minutes=5,
         repair_retries=0,transport_retries=0,invocation_timeout=120,gpu_monitor=False,open_browser=False)
     identifier=service.store.create(config,'Explain recorded harness state without changing artifacts.',policy_hash())
@@ -45,13 +48,13 @@ def run(backend):
             'reported_models':sorted({m for audit in audits for m in audit.get('models',[])}),
             'usage':[audit.get('usage',{}) for audit in audits],
             'errors':[error for audit in audits for error in audit.get('errors',[])],
-            'reply':message.get('answer'),'run_status':after['status'],'run_message':after['message']}
+            'reply_nonempty':bool(message.get('answer')),'run_status':after['status'],'run_message':after['message']}
         path=root/'reports/console-acceptance.json'
         document=read_json(path) if path.exists() else {'browser':[],'live':[]}
         document.setdefault('live',[]).append(record)
         write_json(path,document)
         print(json.dumps(record,ensure_ascii=False,indent=2),flush=True)
-        return 0 if message['status']=='answered' and after['calls']==1 and after['phase_index']==before['phase_index'] else 2
+        return 0 if message['status']=='answered' and record['reply_nonempty'] and after['calls']==1 and after['phase_index']==before['phase_index'] else 2
     finally:service.close()
 
 

@@ -9,7 +9,7 @@ Defaults below are field defaults. Backend defaults resolve an empty model to `h
 | `project` | `"required"` | "string" | value | new run | run / claude, codex | Research project directory; all artifacts belong to this project. |
 | `backend` | `"required"` | ["claude", "codex"] | value | new run | run / claude, codex | Authenticated coding CLI used for every invocation. |
 | `model` | `""` | "string" | value | new run | run / claude, codex | Model identifier. An empty value selects the backend default. |
-| `mode` | `"cycle"` | ["cycle", "continuous", "budget"] | value | new run | run / claude, codex | One cycle, repeating cycles, or budget-bounded execution. |
+| `mode` | `"cycle"` | ["cycle", "continuous", "budget"] | value | immediate | run / claude, codex | One cycle, repeating cycles, or budget-bounded execution. |
 | `max_minutes` | `null` | ["number", "null"] | active minutes | immediate | run / claude, codex | Total active minutes, including chat and retries; null means no general-profile limit. |
 | `max_calls` | `null` | ["integer", "null"] | value | immediate | run / claude, codex | Total charged CLI calls across all cycles and chat. |
 | `max_cycles` | `null` | ["integer", "null"] | value | immediate | run / claude, codex | Maximum started cycles, including abandoned revisions. |
