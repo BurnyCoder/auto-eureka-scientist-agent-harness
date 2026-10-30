@@ -36,7 +36,9 @@ def make_prompt(run: dict, phase: str, cycle: Path, previous: list, errors: list
     project = Path(run['config']['project'])
     relative = cycle.relative_to(project).as_posix()
     prior_cycles = []
-    for directory in sorted((project/'cycles').glob('*')):
+    history_count=run['config'].get('history_cycles',5)
+    directories=sorted((d for d in (project/'cycles').glob('*') if d.name.isdigit() and int(d.name)<int(cycle.name)),key=lambda d:int(d.name))
+    for directory in directories[-history_count:] if history_count else []:
         history = directory/'research/decisions.jsonl'
         if directory.name.isdigit() and int(directory.name)<int(cycle.name) and history.exists():
             decisions = [json.loads(line) for line in history.read_text(encoding='utf-8').splitlines() if line.strip()]
@@ -44,6 +46,11 @@ def make_prompt(run: dict, phase: str, cycle: Path, previous: list, errors: list
                 last = decisions[-1]
                 prior_cycles.append({'history':history.relative_to(project).as_posix(),
                     'summary':last.get('summary',''),'learning':last.get('learning','')})
+    # Keep the durable archive, but bound automatically included historical context.
+    prior_cycles=prior_cycles[-history_count:] if history_count else []
+    allowance=run['config'].get('history_chars',24000)
+    while prior_cycles and len(json.dumps(prior_cycles,ensure_ascii=False))>allowance:
+        prior_cycles.pop(0)
     fixture = ''
     if run['config']['profile'].startswith('digits'):
         import sys
@@ -67,6 +74,11 @@ Do not invoke any LLM API, agent CLI, alternative model, or collaborator yoursel
 --- HARNESS EXECUTION CONTRACT ---
 {NEEL}
 Task: {run['task']}
+Requested research parameters (agent-applied requests, not controller-enforced configuration): {json.dumps(run.get('research_parameters',{}),ensure_ascii=False)}
+Changes to registered datasets, seeds or hyperparameters require a new cycle and prospective protocol; preserve earlier results.
+Operator instructions (do not rewrite the canonical policy or earlier registrations): {json.dumps(run.get('operator_instructions',[]),ensure_ascii=False)}
+Pinned operator instructions: {run['config'].get('pinned_instructions','')}
+Selected project artifact references: {json.dumps(run['config'].get('artifact_references',[]))}
 Backend/model: {run['config']['backend']} / {run['config']['model']}
 Project root: {project}
 All phase artifact paths below are relative to {relative}. Stay in this project; do not inspect sibling projects.
@@ -88,6 +100,7 @@ Previous completed phase summaries:
 {json.dumps([{'phase':p['name'],'summary':p['result']['summary'],'learning':p['result'].get('learning','')} for p in previous],ensure_ascii=False)}
 Earlier cycle findings (read their histories and reports before extending them; prior results are already observed):
 {json.dumps(prior_cycles,ensure_ascii=False)}
+Older complete histories remain in cycles/*/research/decisions.jsonl and cycle reports; inspect relevant records as needed.
 Corrections required from prior attempt: {json.dumps(errors,ensure_ascii=False)}
 Return the structured phase result. File paths can be relative to the cycle or project; use project-relative paths if both would exist.
 Use this handoff shape, replacing its descriptive placeholders with actual observations: {json.dumps(example,ensure_ascii=False)}

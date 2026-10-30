@@ -1,0 +1,1265 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "project",
+    "backend"
+  ],
+  "properties": {
+    "project": {
+      "title": "Project",
+      "description": "Research project directory; all artifacts belong to this project.",
+      "type": "string",
+      "x-category": "Run",
+      "x-apply": "new run",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "x-units": "value"
+    },
+    "backend": {
+      "title": "Backend",
+      "description": "Authenticated coding CLI used for every invocation.",
+      "type": "string",
+      "x-category": "Run",
+      "x-apply": "new run",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "enum": [
+        "claude",
+        "codex"
+      ],
+      "x-units": "value"
+    },
+    "model": {
+      "title": "Model",
+      "description": "Model identifier. An empty value selects the backend default.",
+      "type": "string",
+      "x-category": "Run",
+      "x-apply": "new run",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "",
+      "x-units": "value"
+    },
+    "mode": {
+      "title": "Mode",
+      "description": "One cycle, repeating cycles, or budget-bounded execution.",
+      "type": "string",
+      "x-category": "Run",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "cycle",
+      "enum": [
+        "cycle",
+        "continuous",
+        "budget"
+      ],
+      "x-units": "value"
+    },
+    "max_minutes": {
+      "title": "Max minutes",
+      "description": "Total active minutes, including chat and retries; null means no general-profile limit.",
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-category": "Run",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": null,
+      "minimum": 0.001,
+      "x-units": "active minutes"
+    },
+    "max_calls": {
+      "title": "Max calls",
+      "description": "Total charged CLI calls across all cycles and chat.",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "x-category": "Run",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": null,
+      "minimum": 1,
+      "x-units": "value"
+    },
+    "max_cycles": {
+      "title": "Max cycles",
+      "description": "Maximum started cycles, including abandoned revisions.",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "x-category": "Run",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": true,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": null,
+      "minimum": 1,
+      "x-units": "value"
+    },
+    "max_loops": {
+      "title": "Max loops",
+      "description": "Maximum completed eight-phase loops; independent of started cycles.",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "x-category": "Run",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": null,
+      "minimum": 1,
+      "x-units": "value"
+    },
+    "profile": {
+      "title": "Profile",
+      "description": "Research verification profile.",
+      "type": "string",
+      "x-category": "Run",
+      "x-apply": "new run",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "research",
+      "enum": [
+        "research",
+        "digits",
+        "digits-replication"
+      ],
+      "x-units": "value"
+    },
+    "publish": {
+      "title": "Publish",
+      "description": "Publish through authenticated GitHub and Hugging Face CLIs; false keeps local checkpoints.",
+      "type": "boolean",
+      "x-category": "Publication",
+      "x-apply": "new run",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": true,
+      "x-units": "value"
+    },
+    "owner": {
+      "title": "Owner",
+      "description": "GitHub/Hugging Face owner; empty uses the authenticated account.",
+      "type": "string",
+      "x-category": "Publication",
+      "x-apply": "new run",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "",
+      "x-units": "value"
+    },
+    "repository": {
+      "title": "Repository",
+      "description": "GitHub repository name; empty uses the project name.",
+      "type": "string",
+      "x-category": "Publication",
+      "x-apply": "new run",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "",
+      "x-units": "value"
+    },
+    "executable": {
+      "title": "Executable",
+      "description": "CLI executable path; empty discovers the selected backend on PATH.",
+      "type": "string",
+      "x-category": "Run",
+      "x-apply": "new run",
+      "x-scope": "run",
+      "x-advanced": true,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "",
+      "x-units": "value"
+    },
+    "reasoning": {
+      "title": "Reasoning",
+      "description": "Codex reasoning or Claude effort for future calls.",
+      "type": "string",
+      "x-category": "Run",
+      "x-apply": "next invocation",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "high",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "x-units": "value"
+    },
+    "hf_collection": {
+      "title": "Hf collection",
+      "description": "Existing Hugging Face collection slug for model uploads.",
+      "type": "string",
+      "x-category": "Publication",
+      "x-apply": "new run",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "",
+      "x-units": "value"
+    },
+    "model_pin": {
+      "title": "Model pin",
+      "description": "Resolved Claude model identifier, including background helpers. Codex uses its exact model field.",
+      "type": "string",
+      "x-category": "Run",
+      "x-apply": "new run",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude"
+      ],
+      "default": "",
+      "x-units": "value"
+    },
+    "invocation_timeout": {
+      "title": "Invocation timeout",
+      "description": "Seconds allowed for one CLI call; bounded by remaining run time.",
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-category": "Execution",
+      "x-apply": "next invocation",
+      "x-scope": "cycle",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": null,
+      "minimum": 0.1,
+      "x-units": "seconds"
+    },
+    "no_output_timeout": {
+      "title": "No output timeout",
+      "description": "Seconds without CLI stdout/stderr before interrupting; disabled by default.",
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-category": "Execution",
+      "x-apply": "next invocation",
+      "x-scope": "cycle",
+      "x-advanced": true,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": null,
+      "minimum": 0.1,
+      "x-units": "seconds"
+    },
+    "queue_order": {
+      "title": "Queue order",
+      "description": "Choose specs in listed order or a recorded seeded shuffle.",
+      "type": "string",
+      "x-category": "Queue",
+      "x-apply": "next cycle",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "ordered",
+      "enum": [
+        "ordered",
+        "shuffle"
+      ],
+      "x-units": "value"
+    },
+    "queue_seed": {
+      "title": "Queue seed",
+      "description": "Seed for queue ordering, not a model training seed.",
+      "type": "integer",
+      "x-category": "Queue",
+      "x-apply": "next cycle",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 0,
+      "x-units": "value"
+    },
+    "queue_start": {
+      "title": "Queue start",
+      "description": "Zero-based starting enabled spec for a new queue.",
+      "type": "integer",
+      "x-category": "Queue",
+      "x-apply": "new run",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 0,
+      "minimum": 0,
+      "x-units": "value"
+    },
+    "cycle_delay": {
+      "title": "Cycle delay",
+      "description": "Active seconds to wait between completed loops.",
+      "type": "number",
+      "x-category": "Queue",
+      "x-apply": "next cycle",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 0.0,
+      "minimum": 0,
+      "x-units": "seconds"
+    },
+    "failure_policy": {
+      "title": "Failure policy",
+      "description": "After bounded repairs, pause or skip the incomplete spec.",
+      "type": "string",
+      "x-category": "Recovery",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "pause",
+      "enum": [
+        "pause",
+        "skip"
+      ],
+      "x-units": "value"
+    },
+    "repair_retries": {
+      "title": "Repair retries",
+      "description": "Additional artifact-repair attempts per phase invocation.",
+      "type": "integer",
+      "x-category": "Recovery",
+      "x-apply": "next invocation",
+      "x-scope": "cycle",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 2,
+      "minimum": 0,
+      "x-units": "value"
+    },
+    "transport_retries": {
+      "title": "Transport retries",
+      "description": "Additional transient transport retries.",
+      "type": "integer",
+      "x-category": "Recovery",
+      "x-apply": "next invocation",
+      "x-scope": "cycle",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 2,
+      "minimum": 0,
+      "x-units": "value"
+    },
+    "retry_delay": {
+      "title": "Retry delay",
+      "description": "Initial retry delay in active seconds.",
+      "type": "number",
+      "x-category": "Recovery",
+      "x-apply": "next invocation",
+      "x-scope": "cycle",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 2.0,
+      "minimum": 0,
+      "x-units": "seconds"
+    },
+    "retry_multiplier": {
+      "title": "Retry multiplier",
+      "description": "Exponential retry-delay multiplier.",
+      "type": "number",
+      "x-category": "Recovery",
+      "x-apply": "next invocation",
+      "x-scope": "cycle",
+      "x-advanced": true,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 2.0,
+      "minimum": 1,
+      "x-units": "value"
+    },
+    "retry_max": {
+      "title": "Retry max",
+      "description": "Maximum retry delay in seconds.",
+      "type": "number",
+      "x-category": "Recovery",
+      "x-apply": "next invocation",
+      "x-scope": "cycle",
+      "x-advanced": true,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 30.0,
+      "minimum": 0,
+      "x-units": "seconds"
+    },
+    "no_progress_passes": {
+      "title": "No progress passes",
+      "description": "Queue passes without a completed loop before pausing.",
+      "type": "integer",
+      "x-category": "Recovery",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 1,
+      "minimum": 1,
+      "x-units": "value"
+    },
+    "termination_grace": {
+      "title": "Termination grace",
+      "description": "Seconds between owned-process termination and forced kill.",
+      "type": "number",
+      "x-category": "Recovery",
+      "x-apply": "next invocation",
+      "x-scope": "run",
+      "x-advanced": true,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 2.0,
+      "minimum": 0,
+      "maximum": 30,
+      "x-units": "seconds"
+    },
+    "pause_before": {
+      "title": "Pause before",
+      "description": "Pause before these phases; resume crosses the current pause once.",
+      "type": "array",
+      "x-category": "Intervention",
+      "x-apply": "next invocation",
+      "x-scope": "cycle",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": [],
+      "items": {
+        "enum": [
+          "research",
+          "preregister",
+          "core",
+          "pilot",
+          "experiments",
+          "analysis",
+          "review",
+          "publish"
+        ]
+      },
+      "x-units": "value"
+    },
+    "pause_before_publication": {
+      "title": "Pause before publication",
+      "description": "Pause before core, pilot or final publication.",
+      "type": "boolean",
+      "x-category": "Intervention",
+      "x-apply": "next invocation",
+      "x-scope": "cycle",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": false,
+      "x-units": "value"
+    },
+    "stop_after": {
+      "title": "Stop after",
+      "description": "Stop resumably at the next selected boundary.",
+      "type": "string",
+      "x-category": "Intervention",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "",
+      "enum": [
+        "",
+        "phase",
+        "cycle"
+      ],
+      "x-units": "value"
+    },
+    "message_mode": {
+      "title": "Message mode",
+      "description": "Default chat composer mode.",
+      "type": "string",
+      "x-category": "Intervention",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "steer",
+      "enum": [
+        "ask",
+        "steer"
+      ],
+      "x-units": "value"
+    },
+    "delivery": {
+      "title": "Delivery",
+      "description": "Default message delivery timing.",
+      "type": "string",
+      "x-category": "Intervention",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "next_turn",
+      "enum": [
+        "next_turn",
+        "interrupt_now"
+      ],
+      "x-units": "value"
+    },
+    "message_scope": {
+      "title": "Message scope",
+      "description": "Default steering lifetime.",
+      "type": "string",
+      "x-category": "Intervention",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "next_invocation",
+      "enum": [
+        "next_invocation",
+        "cycle",
+        "run"
+      ],
+      "x-units": "value"
+    },
+    "history_cycles": {
+      "title": "History cycles",
+      "description": "Recent cycle summaries included in each prompt; full history stays on disk.",
+      "type": "integer",
+      "x-category": "Context",
+      "x-apply": "next invocation",
+      "x-scope": "cycle",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 5,
+      "minimum": 0,
+      "x-units": "value"
+    },
+    "history_chars": {
+      "title": "History chars",
+      "description": "Maximum characters of prior-cycle summaries in prompts.",
+      "type": "integer",
+      "x-category": "Context",
+      "x-apply": "next invocation",
+      "x-scope": "cycle",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 24000,
+      "minimum": 0,
+      "x-units": "characters"
+    },
+    "chat_history_chars": {
+      "title": "Chat history chars",
+      "description": "Maximum recent chat-context characters; full messages remain stored.",
+      "type": "integer",
+      "x-category": "Context",
+      "x-apply": "next invocation",
+      "x-scope": "cycle",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 12000,
+      "minimum": 0,
+      "x-units": "characters"
+    },
+    "pinned_instructions": {
+      "title": "Pinned instructions",
+      "description": "Persistent operator instructions, appended without changing canonical policy.",
+      "type": "string",
+      "x-category": "Context",
+      "x-apply": "next invocation",
+      "x-scope": "cycle",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "",
+      "x-units": "value"
+    },
+    "artifact_references": {
+      "title": "Artifact references",
+      "description": "Project-relative artifact paths to reference in future prompts.",
+      "type": "array",
+      "x-category": "Context",
+      "x-apply": "next invocation",
+      "x-scope": "cycle",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "x-units": "value"
+    },
+    "command_timeout": {
+      "title": "Command timeout",
+      "description": "Seconds allowed for core verification commands.",
+      "type": "number",
+      "x-category": "Execution",
+      "x-apply": "next invocation",
+      "x-scope": "cycle",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 120.0,
+      "minimum": 0.1,
+      "x-units": "seconds"
+    },
+    "publication_timeout": {
+      "title": "Publication timeout",
+      "description": "Seconds allowed per publication command.",
+      "type": "number",
+      "x-category": "Publication",
+      "x-apply": "next invocation",
+      "x-scope": "run",
+      "x-advanced": true,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 180.0,
+      "minimum": 0.1,
+      "x-units": "seconds"
+    },
+    "render_timeout": {
+      "title": "Render timeout",
+      "description": "Seconds allowed for paper rendering.",
+      "type": "number",
+      "x-category": "Publication",
+      "x-apply": "next invocation",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 180.0,
+      "minimum": 0.1,
+      "x-units": "seconds"
+    },
+    "ci_timeout": {
+      "title": "Ci timeout",
+      "description": "Maximum seconds waiting for published CI checks.",
+      "type": "number",
+      "x-category": "Publication",
+      "x-apply": "next invocation",
+      "x-scope": "run",
+      "x-advanced": true,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 180.0,
+      "minimum": 0.1,
+      "x-units": "seconds"
+    },
+    "ci_poll_seconds": {
+      "title": "Ci poll seconds",
+      "description": "Interval between remote CI status checks.",
+      "type": "number",
+      "x-category": "Publication",
+      "x-apply": "next invocation",
+      "x-scope": "run",
+      "x-advanced": true,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 5.0,
+      "minimum": 0.1,
+      "x-units": "seconds"
+    },
+    "preview_format": {
+      "title": "Preview format",
+      "description": "Format for additional exported research figures; required PNG artifacts remain.",
+      "type": "string",
+      "x-category": "Publication",
+      "x-apply": "next invocation",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "png",
+      "enum": [
+        "png",
+        "svg"
+      ],
+      "x-units": "value"
+    },
+    "figure_dpi": {
+      "title": "Figure dpi",
+      "description": "Resolution of rendered research figures.",
+      "type": "integer",
+      "x-category": "Publication",
+      "x-apply": "next invocation",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 160,
+      "minimum": 72,
+      "maximum": 600,
+      "x-units": "dots per inch"
+    },
+    "heartbeat_seconds": {
+      "title": "Heartbeat seconds",
+      "description": "Interval persisting active time; bounds crash-time accounting loss.",
+      "type": "number",
+      "x-category": "Observability",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": true,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 1.0,
+      "minimum": 0.1,
+      "maximum": 30,
+      "x-units": "seconds"
+    },
+    "telemetry_seconds": {
+      "title": "Telemetry seconds",
+      "description": "Interval sampling process and machine telemetry.",
+      "type": "number",
+      "x-category": "Observability",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 2.0,
+      "minimum": 0.5,
+      "x-units": "seconds"
+    },
+    "cpu_monitor": {
+      "title": "Cpu monitor",
+      "description": "Sample owned-process CPU and RAM.",
+      "type": "boolean",
+      "x-category": "Observability",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": true,
+      "x-units": "value"
+    },
+    "gpu_monitor": {
+      "title": "Gpu monitor",
+      "description": "Sample machine GPU utilization and VRAM when nvidia-smi is available.",
+      "type": "boolean",
+      "x-category": "Observability",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": true,
+      "x-units": "value"
+    },
+    "stream_batch_ms": {
+      "title": "Stream batch ms",
+      "description": "Event-stream polling/batching interval in milliseconds.",
+      "type": "integer",
+      "x-category": "Observability",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": true,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 100,
+      "minimum": 20,
+      "maximum": 5000,
+      "x-units": "milliseconds"
+    },
+    "log_filter": {
+      "title": "Log filter",
+      "description": "Default activity-stream category filter.",
+      "type": "string",
+      "x-category": "Observability",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "all",
+      "enum": [
+        "all",
+        "agent",
+        "stderr",
+        "control",
+        "publication"
+      ],
+      "x-units": "value"
+    },
+    "history_page_size": {
+      "title": "History page size",
+      "description": "Events per history page and maximum visible activity entries.",
+      "type": "integer",
+      "x-category": "Observability",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 200,
+      "minimum": 20,
+      "maximum": 2000,
+      "x-units": "value"
+    },
+    "timezone": {
+      "title": "Timezone",
+      "description": "IANA display timezone or local; stored timestamps always use UTC.",
+      "type": "string",
+      "x-category": "Observability",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "local",
+      "x-units": "value"
+    },
+    "show_timestamps": {
+      "title": "Show timestamps",
+      "description": "Show event and message timestamps.",
+      "type": "boolean",
+      "x-category": "Interface",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": true,
+      "x-units": "value"
+    },
+    "notification_events": {
+      "title": "Notification events",
+      "description": "Run statuses that trigger enabled notifications.",
+      "type": "array",
+      "x-category": "Observability",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": [
+        "blocked",
+        "complete",
+        "budget_exhausted"
+      ],
+      "items": {
+        "enum": [
+          "blocked",
+          "complete",
+          "budget_exhausted",
+          "paused",
+          "stopped",
+          "interrupted"
+        ]
+      },
+      "x-units": "value"
+    },
+    "cost_warning_usd": {
+      "title": "Cost warning usd",
+      "description": "Warning threshold for reported provider cost, not a billing guarantee or hard cap.",
+      "type": [
+        "number",
+        "null"
+      ],
+      "x-category": "Observability",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": null,
+      "minimum": 0,
+      "x-units": "USD, provider reported"
+    },
+    "theme": {
+      "title": "Theme",
+      "description": "Console color theme.",
+      "type": "string",
+      "x-category": "Interface",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "system",
+      "enum": [
+        "system",
+        "dark",
+        "light"
+      ],
+      "x-units": "value"
+    },
+    "density": {
+      "title": "Density",
+      "description": "Console spacing.",
+      "type": "string",
+      "x-category": "Interface",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "comfortable",
+      "enum": [
+        "comfortable",
+        "compact"
+      ],
+      "x-units": "value"
+    },
+    "font_size": {
+      "title": "Font size",
+      "description": "Base console font size in pixels.",
+      "type": "integer",
+      "x-category": "Interface",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 14,
+      "minimum": 11,
+      "maximum": 24,
+      "x-units": "pixels"
+    },
+    "panels": {
+      "title": "Panels",
+      "description": "Visible side panels.",
+      "type": "array",
+      "x-category": "Interface",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": [
+        "queue",
+        "details"
+      ],
+      "items": {
+        "enum": [
+          "queue",
+          "details"
+        ]
+      },
+      "x-units": "value"
+    },
+    "queue_width": {
+      "title": "Queue width",
+      "description": "Queue panel width in pixels.",
+      "type": "integer",
+      "x-category": "Interface",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 240,
+      "minimum": 180,
+      "maximum": 480,
+      "x-units": "pixels"
+    },
+    "details_width": {
+      "title": "Details width",
+      "description": "Details panel width in pixels.",
+      "type": "integer",
+      "x-category": "Interface",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 360,
+      "minimum": 240,
+      "maximum": 700,
+      "x-units": "pixels"
+    },
+    "detail_tab": {
+      "title": "Detail tab",
+      "description": "Default details tab.",
+      "type": "string",
+      "x-category": "Interface",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "activity",
+      "enum": [
+        "activity",
+        "artifacts",
+        "diff",
+        "settings"
+      ],
+      "x-units": "value"
+    },
+    "auto_scroll": {
+      "title": "Auto scroll",
+      "description": "Follow new chat and activity entries.",
+      "type": "boolean",
+      "x-category": "Interface",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": true,
+      "x-units": "value"
+    },
+    "send_key": {
+      "title": "Send key",
+      "description": "Keyboard shortcut for sending chat.",
+      "type": "string",
+      "x-category": "Interface",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": "ctrl_enter",
+      "enum": [
+        "ctrl_enter",
+        "enter"
+      ],
+      "x-units": "value"
+    },
+    "sound": {
+      "title": "Sound",
+      "description": "Play a short tone for selected status notifications.",
+      "type": "boolean",
+      "x-category": "Interface",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": false,
+      "x-units": "value"
+    },
+    "browser_notifications": {
+      "title": "Browser notifications",
+      "description": "Use browser notifications after the user grants browser permission.",
+      "type": "boolean",
+      "x-category": "Interface",
+      "x-apply": "immediate",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": false,
+      "x-units": "value"
+    },
+    "port": {
+      "title": "Port",
+      "description": "Local console HTTP port.",
+      "type": "integer",
+      "x-category": "Interface",
+      "x-apply": "server restart",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": 8765,
+      "minimum": 1024,
+      "maximum": 65535,
+      "x-units": "value"
+    },
+    "open_browser": {
+      "title": "Open browser",
+      "description": "Open the local console automatically on server launch.",
+      "type": "boolean",
+      "x-category": "Interface",
+      "x-apply": "server restart",
+      "x-scope": "run",
+      "x-advanced": false,
+      "x-backends": [
+        "claude",
+        "codex"
+      ],
+      "default": true,
+      "x-units": "value"
+    }
+  }
+}

@@ -32,6 +32,35 @@ No sandbox, container, additional permission dialog, or action allowlist is supp
 
 Only the supplied digits profile has live validation evidence. The general controller can initialize or attach other projects, but the bundled numerical reporting specializes in saved classification predictions, validation-loss histories and the registered regularization comparison. Other domains need appropriate metric calculations and verification rules; schema completion alone is insufficient evidence that a new domain is scientifically supported.
 
+## Console, settings and loop accounting
+
+```mermaid
+flowchart LR
+  Browser[Local chat / settings / spec queue] -->|Typed requests + action IDs| API[FastAPI loopback server]
+  API -->|Launch / resumable shutdown| Worker[Owned worker process]
+  Worker --> Controller[Existing eight-phase controller]
+  Controller --> CLI[One selected coding CLI]
+  CLI -->|Streaming output + handoffs| Controller
+  Controller -->|Transactions| DB[(SQLite events / messages / settings / specs / counters)]
+  API --> DB
+  DB -->|SSE event IDs + replay| Browser
+  Controller --> Verify[Required verification / publication receipts]
+  Verify -->|Successful completion only| Loop[Idempotent loop completion]
+  Loop --> Queue[Persisted next spec selection]
+  Queue --> Controller
+  Registry[RunConfig metadata / JSON Schema] --> API
+  Registry --> Browser
+  Registry --> Worker
+```
+
+`settings.py` derives validation and annotations from `RunConfig`; CLI, API, forms and generated reference use that registry. `interactive_state.py` adds append-only events, messages/actions, settings revisions, spec history, immutable cycle snapshots, persisted shuffle order and completion markers. Queue outcome and requested advancement are committed together. Reserving the next cycle and freezing its selection remain separate idempotent steps; recovery preserves the selected order. Earlier observed outcomes cannot become completed loops merely by resuming.
+
+`operator.py` applies documented boundaries, handles queued controls, and answers questions without accepting scientific phases. Questions share the same call/time allowances and serialize with research. Accepted handoffs and phase navigation recover without another paid call; revisits invalidate current projections atomically while retaining historical evidence. Completed-loop markers survive a crash before their final receipt. Deferred cycle settings survive worker restarts. Private settings history records before/after values with consumed counters; resume never resets them.
+
+`web/service.py` owns workers independently of browser connections. `web/server.py` serves packaged assets and replayable [FastAPI SSE](https://fastapi.tiangolo.com/tutorial/server-sent-events/). Normal server shutdown requests a resumable worker stop. Loopback Host checks, same-origin mutation tokens, strict registered-key validation, and project-scoped file resolution keep the control surface local. Public results remain static; raw private chat/transcripts are not deployed. The API/UI keeps bounded visible history while retaining the full durable event archive.
+
+Active time includes subprocess execution, checks, publication, questions and configured delays. Operator pauses and downtime are excluded. The heartbeat bounds unrecorded time after a hard crash. Limits are cumulative; negative findings can finish a verified study, whereas failed/skipped/revised cycles cannot. In skip mode, a configured number of queue passes without completion triggers a pause. [Console controls](console.md) document these boundaries and the [settings reference](settings.md) is generated from code.
+
 ## Regenerating the diagrams
 
 The overview, print layouts and accessible website descriptions share [one source module](../src/auto_eureka_scientist/architecture.py). Its phase keys are checked against the controller's `PHASES` contract. `uv run --extra research --extra cuda python scripts/summarize_validation.py` regenerates the README assets, paper figures and website views together with the existing numerical report. `eureka render` also uses these views in newly rendered study reports and explorers. The website offers view selection, keyboard-operable zoom, a fit control, a full-size vector link and a text description.
