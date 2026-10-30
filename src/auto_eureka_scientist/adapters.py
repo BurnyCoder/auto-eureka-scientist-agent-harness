@@ -14,7 +14,7 @@ from .contracts import PHASE_SCHEMA
 from .util import read_json, write_json
 
 
-def invocation(config: RunConfig, logs: Path, base_env: dict) -> tuple[list[str], dict]:
+def invocation(config: RunConfig, logs: Path, base_env: dict, *, response_schema=None) -> tuple[list[str], dict]:
     """Per-process settings preserve global CLI configuration and existing logins."""
     executable = config.executable or shutil.which(config.backend) or config.backend
     env = {**os.environ, **{k:str(v) for k,v in base_env.items() if v is not None},
@@ -34,13 +34,15 @@ def invocation(config: RunConfig, logs: Path, base_env: dict) -> tuple[list[str]
             env.update(pinned)
         settings = {'sandbox':{'enabled':False}, 'fallbackModel':[], 'availableModels':[selected],
                     'env':{**pinned,'CLAUDE_CODE_SUBAGENT_MODEL':selected,'CLAUDE_CODE_SUBAGENT_MODEL_FORCE':'1'}}
-        schema = {**PHASE_SCHEMA,'required':[key for key in PHASE_SCHEMA['required'] if key not in ('revisit_phase','not_applicable')]}
+        source_schema = response_schema or PHASE_SCHEMA
+        schema = {**source_schema,'required':[key for key in source_schema['required'] if key not in ('revisit_phase','not_applicable')]}
         return [executable,'-p','--model',selected,'--dangerously-skip-permissions',
+                '--effort',config.reasoning,
                 '--settings',json.dumps(settings),'--output-format','stream-json','--verbose',
                 '--include-partial-messages','--json-schema',json.dumps(schema)], env
     logs.mkdir(parents=True,exist_ok=True)
     schema_path = logs / 'response-schema.json'
-    write_json(schema_path,PHASE_SCHEMA)
+    write_json(schema_path,response_schema or PHASE_SCHEMA)
     # Validation counts every inference; native delegated agents would escape that counter.
     helper_settings = ['--disable','multi_agent'] if config.profile.startswith('digits') else []
     return [executable,'exec','--model',config.model,'--dangerously-bypass-approvals-and-sandbox',*helper_settings,
