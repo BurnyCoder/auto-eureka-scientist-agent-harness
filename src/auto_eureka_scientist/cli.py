@@ -14,17 +14,18 @@ from .reporting import render
 from .state import Store
 from .util import command, read_json
 from .workspace import initialize
+from .settings import resolve_settings, parse_overrides, import_settings, load_preset
 
 
 def parser():
     root = argparse.ArgumentParser(prog='eureka',description='Resumable scientific research through one selected coding CLI')
     commands = root.add_subparsers(dest='command',required=True)
-    for name in ('init','doctor','run','resume','status','stop','verify','render'):
+    for name in ('init','doctor','run','resume','status','stop','verify','render','ui','_worker'):
         item = commands.add_parser(name)
         item.add_argument('--project',type=Path,default=Path.cwd())
         if name in ('init','run'):
-            item.add_argument('--profile',choices=('research','digits','digits-replication'),default='research')
-            item.add_argument('--task',type=Path,required=name=='run')
+            item.add_argument('--profile',choices=('research','digits','digits-replication'),default='research' if name=='init' else None)
+            item.add_argument('--task',type=Path,required=name=='run',**({'action':'append'} if name=='run' else {}))
         if name in ('run','resume'):
             item.add_argument('--backend',choices=('claude','codex'),required=name=='run')
             item.add_argument('--model')
@@ -38,6 +39,19 @@ def parser():
             item.add_argument('--repository')
             item.add_argument('--executable')
             item.add_argument('--hf-collection')
+            item.add_argument('--max-loops',type=int)
+            item.add_argument('--failure-policy',choices=('pause','skip'))
+            item.add_argument('--reasoning',choices=('low','medium','high','xhigh','max'))
+        if name in ('run','resume','ui'):
+            item.add_argument('--config',type=Path,help='Versioned JSON settings export')
+            item.add_argument('--preset',help='Project-local named settings preset')
+            item.add_argument('--set',dest='overrides',action='append',default=[],metavar='KEY=VALUE',help='Typed setting override; JSON null clears an optional limit')
+        if name=='ui':
+            item.add_argument('--port',type=int)
+            item.add_argument('--open-browser',action=argparse.BooleanOptionalAction,default=None)
+        if name=='_worker':
+            item.add_argument('--run-id',required=True)
+            item.add_argument('--maintenance',action='store_true')
         if name in ('resume','status','stop','verify','render'):
             item.add_argument('--run-id')
         if name in ('verify','render'):
@@ -77,24 +91,28 @@ def doctor(project: Path, backend=None):
 
 def configuration(args, previous=None):
     project = args.project.resolve()
-    env = environment(project)
-    values = dict(previous or {'project':str(project),'backend':args.backend,'profile':args.profile})
+    explicit={}
+    if getattr(args,'config',None): explicit.update(import_settings(read_json(args.config)))
+    for key in ('backend','profile','model','model_pin','mode','max_minutes','max_calls','max_cycles','max_loops',
+                'failure_policy','publish','owner','repository','executable','hf_collection','reasoning','port','open_browser'):
+        value=getattr(args,key,None)
+        if value is not None: explicit[key]=value
+    explicit.update(parse_overrides(getattr(args,'overrides',[])))
+    if 'max_loops' in explicit and explicit['max_loops'] and explicit['max_loops']>1 and 'mode' not in explicit:
+        explicit['mode']='continuous'
+    if previous:
+        values={**previous,**explicit}
+    else:
+        defaults_path=project/'.eureka/settings.json'
+        defaults=import_settings(read_json(defaults_path)) if defaults_path.exists() else {}
+        preset=load_preset(project,args.preset) if getattr(args,'preset',None) else {}
+        values=resolve_settings(project,explicit,defaults=defaults,preset=preset)
+    values['project']=str(project)
     if previous and args.backend and args.backend!=previous['backend']:
         raise ValueError('Resume retains its backend; start a new run to change providers')
-    for key in ('model','model_pin','mode','max_minutes','max_calls','max_cycles','publish','owner','repository','executable','hf_collection'):
-        value = getattr(args,key,None)
-        if value is None and not previous:
-            variable = f'EUREKA_{args.backend.upper()}_MODEL' if key=='model' else f'EUREKA_{key.upper()}'
-            value = env.get(variable)
-            if value is not None:
-                if key=='max_minutes': value = float(value)
-                if key in ('max_calls','max_cycles'): value = int(value)
-                if key=='publish': value = str(value).lower() not in ('false','0','no')
-        if value is not None:
-            values[key] = value
-    if previous and args.model and args.model!=previous['model']:
+    if previous and values['model']!=previous['model']:
         raise ValueError('Resume retains its model; start a separate run for a different model')
-    if previous and previous.get('model_pin') and args.model_pin and args.model_pin!=previous['model_pin']:
+    if previous and previous.get('model_pin') and values.get('model_pin')!=previous['model_pin']:
         raise ValueError('Resume retains its resolved model pin')
     return RunConfig(**values)
 
@@ -159,6 +177,16 @@ def main():
     try:
         if args.command=='doctor':
             result = doctor(project,args.backend)
+        elif args.command=='ui':
+            try: from .web.server import serve
+            except ImportError:
+                raise ValueError('Install the UI extra: uv run --extra ui eureka ui --project PATH') from None
+            serve(project,configuration(args))
+            return 0
+        elif args.command=='_worker':
+            store=Store(project)
+            try: result=asyncio.run(Controller(store,args.run_id).run(maintenance=args.maintenance))
+            finally: store.close()
         elif args.command in ('verify','render'):
             result = inspect_artifacts(args)
         elif args.command=='init':
@@ -167,10 +195,12 @@ def main():
             result = {'project':str(project),'profile':args.profile,'status':'initialized'}
         elif args.command=='run':
             config = configuration(args)
-            task = args.task.read_text(encoding='utf-8-sig')
+            specs=[{'title':path.stem,'text':path.read_text(encoding='utf-8-sig')} for path in args.task]
+            task = specs[0]['text']
             initialize(project,profile=config.profile,task=task)
             store = Store(project)
             run_id = store.create(config,task,policy_hash())
+            store.set_specs(run_id,specs)
             result = asyncio.run(Controller(store,run_id).run())
             store.close()
         else:
@@ -183,7 +213,7 @@ def main():
                 store.reconfigure(run['id'],config)
                 result = asyncio.run(Controller(store,run['id']).run())
             elif args.command=='status':
-                result = {key:run[key] for key in ('id','status','cycle','cycles_started','phase_index','calls','elapsed','message','config')}
+                result = {key:run[key] for key in ('id','status','cycle','cycles_started','loops_completed','phase_index','calls','elapsed','message','config')}
                 result['next_phase'] = PHASES[run['phase_index']] if run['phase_index']<len(PHASES) else None
             elif args.command=='stop':
                 store.update(run['id'],stop=1)

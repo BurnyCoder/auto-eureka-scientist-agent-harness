@@ -29,36 +29,47 @@ def write_json(path: Path, value):
     temporary.replace(path)
 
 
-def command(args: list[str], cwd: Path, timeout: float = 120, check=True, cancelled=None) -> str:
+def command(args: list[str], cwd: Path, timeout: float = 120, check=True, cancelled=None,
+            emit=None, termination_grace=2) -> str:
     """Drain both pipes with communicate; cancellation also covers publication tools.
 
     Retrying communicate after TimeoutExpired preserves captured bytes:
     https://docs.python.org/3/library/subprocess.html#subprocess.Popen.communicate
     """
-    if cancelled and cancelled():
-        raise InterruptedError('stop requested')
+    if cancelled and (reason:=cancelled()):
+        raise InterruptedError(reason if isinstance(reason,str) else 'stop requested')
     if timeout <= 0:
         raise InterruptedError('time budget exhausted')
     deadline = time.monotonic()+timeout
     process = subprocess.Popen(args,cwd=cwd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
                                text=True,encoding='utf-8',errors='replace',shell=False)
+    offsets={'stdout':0,'stderr':0}
+    def publish(channel,value):
+        if not emit or value is None: return
+        if isinstance(value,bytes): value=value.decode('utf-8',errors='replace')
+        addition=value[offsets[channel]:]
+        if addition: emit(channel,addition)
+        offsets[channel]=len(value)
     try:
         while True:
-            if cancelled and cancelled():
-                raise InterruptedError('stop requested')
+            if cancelled and (reason:=cancelled()):
+                raise InterruptedError(reason if isinstance(reason,str) else 'stop requested')
             remaining = deadline-time.monotonic()
             if remaining <= 0:
                 raise subprocess.TimeoutExpired(args,timeout)
             try:
                 stdout,stderr = process.communicate(timeout=min(.2,remaining))
                 break
-            except subprocess.TimeoutExpired:
-                continue
+            except subprocess.TimeoutExpired as partial:
+                publish('stdout',partial.stdout)
+                publish('stderr',partial.stderr)
     except BaseException:
         from .execution import terminate_tree
-        terminate_tree(process.pid)
+        terminate_tree(process.pid,termination_grace)
         process.communicate()
         raise
+    publish('stdout',stdout)
+    publish('stderr',stderr)
     if check and process.returncode:
         raise RuntimeError(f'{args[0]} {args[1] if len(args)>1 else ""} failed: {stderr or stdout}')
     return stdout.strip()

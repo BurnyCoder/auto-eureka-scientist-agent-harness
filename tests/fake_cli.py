@@ -9,6 +9,18 @@ from auto_eureka_scientist.policy import requirements
 from auto_eureka_scientist.util import now, read_json, write_json
 
 prompt = sys.stdin.read()
+if (Path.cwd()/'fixture-delay').exists():
+    import time
+    print(json.dumps({'type':'fixture.progress','text':'Offline invocation started'}),flush=True)
+    time.sleep(float((Path.cwd()/'fixture-delay').read_text()))
+if '--- HARNESS CHAT QUESTION ---' in prompt:
+    value={'reply':'Recorded phase explained by an offline fixture.','references':[]}
+    if '--codex-fixture' in sys.argv:
+        print(json.dumps({'type':'item.completed','item':{'type':'agent_message','text':json.dumps(value)}}),flush=True)
+        print(json.dumps({'type':'turn.completed','usage':{'input_tokens':10,'output_tokens':10}}),flush=True)
+    else:
+        print(json.dumps({'type':'result','structured_output':value,'model':'claude-haiku-fixture'}),flush=True)
+    raise SystemExit(0)
 phase = re.search(r'Current phase: (\w+)\.',prompt).group(1)
 root = Path.cwd()
 cycle = root/re.search(r'All phase artifact paths below are relative to (cycles/\d+)\.',prompt).group(1)

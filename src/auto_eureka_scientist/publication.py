@@ -37,10 +37,14 @@ class Publisher:
         self.config, self.store, self.run_id = config, store, run_id
         self.project = Path(config.project)
         self.remaining = remaining
+        self.cancelled = lambda:bool(self.store.get(self.run_id)['stop'])
 
     def call(self, args, check=True):
-        return command(args,self.project,timeout=min(180,self.remaining()),check=check,
-                       cancelled=lambda:bool(self.store.get(self.run_id)['stop']))
+        self.store.event(self.run_id,'publication.command',{'command':args})
+        result=command(args,self.project,timeout=min(self.config.publication_timeout,self.remaining()),check=check,
+                       cancelled=self.cancelled,termination_grace=self.config.termination_grace,
+                       emit=lambda channel,text:self.store.event(self.run_id,'publication.'+channel,{'text':text}))
+        return result
 
     def bootstrap(self):
         existing = self.store.receipt(self.run_id,'repository')
@@ -115,7 +119,7 @@ class Publisher:
         https://cli.github.com/manual/gh_pr_view
         Empty checks mean none are configured, not that remote CI ran successfully.
         """
-        deadline = time.monotonic()+min(180,self.remaining())
+        deadline = time.monotonic()+min(self.config.ci_timeout,self.remaining())
         while True:
             info = json.loads(self.call(['gh','pr','view',str(number),'--json','headRefOid,statusCheckRollup']))
             if info['headRefOid']!=expected_sha:
@@ -133,9 +137,9 @@ class Publisher:
                 return
             if time.monotonic()>=deadline:
                 raise RuntimeError(f'PR checks still pending; resume publication: {pending}')
-            if self.store.get(self.run_id)['stop']:
-                raise InterruptedError('stop requested')
-            time.sleep(min(5,max(0,deadline-time.monotonic())))
+            if reason:=self.cancelled():
+                raise InterruptedError(reason if isinstance(reason,str) else 'stop requested')
+            time.sleep(min(self.config.ci_poll_seconds,max(0,deadline-time.monotonic())))
 
     def models(self, cycle: Path, milestone: str) -> dict:
         if not self.config.publish:

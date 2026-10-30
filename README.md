@@ -12,6 +12,16 @@ The original Haiku trial stopped at its time limit with missing phases. Luna com
 
 [Results hub](https://burnycoder.github.io/auto-eureka-scientist-agent-harness/) · [Validation paper](reports/validation-paper.pdf) · [Reproduce published artifacts](docs/reproduction.md) · [Haiku explorer](https://burnycoder.github.io/eureka-digits-haiku/) · [Luna explorer](https://burnycoder.github.io/eureka-digits-luna/) · [Sonnet explorer](https://burnycoder.github.io/eureka-digits-sonnet/) · [Sol explorer](https://burnycoder.github.io/eureka-digits-sol/)
 
+## Live research console
+
+A local chat UI shows phases, recorded research stages, tool output, checks, model/usage reports, telemetry and artifacts. Ask questions, steer or interrupt execution, pause/step/resume, edit future specs, recover publication and inspect file diffs. Repeat a queue for a completed-loop count, active duration, both limits, or indefinitely. Settings, presets and versioned JSON configuration share one typed registry.
+
+```powershell
+uv run --extra ui --extra research --extra cuda eureka ui --project workspaces/my-study --port 8765
+```
+
+[Setup and controls](docs/console.md) · [Generated settings reference](docs/settings.md) · [Console acceptance evidence](reports/console-acceptance.md). New live console validation is restricted to Haiku and Luna; historical model results below retain their original scope.
+
 ## Installation
 
 Install [uv](https://docs.astral.sh/uv/), Python 3.14, Git, the [GitHub CLI](https://cli.github.com/), the [HF CLI](https://huggingface.co/docs/huggingface_hub/guides/cli), [Pandoc](https://pandoc.org/installing.html), and LaTeX with `pdflatex`. Install and authenticate the chosen [Claude Code](https://code.claude.com/docs/en/quickstart) or [Codex CLI](https://learn.chatgpt.com/docs/non-interactive-mode). The harness uses their existing logins; no API key is required by the harness.
@@ -24,7 +34,7 @@ Copy-Item .env.example .env
 gh auth login
 hf auth login
 uv run --extra research eureka doctor
-uv run --extra research pytest
+uv run --extra ui --extra research pytest
 ```
 
 For the CUDA validation environment, use `uv sync --locked --extra research --extra cuda` and retain those extras in subsequent `uv run` commands. The explicit CUDA wheel index is recorded in `pyproject.toml` and `uv.lock`; the newest CPU wheel and newest available CUDA wheel can differ. CUDA is used only when PyTorch reports it available. General research execution requires the base package; scientific rendering requires the `research` extra. PDF compilation also requires the external tools above.
@@ -47,7 +57,7 @@ uv run --extra research eureka render --project workspaces/my-study
 
 New runs use a fresh cycle directory after the project's existing cycles, including when attaching a public clone. Earlier results and preregistrations are retained and referenced in the next research prompt. Only one controller writes a project at a time. `--max-cycles` counts cycles started by the current run; `verify --cycle N` and `render --cycle N` inspect the selected cycle.
 
-`cycle` stops after a completed cycle. `continuous` starts separately recorded cycles until stopped or a limit is met. `budget` requires `--max-minutes` or `--max-calls`. Optional `--max-cycles` also limits continuous/budget operation. Time means active controller wall time, including checks and publication; downtime between resumes does not consume it. Every CLI invocation, including failures and retries, consumes a call. There are at most two targeted repairs and two transient retries per phase execution. Persistent failure leaves resumable state. `stop` and Ctrl+C terminate owned CLI processes. A hard OS crash can require manual inspection of orphaned processes.
+`cycle` stops after a completed cycle. `continuous` repeats the spec queue until stopped or a limit is met. `budget` requires `--max-minutes` or `--max-calls`. `--max-loops` counts fully verified completions; `--max-cycles` separately limits started cycles. Repeat `--task` to supply multiple spec files. Time includes active execution, chat, checks, retry/cycle delays and publication; pauses and downtime do not consume it. Every CLI invocation, including questions, failures and retries, consumes a call. Default repairs/retries remain bounded and are configurable. `--failure-policy pause|skip` selects recovery behavior. `stop` and Ctrl+C terminate owned CLI processes; restart also retires recorded orphan process identities. See [control semantics and limits](docs/console.md).
 
 Publication is enabled by default; `--no-publish` records local receipts for local work. `--owner` and `--repository` select GitHub destinations. Public runs create a public repository, commit the preregistration, merge core and pilot PRs, upload checkpoints, and deploy a static explorer. Only the controller owns Git/publication operations during the run. Authentication/access failures are resumable and never treated as completed publication.
 

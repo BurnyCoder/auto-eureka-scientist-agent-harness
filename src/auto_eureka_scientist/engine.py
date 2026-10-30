@@ -24,6 +24,8 @@ from .science import experiments, snapshot_evidence
 from .state import Store
 from .util import digest, log, now, read_json, write_json
 from .workspace import prepare_cycle, preserve_artifact_bytes
+from .operator import OperatorRuntime
+from .events import EventSink
 
 
 def register_protocol(cycle: Path, commit_sha: str) -> dict:
@@ -46,17 +48,23 @@ def register_protocol(cycle: Path, commit_sha: str) -> dict:
     return receipt
 
 
-class Controller:
+class Controller(OperatorRuntime):
     def __init__(self, store: Store, run_id: str, *, publisher=None, echo=True):
         self.store,self.run_id = store,run_id
         row = store.get(run_id)
         self.config = RunConfig(**row['config'])
+        effective=store.receipt(run_id,'effective_settings') or {}
+        from .settings import schema
+        for key,definition in schema()['properties'].items():
+            if definition['x-apply']=='next cycle' and key in effective:
+                setattr(self.config,key,effective[key])
         self.project = Path(self.config.project)
         self.started = time.monotonic()
         self.consumed = row['elapsed']
         self.echo = echo
         self.publisher = publisher or Publisher(self.config,store,run_id,self.remaining)
         self.done = threading.Event()
+        if isinstance(self.publisher,Publisher): self.publisher.cancelled=self.cancellation
 
     def remaining(self):
         limit = self.config.max_minutes
@@ -68,13 +76,18 @@ class Controller:
             return 'stop requested'
         if self.remaining() <= 0:
             return 'time budget exhausted'
+        if self.config.max_loops is not None and row['loops_completed']>=self.config.max_loops and row['phase_index']<len(PHASES):
+            return 'completed-loop budget exhausted'
+        if self.config.max_cycles is not None and row['cycles_started']>self.config.max_cycles:
+            return 'started-cycle budget exhausted'
         if call and self.config.max_calls is not None and row['calls'] >= self.config.max_calls:
             return 'call budget exhausted'
         return ''
 
     def heartbeat(self):
         # Persist active wall time even if the controller is killed, with one-second granularity.
-        while not self.done.wait(1):
+        while not self.done.wait(self.config.heartbeat_seconds):
+            self.refresh()
             self.store.update(self.run_id,elapsed=self.consumed+time.monotonic()-self.started)
 
     async def check_command(self, cycle: Path):
@@ -83,14 +96,22 @@ class Controller:
         check = read_json(cycle/'research/checks.json')
         cwd = cycle if check.get('cwd') == 'cycle' else self.project
         result = await execute(check['command'],'',cwd,self.project/'.eureka'/self.run_id/'checks',
-                               time.monotonic()+self.remaining(),lambda:bool(self.store.get(self.run_id)['stop']),echo=self.echo)
+                               time.monotonic()+min(self.remaining(),self.config.command_timeout),self.cancellation,echo=self.echo,
+                               emit=EventSink(self.store,self.run_id,phase='core-check'),termination_grace=self.config.termination_grace)
         if result.returncode or result.reason != 'exited':
+            if result.reason in ('paused','stopped','interrupt_requested','skip_requested','revision_requested'):
+                raise InterruptedError(result.reason)
+            if result.reason=='budget_exhausted' and self.remaining()<=0:
+                raise InterruptedError('time budget exhausted')
             raise ValueError(f'Core checks failed: {asdict(result)}')
         write_json(cycle/'research/core-checks.json',{'command':check['command'],'at':now(),**asdict(result)})
 
     async def finalize(self, phase: str, cycle: Path, handoff: dict):
         """Publication errors resume here without paying for another model response."""
         number = self.store.get(self.run_id)['cycle']
+        if phase in ('core','pilot','publish'):
+            self.gate(f'publication-gate:{number}:{phase}',self.config.pause_before_publication)
+        self.emit('phase.finalizing',phase=phase)
         snapshot_evidence(cycle)
         if phase == 'preregister':
             sha = commit(self.project,f'Preregister research cycle {number} before results')
@@ -104,7 +125,8 @@ class Controller:
         if phase in ('pilot','analysis','publish'):
             self.write_summary()
             render(self.project,cycle,backend='Claude Code' if self.config.backend=='claude' else 'Codex',
-                   timeout=min(180,self.remaining()),cancelled=lambda:bool(self.store.get(self.run_id)['stop']))
+                   timeout=min(self.config.render_timeout,self.remaining()),cancelled=self.cancellation,
+                   figure_dpi=self.config.figure_dpi,figure_format=self.config.preview_format)
         if phase in ('pilot','publish'):
             model_files = list((cycle/'models').glob('*.safetensors'))+list((cycle/'models').glob('*.npz'))
             if model_files:
@@ -126,6 +148,7 @@ class Controller:
             if errors:
                 raise ValueError('Post-publication artifact verification failed: '+'; '.join(errors))
         self.store.complete_phase(self.run_id,phase,handoff,artifact_hashes(cycle))
+        self.emit('phase.accepted',phase=phase,handoff=handoff)
         # The append-only handoff history retains revisited phases as separate observations.
         record = {'at':now(),'phase':phase,**handoff}
         decisions = cycle/'research/decisions.jsonl'
@@ -136,13 +159,12 @@ class Controller:
     async def phase(self, phase: str, cycle: Path):
         key = f'pending:{self.store.get(self.run_id)["cycle"]}:{phase}'
         errors = []
-        previous = [a for a in self.store.attempts(self.run_id) if a['cycle']==self.store.get(self.run_id)['cycle'] and a['phase']==phase]
+        previous = self.store.attempts(self.run_id,cycle=self.store.get(self.run_id)['cycle'],phase=phase)
         if previous and previous[-1]['result']:
             errors = json.loads(previous[-1]['result']).get('errors',[])
         # A controller may crash after the CLI has finished but before its result commits.
         # Recover only a complete provider terminal event, then revalidate the files.
-        unfinished = [a for a in self.store.attempts(self.run_id) if a['cycle']==self.store.get(self.run_id)['cycle']
-                      and a['phase']==phase and a['status']=='running']
+        unfinished = [a for a in previous if a['status']=='running']
         if unfinished and not self.store.receipt(self.run_id,key):
             attempt = unfinished[-1]
             logs = self.project/'.eureka'/self.run_id/f'{attempt["id"]:04d}-{phase}'
@@ -176,6 +198,10 @@ class Controller:
                     self.store.finish_attempt(attempt['id'],'failed',{'errors':errors,'models':response.models,
                                               'usage':response.usage,'handoff':response.value,'recovered_from_terminal_event':True})
         pending = self.store.receipt(self.run_id,key)
+        if pending and pending.get('consumed'):
+            accepted = next((p for p in self.store.phases(self.run_id) if p['name']==phase),None)
+            if accepted and not verify_phase(phase,cycle,accepted['result']):
+                return accepted['result']
         if pending and not pending.get('consumed'):
             searched = pending.get('searched',any(json.loads(a['result'] or '{}').get('searched') for a in previous))
             errors = self.check_outputs(phase,cycle,pending['handoff'],searched)
@@ -185,19 +211,27 @@ class Controller:
                 return pending['handoff']
         repairs,transports = 0,0
         while True:
+            self.refresh('next invocation')
+            await self.controls(cycle)
+            await self.chat()
             if reason := self.limit_reason(call=True):
                 raise InterruptedError(reason)
-            run = self.store.get(self.run_id)
+            run = self.prompt_context(self.store.get(self.run_id))
             prompt = make_prompt(run,phase,cycle,self.store.phases(self.run_id),errors)
             prompt_hash = hashlib.sha256(prompt.encode()).hexdigest()
             attempt = self.store.begin_attempt(self.run_id,phase,prompt_hash)
+            self.store.deliver_messages(self.run_id,attempt)
             logs = self.project/'.eureka'/self.run_id/f'{attempt:04d}-{phase}'
             argv,env = invocation(self.config,logs,environment(self.project))
             write_json(logs/'invocation.json',{'argv':argv,'prompt_sha256':prompt_hash,'at':now(),
                                               'requested_model':self.config.model,'model_pin':self.config.model_pin,'backend':self.config.backend})
             log(f'{self.run_id}: cycle {run["cycle"]}, {phase}, CLI call {run["calls"]+1}')
-            execution = await execute(argv,prompt,self.project,logs,time.monotonic()+self.remaining(),
-                                      lambda:bool(self.store.get(self.run_id)['stop']),env=env,echo=self.echo)
+            self.emit('phase.started',phase=phase,attempt=attempt)
+            execution = await execute(argv,prompt,self.project,logs,
+                                      time.monotonic()+min(self.remaining(),self.config.invocation_timeout or float('inf')),
+                                      self.cancellation,env=env,echo=self.echo,
+                                      emit=EventSink(self.store,self.run_id,phase=phase,attempt=attempt,cycle=run['cycle']),
+                                      no_output_timeout=self.config.no_output_timeout,termination_grace=self.config.termination_grace)
             write_json(logs/'execution.json',asdict(execution))
             response = parse_response(self.config.backend,logs)
             errors = [error for error in (response.error,model_error(self.config,response)) if error]
@@ -206,6 +240,8 @@ class Controller:
                 errors.append(f'CLI exited {execution.returncode}: {stderr}')
             if execution.reason != 'exited':
                 self.store.finish_attempt(attempt,execution.reason,{'execution':asdict(execution)})
+                if execution.reason=='no_output_timeout' or (execution.reason=='budget_exhausted' and self.remaining()>0):
+                    raise RuntimeError('CLI invocation timeout: '+execution.reason)
                 raise InterruptedError(execution.reason)
             if not errors:
                 errors = self.check_outputs(phase,cycle,response.value,response.searched)
@@ -219,6 +255,7 @@ class Controller:
                      'usage':response.usage,'searched':response.searched,'handoff':response.value}
             write_json(logs/'outcome.json',audit)
             self.store.finish_attempt(attempt,'failed' if errors else 'accepted',audit)
+            self.emit('verification.result',phase=phase,attempt=attempt,errors=errors,usage=response.usage,models=response.models)
             if not errors:
                 self.store.receipt(self.run_id,key,{'handoff':response.value,'searched':response.searched})
                 await self.finalize(phase,cycle,response.value)
@@ -230,12 +267,14 @@ class Controller:
             transient = re.search(r'429|502|503|504|connection reset|transport error|temporarily unavailable|rate limit',str(errors),re.I)
             if transient:
                 transports += 1
-                if transports>2:
+                if transports>self.config.transport_retries:
                     raise RuntimeError('Transport retries exhausted: '+'; '.join(errors))
-                await asyncio.sleep(min(2**transports,self.remaining()))
+                delay=min(self.config.retry_delay*self.config.retry_multiplier**(transports-1),self.config.retry_max,self.remaining())
+                self.emit('retry.waiting',seconds=delay,attempt=attempt)
+                await self.delay(delay)
             else:
                 repairs += 1
-                if repairs>2:
+                if repairs>self.config.repair_retries:
                     raise RuntimeError('Targeted repairs exhausted: '+'; '.join(errors))
 
     def check_outputs(self, phase, cycle, handoff, searched):
@@ -251,8 +290,38 @@ class Controller:
                     errors.append(f'Missing registered comparisons: {sorted(missing)}')
         return errors
 
-    async def run(self):
+    async def complete_loop(self,cycle):
+        """Finalize every cycle, including continuous runs, before advancing the queue."""
+        row=self.store.get(self.run_id)
+        key=f'loop-finalized:{row["cycle"]}'
+        if self.store.receipt(self.run_id,key): return
+        with self.store.lock:
+            completed=self.store.db.execute("SELECT 1 FROM cycle_outcomes WHERE run_id=? AND cycle=? AND status='complete'",(self.run_id,row['cycle'])).fetchone()
+        if completed:
+            self.store.receipt(self.run_id,key,{'complete':True})
+            return
+        saved=self.store.phases(self.run_id)
+        errors=[error for phase in saved for error in verify_phase(phase['name'],cycle,phase['result'])]
+        if set(p['name'] for p in saved)!=set(PHASES): errors.append('Not all phases have been accepted')
+        if errors: raise ValueError('Final artifact verification failed: '+'; '.join(errors))
+        self.store.update(self.run_id,status='finalizing',elapsed=self.consumed+time.monotonic()-self.started)
+        self.write_summary()
+        render(self.project,cycle,backend='Claude Code' if self.config.backend=='claude' else 'Codex',
+               timeout=min(self.config.render_timeout,self.remaining()),cancelled=self.cancellation,
+               figure_dpi=self.config.figure_dpi,figure_format=self.config.preview_format)
+        self.publisher.branch(row['cycle'],'summary')
+        self.publisher.checkpoint(row['cycle'],'summary')
+        # A crash between these writes is harmless: both markers are idempotent.
+        self.store.finish_cycle(self.run_id,'complete')
+        self.store.receipt(self.run_id,key,{'complete':True})
+
+    def schedule_cycle(self, *, status, carry=False):
+        self.store.finish_cycle(self.run_id,status,advance=True,carry=carry)
+
+    async def run(self, *, maintenance=False):
+        previous_status=self.store.get(self.run_id)['status']
         self.store.acquire(self.run_id)
+        self.emit('run.started',maintenance=maintenance)
         heartbeat = threading.Thread(target=self.heartbeat,daemon=True)
         heartbeat.start()
         try:
@@ -261,54 +330,81 @@ class Controller:
             if reason := self.limit_reason():
                 raise InterruptedError(reason)
             preserve_artifact_bytes(self.project)
-            self.publisher.bootstrap()
+            if not maintenance: self.publisher.bootstrap()
+            active_cycle=(self.store.receipt(self.run_id,'applied-cycle') or {}).get('cycle')
             while True:
                 row = self.store.get(self.run_id)
-                revision = self.store.receipt(self.run_id,'revised-hypothesis-cycle')
-                if revision and revision['from_cycle']==row['cycle']:
+                revision = self.store.receipt(self.run_id,'next-cycle') or self.store.receipt(self.run_id,'revised-hypothesis-cycle')
+                if revision and revision.get('from_cycle')==row['cycle']:
                     if self.config.max_cycles and row['cycles_started']>=self.config.max_cycles:
                         raise InterruptedError('cycle budget exhausted before revised hypothesis')
                     self.store.advance_cycle(self.run_id,
-                        message='New cycle required for revised hypothesis; earlier results retained')
+                        message='Starting next cycle; earlier results retained',carry_spec=revision.get('carry',True))
                     continue
+                self.refresh('next cycle' if active_cycle!=row['cycle'] else 'immediate')
+                active_cycle=row['cycle']
+                if self.store.active_spec(self.run_id) is None and not maintenance:
+                    raise InterruptedError('paused: no enabled specs')
                 cycle = prepare_cycle(self.project,row['cycle'],self.config.profile,self.config.to_dict())
-                if row['phase_index'] == 0:
-                    self.publisher.branch(row['cycle'],'core')
-                if row['phase_index'] >= len(PHASES):
-                    if self.config.mode == 'cycle' or (self.config.max_cycles and row['cycles_started']>=self.config.max_cycles):
-                        self.store.update(self.run_id,status='complete',message='All required phases completed')
-                        # The phase publication precedes its acceptance record. Publish a
-                        # final snapshot too, so public clones can verify the final phase.
-                        self.store.update(self.run_id,elapsed=self.consumed+time.monotonic()-self.started)
-                        self.write_summary()
-                        render(self.project,cycle,backend='Claude Code' if self.config.backend=='claude' else 'Codex',
-                               timeout=min(180,self.remaining()),cancelled=lambda:bool(self.store.get(self.run_id)['stop']))
-                        self.publisher.branch(row['cycle'],'summary')
-                        self.publisher.checkpoint(row['cycle'],'summary')
-                        errors = [error for saved in self.store.phases(self.run_id)
-                                  for error in verify_phase(saved['name'],cycle,saved['result'])]
-                        if errors:
-                            raise ValueError('Final artifact verification failed: '+'; '.join(errors))
+                try:
+                    await self.controls(cycle)
+                    await self.chat()
+                    if maintenance:
+                        self.store.update(self.run_id,status=previous_status,message='Requested maintenance completed')
                         break
-                    self.store.advance_cycle(self.run_id)
-                    continue
-                if reason := self.limit_reason():
-                    raise InterruptedError(reason)
-                phase = PHASES[row['phase_index']]
-                result = await self.phase(phase,cycle)
-                next_index = row['phase_index']+1
-                if result['decision']=='revisit':
-                    next_index = PHASES.index(result['revisit_phase'])
-                    if next_index>=row['phase_index']:
-                        raise ValueError('Revisit must name an earlier phase')
-                    if next_index<=1 and experiments(cycle):
-                        # Persist navigation before checking limits, so resume does not
-                        # ask the model to repeat or undo its accepted revision decision.
-                        self.store.receipt(self.run_id,'revised-hypothesis-cycle',{'from_cycle':row['cycle']})
+                    if reason := self.limit_reason(): raise InterruptedError(reason)
+                    if row['phase_index']>=len(PHASES):
+                        await self.complete_loop(cycle)
+                        row=self.store.get(self.run_id)
+                        if self.config.mode=='cycle' or (self.config.max_loops and row['loops_completed']>=self.config.max_loops) or (self.config.max_cycles and row['cycles_started']>=self.config.max_cycles):
+                            self.store.update(self.run_id,status='complete',message='Requested verified loops completed')
+                            break
+                        if self.config.stop_after=='cycle': raise InterruptedError('stop after cycle')
+                        self.store.update(self.run_id,status='running')
+                        await self.delay(self.config.cycle_delay)
+                        self.schedule_cycle(status='complete')
                         continue
-                self.store.update(self.run_id,phase_index=next_index)
+                    if row['phase_index']==0: self.publisher.branch(row['cycle'],'core')
+                    phase=PHASES[row['phase_index']]
+                    self.refresh('next invocation')
+                    self.gate(f'phase-gate:{row["cycle"]}:{phase}',phase in self.config.pause_before)
+                    result=await self.phase(phase,cycle)
+                    next_index=row['phase_index']+1
+                    if result['decision']=='revisit':
+                        next_index=PHASES.index(result['revisit_phase'])
+                        if next_index>=row['phase_index']: raise ValueError('Revisit must name an earlier phase')
+                        if next_index<=1 and experiments(cycle):
+                            self.schedule_cycle(status='revised',carry=True)
+                            continue
+                    self.store.navigate(self.run_id,next_index,revisit=result['decision']=='revisit')
+                    if self.config.stop_after=='phase': raise InterruptedError('stop after phase')
+                    pause=self.store.receipt(self.run_id,'pause_after_phase')
+                    if pause and pause.get('enabled'):
+                        self.store.receipt(self.run_id,'pause_after_phase',{'enabled':False})
+                        raise InterruptedError('paused after phase')
+                except InterruptedError as exc:
+                    reason=str(exc)
+                    if reason=='interrupt_requested':
+                        self.finish_controls('interrupt')
+                        self.emit('run.interrupted_for_message')
+                        continue
+                    if reason in ('skip_requested','revision_requested'):
+                        self.schedule_cycle(status='skipped' if reason=='skip_requested' else 'revised',carry='latest' if reason=='revision_requested' else False)
+                        self.finish_controls('skip','new_cycle')
+                        if reason=='skip_requested' and self.store.no_progress(self.run_id):
+                            raise InterruptedError('paused: queue exhausted without progress')
+                        continue
+                    raise
+                except Exception as exc:
+                    if self.config.failure_policy!='skip' or self.limit_reason() or maintenance: raise
+                    self.emit('spec.failed',error=str(exc))
+                    self.schedule_cycle(status='skipped')
+                    if self.store.no_progress(self.run_id):
+                        raise InterruptedError('paused: queue exhausted without progress')
         except InterruptedError as exc:
-            self.store.update(self.run_id,status='stopped' if 'stop' in str(exc) else 'budget_exhausted',message=str(exc))
+            self.finish_controls('pause','stop')
+            status='paused' if 'pause' in str(exc) else 'stopped' if 'stop' in str(exc) else 'budget_exhausted'
+            self.store.update(self.run_id,status=status,message=str(exc))
         except (KeyboardInterrupt,asyncio.CancelledError):
             self.store.update(self.run_id,status='interrupted',message='Interrupted; owned CLI processes terminated')
         except Exception as exc:
@@ -320,6 +416,7 @@ class Controller:
             heartbeat.join(timeout=2)
             self.store.update(self.run_id,elapsed=self.consumed+time.monotonic()-self.started,owner_pid=0,owner_start=0)
             self.write_summary()
+            self.emit('run.finished',status=self.store.get(self.run_id)['status'])
         return self.store.get(self.run_id)
 
     def write_summary(self):
@@ -327,6 +424,10 @@ class Controller:
         run = self.store.get(self.run_id)
         import json
         attempts = []
+        history=self.store.receipt(self.run_id,'configuration_history') or {'changes':[]}
+        public_keys={'backend','model','model_pin','max_minutes','max_calls','max_cycles','max_loops','mode','profile','publish','failure_policy'}
+        history={'changes':[{**change,**{field:{k:v for k,v in change.get(field,{}).items() if k in public_keys}
+                   for field in ('previous','updated')}} for change in history['changes']]}
         for row in self.store.attempts(self.run_id):
             result = json.loads(row['result']) if row['result'] else {}
             attempts.append({'id':row['id'],'cycle':row['cycle'],'phase':row['phase'],'status':row['status'],
@@ -337,8 +438,9 @@ class Controller:
             'id':self.run_id,'backend':self.config.backend,'requested_model':self.config.model,
             'model_pin':self.config.model_pin,
             'cycle':run['cycle'],'cycles_started':run['cycles_started'],
+            'loops_completed':run['loops_completed'],
             'status':run['status'],'message':run['message'],'calls':run['calls'],'active_seconds':run['elapsed'],
-            'limits':{'minutes':self.config.max_minutes,'calls':self.config.max_calls},
-            'configuration_history':self.store.receipt(self.run_id,'configuration_history') or {'changes':[]},
+            'limits':{'minutes':self.config.max_minutes,'calls':self.config.max_calls,'loops':self.config.max_loops},
+            'configuration_history':history,
             'policy_sha256':run['policy_hash'],'completed_phases':[p['name'] for p in self.store.phases(self.run_id)],
             'attempts':attempts})

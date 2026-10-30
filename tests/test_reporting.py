@@ -37,7 +37,7 @@ def test_partial_run_does_not_publish_unaccepted_draft_claims(tmp_path,monkeypat
     write_json(cycle/'research/protocol.json',{'question':'A research question'})
     write_json(cycle/'research/claims.json',[{'id':'draft','text':'UNVERIFIED CLAIM','evidence':[],'limitations':'Unreviewed'}])
     write_json(tmp_path/'reports/run-partial.json',{'status':'budget_exhausted','completed_phases':['research']})
-    monkeypatch.setattr('auto_eureka_scientist.reporting.figures',lambda path:None)
+    monkeypatch.setattr('auto_eureka_scientist.reporting.figures',lambda path,**kwargs:None)
     render(tmp_path,cycle,pdf=False)
     assert 'UNVERIFIED CLAIM' not in (cycle/'reports/paper.md').read_text(encoding='utf-8')
     assert 'budget_exhausted' in (cycle/'reports/paper.md').read_text(encoding='utf-8')
@@ -53,7 +53,7 @@ def test_reviewed_generated_files_survive_later_rendering(tmp_path,monkeypatch):
     original.write_text('Reviewed website version',encoding='utf-8')
     fingerprint = digest(original)
     write_json(cycle/'research/evidence.json',[{'id':'reviewed-site','path':'site/index.html','sha256':fingerprint,'analysis_kind':'not_applicable'}])
-    monkeypatch.setattr('auto_eureka_scientist.reporting.figures',lambda path:None)
+    monkeypatch.setattr('auto_eureka_scientist.reporting.figures',lambda path,**kwargs:None)
     render(tmp_path,cycle,pdf=False)
     records, errors = artifact_evidence(cycle)
     assert not errors

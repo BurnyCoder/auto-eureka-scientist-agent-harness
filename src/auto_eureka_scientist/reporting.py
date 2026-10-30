@@ -87,7 +87,10 @@ def markdown_table(summary: dict, *, compact=False) -> str:
     return '\n'.join(lines)
 
 
-def figures(cycle: Path, records=None, *, harness_diagram=True):
+def figures(cycle: Path, records=None, *, harness_diagram=True, dpi=160, figure_format='png'):
+    def save(fig,name,**options):
+        fig.savefig(cycle/'figures'/f'{name}.png',dpi=dpi,**options)
+        if figure_format!='png': fig.savefig(cycle/'figures'/f'{name}.{figure_format}',dpi=dpi,**options)
     """Plot recorded scores, histories and deterministic prediction examples."""
     import matplotlib
     matplotlib.use('Agg')
@@ -104,7 +107,7 @@ def figures(cycle: Path, records=None, *, harness_diagram=True):
            title='Recorded outcomes: blue = test; orange = validation pilot')
     ax.grid(axis='x',alpha=.25)
     fig.tight_layout()
-    fig.savefig(cycle/'figures/accuracy.png',dpi=160)
+    save(fig,'accuracy')
     plt.close(fig)
     fig,ax = plt.subplots(figsize=(9,4))
     for record in records:
@@ -115,7 +118,7 @@ def figures(cycle: Path, records=None, *, harness_diagram=True):
     if ax.lines:
         ax.legend(fontsize=6,ncol=3)
     fig.tight_layout()
-    fig.savefig(cycle/'figures/loss.png',dpi=160)
+    save(fig,'loss')
     plt.close(fig)
     if harness_diagram:
         from .architecture import render_architecture
@@ -135,7 +138,7 @@ def figures(cycle: Path, records=None, *, harness_diagram=True):
             if i:
                 ax.annotate('',xy=(x-.09,.55),xytext=(x-1/len(layers)+.09,.55),arrowprops={'arrowstyle':'->'})
         ax.set_title('Registered model architecture')
-        fig.savefig(cycle/'figures/model-architecture.png',dpi=160,bbox_inches='tight')
+        save(fig,'model-architecture',bbox_inches='tight')
         plt.close(fig)
     # Select in saved order, without inspecting correctness or choosing favorable cases.
     examples = {}
@@ -152,11 +155,12 @@ def figures(cycle: Path, records=None, *, harness_diagram=True):
                         bbox={'facecolor':'#e7f1e9' if prediction==truth else '#f8e4dc','edgecolor':'#adc4cf'})
         fig.suptitle('Saved examples: prediction / true label; first test record per method',fontsize=10)
         fig.tight_layout()
-        fig.savefig(cycle/'figures/examples.png',dpi=160)
+        save(fig,'examples')
         plt.close(fig)
 
 
-def render(project: Path, cycle: Path, *, backend='Codex', pdf=True, timeout=180, cancelled=None) -> dict:
+def render(project: Path, cycle: Path, *, backend='Codex', pdf=True, timeout=180, cancelled=None,
+           figure_dpi=160,figure_format='png') -> dict:
     """One command rebuilds reports, figures, paper, model card, and browser data."""
     reports = cycle/'reports'
     reports.mkdir(parents=True,exist_ok=True)
@@ -171,7 +175,7 @@ def render(project: Path, cycle: Path, *, backend='Codex', pdf=True, timeout=180
                    'Research is in progress; no final run-status snapshot is available.')
     write_json(reports/'metrics.json',summary)
     table = markdown_table(summary)
-    figures(cycle)
+    figures(cycle,dpi=figure_dpi,figure_format=figure_format)
     sources = read_json(cycle/'research/sources.json') if (cycle/'research/sources.json').exists() else []
     references = '\n'.join(f"- [{s['id']}: {s.get('title',s['id'])}]({s['url']})" for s in sources)
     protocol = read_json(cycle/'research/protocol.json')
