@@ -209,9 +209,9 @@ async function viewArtifact(path) {
   else {const response=await fetch(url);if(!response.ok)throw Error('Artifact unavailable');$('#artifact-view').append(node('pre',{text:await response.text()}));}
   $('#artifact-dialog').showModal();
 }
-function setup() {
-  state.newConfig={...clone(state.meta.defaults),max_loops:1,mode:'continuous'};
-  populateSetup();$('#setup-dialog').showModal();
+async function setup() {
+  try {state.meta=await api('/meta');state.newConfig=clone(state.meta.defaults);
+    populateSetup();$('#setup-dialog').showModal();}catch(error){fail(error);}
 }
 function populateSetup() {
   const config=state.newConfig;$('#setup-backend').value=config.backend;$('#setup-model').value=config.model|| (config.backend==='claude'?'haiku':'gpt-6-luna');
@@ -220,6 +220,11 @@ function populateSetup() {
 function readSetup() {
   Object.assign(state.newConfig,{backend:$('#setup-backend').value,model:$('#setup-model').value,
     max_loops:$('#setup-infinite').checked?null:Number($('#setup-loops').value),max_minutes:$('#setup-minutes').value?Number($('#setup-minutes').value):null});
+  if(state.newConfig.mode==='cycle'&&(state.newConfig.max_loops==null||state.newConfig.max_loops>1))state.newConfig.mode='continuous';
+}
+async function listPresets(selected='') {
+  const presets=await api('/presets');$('#preset-list').replaceChildren(node('option',{value:'',text:'Saved presets…'}),...presets.map(p=>node('option',{value:p,text:p})));
+  $('#preset-list').value=selected;
 }
 async function openSettings(target) {
   if(target==='run'&&!state.snapshot)target='defaults';
@@ -228,7 +233,7 @@ async function openSettings(target) {
   $('#settings-title').textContent=target==='new'?'New run settings':target==='run'?'Run settings':'Project defaults';
   $('#settings-notice').textContent=target==='run'?'Model, project, and publication identity require a new run. Other fields show their application boundary.':'Defaults can be overridden per run. Existing runs retain their saved settings.';
   $('#settings-search').value='';$('#changed-only').checked=false;
-  const presets=await api('/presets');$('#preset-list').replaceChildren(node('option',{value:'',text:'Saved presets…'}),...presets.map(p=>node('option',{value:p,text:p})));
+  await listPresets();
   renderSettings();$('#settings-dialog').showModal();
 }
 function settingsDiff() {
@@ -335,7 +340,7 @@ $('#save-queue').onclick=async()=>{try{if(![...$('#queue-editor').querySelectorA
 $('#settings-search').oninput=renderSettings;$('#advanced').onchange=renderSettings;$('#changed-only').onchange=renderSettings;$('#apply-settings').onclick=()=>applySettings().catch(fail);
 $('#reset-settings').onclick=()=>{for(const [key,definition] of Object.entries(state.meta.schema.properties))if('default' in definition&&!(state.settings.target==='run'&&definition['x-apply']==='new run'))state.settings.draft[key]=clone(definition.default);renderSettings();};
 $('#save-defaults').onclick=()=>post('/defaults',{schema_version:1,settings:state.settings.draft},'PUT').then(()=>toast('Project defaults saved for new runs.')).catch(fail);
-$('#save-preset').onclick=async()=>{const name=await ask('Save or duplicate preset as');if(name){try{await post('/presets/'+encodeURIComponent(name),{schema_version:1,settings:state.settings.draft},'PUT');toast('Preset saved.');}catch(error){fail(error);}}};
+$('#save-preset').onclick=async()=>{const name=await ask('Save or duplicate preset as');if(name){try{await post('/presets/'+encodeURIComponent(name),{schema_version:1,settings:state.settings.draft},'PUT');await listPresets(name);toast('Preset saved.');}catch(error){fail(error);}}};
 $('#load-preset').onclick=async()=>{const name=$('#preset-list').value;if(name){try{const document=await api('/presets/'+encodeURIComponent(name));for(const [key,value] of Object.entries(document.settings))if(!(state.settings.target==='run'&&state.meta.schema.properties[key]['x-apply']==='new run'))state.settings.draft[key]=value;renderSettings();}catch(error){fail(error);}}};
 $('#export-settings').onclick=()=>{const settings={...state.settings.draft};delete settings.project;delete settings.executable;const blob=new Blob([JSON.stringify({schema_version:1,settings},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=node('a',{href:url,download:'eureka-settings.json'});link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 $('#import-settings').onchange=async event=>{try{const file=event.target.files[0];if(!file)return;const document=JSON.parse(await file.text());if(document.schema_version!==1||!document.settings)throw Error('Expected a versioned settings export.');for(const [key,value] of Object.entries(document.settings)){if(!state.meta.schema.properties[key])throw Error('Unknown setting: '+key);if(!(state.settings.target==='run'&&state.meta.schema.properties[key]['x-apply']==='new run'))state.settings.draft[key]=value;}renderSettings();}catch(error){fail(error);}finally{event.target.value='';}};

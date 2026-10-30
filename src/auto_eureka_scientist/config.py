@@ -12,7 +12,7 @@ class RunConfig:
     project: str = s(description='Research project directory; all artifacts belong to this project.')
     backend: str = s(description='Authenticated coding CLI used for every invocation.',choices=['claude','codex'])
     model: str = s('',description='Model identifier. An empty value selects the backend default.')
-    mode: str = s('cycle',description='One cycle, repeating cycles, or budget-bounded execution.',choices=['cycle','continuous','budget'])
+    mode: str = s('cycle',description='One cycle, repeating cycles, or budget-bounded execution.',choices=['cycle','continuous','budget'],apply='immediate')
     max_minutes: float | None = s(None,kind=['number','null'],minimum=0.001,description='Total active minutes, including chat and retries; null means no general-profile limit.',apply='immediate')
     max_calls: int | None = s(None,kind=['integer','null'],minimum=1,description='Total charged CLI calls across all cycles and chat.',apply='immediate')
     max_cycles: int | None = s(None,kind=['integer','null'],minimum=1,description='Maximum started cycles, including abandoned revisions.',apply='immediate',advanced=True)

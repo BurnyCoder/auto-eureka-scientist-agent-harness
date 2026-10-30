@@ -34,10 +34,11 @@ def setting(default=MISSING, *, description, category='Run', apply='new run', ki
     return field(default=default,metadata=metadata)
 
 
-def schema():
+def schema(*, partial=False, scope=None):
     """JSON Schema defaults describe values; resolve_settings applies them explicitly."""
     from .config import RunConfig
     properties = {f.name:{'title':f.name.replace('_',' ').capitalize(), **dict(f.metadata)} for f in fields(RunConfig)}
+    if scope: properties={key:value for key,value in properties.items() if value['x-scope']==scope}
     for key,definition in properties.items():
         if key.endswith(('_timeout','_seconds','_delay','_grace','_max')) and key!='retry_multiplier': definition.setdefault('x-units','seconds')
         elif key=='max_minutes': definition['x-units']='active minutes'
@@ -47,14 +48,13 @@ def schema():
         elif key=='stream_batch_ms': definition['x-units']='milliseconds'
         elif key=='cost_warning_usd': definition['x-units']='USD, provider reported'
         else: definition.setdefault('x-units','value')
-    return {'type':'object','additionalProperties':False,'required':['project','backend'],'properties':properties}
+    return {'type':'object','additionalProperties':False,'required':[] if partial else ['project','backend'],'properties':properties}
 
 
 def validate(values, *, partial=False):
     try: json.dumps(values,allow_nan=False)
     except (ValueError,TypeError): raise ValueError('Settings must contain finite JSON values') from None
-    contract = schema()
-    if partial: contract = {**contract,'required':[]}
+    contract = schema(partial=partial)
     try:
         jsonschema.Draft202012Validator(contract).validate(values)
     except jsonschema.ValidationError as exc:

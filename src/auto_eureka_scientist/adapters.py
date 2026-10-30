@@ -60,6 +60,20 @@ class Response:
     searched: bool = False
 
 
+def terminal_event(backend: str, logs: Path) -> bool:
+    """A parsed message is not proof that its provider turn finished before a crash."""
+    path=logs/'stdout.jsonl'
+    if not path.exists(): return False
+    with path.open(encoding='utf-8',errors='replace') as stream:
+        for line in stream:
+            try: event=json.loads(line)
+            except ValueError: continue
+            if not isinstance(event,dict): continue
+            if backend=='codex' and event.get('type')=='turn.completed': return True
+            if backend=='claude' and event.get('type')=='result' and not event.get('is_error'): return True
+    return False
+
+
 def parse_response(backend: str, logs: Path) -> Response:
     """Read complete raw events; explicit provider errors outweigh process exit code."""
     response = Response()

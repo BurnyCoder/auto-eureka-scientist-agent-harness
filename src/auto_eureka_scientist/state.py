@@ -140,17 +140,17 @@ class Store(InteractiveState):
 
     def reconfigure(self, run_id: str, config: RunConfig):
         """Record explicit resume changes without resetting calls, time or earlier outcomes."""
-        with self.lock, self.db:
+        with self.lock:
             run = self.get(run_id)
             updated = config.to_dict()
-            if any(run['config'][k]!=updated[k] for k in ('project','backend','model')):
-                raise ValueError('Project, backend and model changes require a new run')
             if run['config'] != updated:
+                # CLI and HTTP patches share validation, boundaries and revision history.
+                self.patch_settings(run_id,{k:v for k,v in updated.items() if run['config'].get(k)!=v},
+                    expected_revision=run['revision'])
                 history = self.receipt(run_id,'configuration_history') or {'changes':[]}
                 history['changes'].append({'at':now(),'previous':run['config'],'updated':updated,
                     'calls':run['calls'],'active_seconds':run['elapsed'],'previous_status':run['status']})
                 self.receipt(run_id,'configuration_history',history)
-                self.update(run_id,config=updated)
 
     def begin_attempt(self, run_id: str, phase: str, prompt: str) -> int:
         with self.lock, self.db:
