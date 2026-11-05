@@ -10,7 +10,7 @@ Sources were inspected before implementation. This is a focused engineering/rese
 | [Ralph](https://github.com/madhavajay/ralph) | Provider process abstraction and iterative harness; inspected provider and harness source | Apache-2.0; architectural comparison only |
 | [ralphex](https://github.com/umputun/ralphex) | Repeated CLI execution, logging and review loops | MIT; comparison only |
 | [AI Scientist v2](https://github.com/SakanaAI/AI-Scientist-v2) | Automated experiment/research artifact workflow | Its [custom license](https://github.com/SakanaAI/AI-Scientist-v2/blob/main/LICENSE) was inspected; no code copied |
-| [autoresearch](https://github.com/karpathy/autoresearch) | Small bounded experiment loops | No applicable license established in this review; no code copied |
+| [autoresearch](https://github.com/karpathy/autoresearch) | Small bounded experiment loops | Its [README](https://github.com/karpathy/autoresearch/blob/master/README.md#license) states MIT, but the repository has no separate LICENSE file; no code copied |
 | [Neel Nanda series](https://www.alignmentforum.org/s/5GT3yoYM9gRmMEKqL) | Ideation, exploration, understanding, distillation; skepticism and research judgment | Paraphrased process guidance, linked in prompts |
 | [Lones: ML pitfalls](https://arxiv.org/abs/2108.02497) | Leakage, evaluation and methodological care | Scientific reference |
 | [Lipton and Steinhardt](https://arxiv.org/abs/1807.03341) | Separate evidence from speculation and avoid overclaiming | Scientific reference |
