@@ -85,7 +85,9 @@ def build(root: Path, pdf: bool):
     body = '# Recorded validation outcomes\n\n'+table+'\n\n'+tests+'\n'
     for trial in trials:
         run = trial['run']
-        body += f"\n## {trial['name']}\n\n[Repository]({trial['repository']}) · [Explorer]({trial['explorer']}) · [Model bundle]({trial['models']})\n\n"
+        # The original cutoff links its historical paper PDF, not an interactive explorer.
+        label = 'Historical paper' if trial['explorer'].endswith('.pdf') else 'Explorer'
+        body += f"\n## {trial['name']}\n\n[Repository]({trial['repository']}) · [{label}]({trial['explorer']}) · [Model bundle]({trial['models']})\n\n"
         if trial['name'] in repeated:
             body += (f"Recorded status: {run['status']}. {run['message']}\n\n"
                      'Its saved experiment records are unchanged in the continuation. Scientific tables and figures are shown once under haiku-extended; the original cutoff remains in the execution table and linked historical paper.\n')
@@ -185,7 +187,7 @@ Codex wrote this harness codebase and report from the exact specification suppli
     for diagram in (root/'reports/figures').glob('architecture*.svg'):
         shutil.copy2(diagram,site/'figures'/diagram.name)
     # Root Pages links to independent trial explorers; it does not combine test outcomes.
-    rows = ''.join(f'<tr><td>{t["name"]}</td><td>{t["run"]["status"].replace("_"," ")}</td><td>{len(t["run"]["completed_phases"])}</td><td>{t["run"]["calls"]}</td><td><a href="{t["explorer"]}">Explore evidence</a></td></tr>' for t in trials)
+    rows = ''.join(f'<tr><td>{t["name"]}</td><td>{t["run"]["status"].replace("_"," ")}</td><td>{len(t["run"]["completed_phases"])}</td><td>{t["run"]["calls"]}</td><td><a href="{t["explorer"]}">{"Historical paper" if t["explorer"].endswith(".pdf") else "Explore evidence"}</a></td></tr>' for t in trials)
     (site/'index.html').write_text('''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Auto Eureka Scientist</title>
 <style>body{font:17px/1.6 system-ui;max-width:980px;margin:auto;padding:40px;color:#18313c;background:#f5f7f8}h1{font-size:3rem;line-height:1.1}table{width:100%;border-collapse:collapse;background:white}td,th{padding:14px;text-align:left;border-bottom:1px solid #ccdce3}a{color:#006a98}.tag{letter-spacing:.14em;color:#54727f;font-size:.8rem}.scroll{overflow:auto}@media(max-width:600px){body{padding:18px}td,th{padding:10px}}</style>
 <div class="tag">DURABLE RESEARCH / OBSERVABLE EVIDENCE</div><h1>Auto Eureka Scientist</h1>
