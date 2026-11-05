@@ -51,7 +51,7 @@ The saved offline test report records 47 tests, 0 failures and 0 errors.
 
 ## haiku-original
 
-[Repository](https://github.com/BurnyCoder/eureka-digits-haiku) · [Explorer](https://github.com/BurnyCoder/eureka-digits-haiku/blob/6f82ace83643fe2b4329ff18dce34d364cc00506/site/paper.pdf) · [Model bundle](https://huggingface.co/BurnyCoder/eureka-digits-haiku-models)
+[Repository](https://github.com/BurnyCoder/eureka-digits-haiku) · [Historical paper](https://github.com/BurnyCoder/eureka-digits-haiku/blob/6f82ace83643fe2b4329ff18dce34d364cc00506/site/paper.pdf) · [Model bundle](https://huggingface.co/BurnyCoder/eureka-digits-haiku-models)
 
 Recorded status: budget_exhausted. budget_exhausted
 
