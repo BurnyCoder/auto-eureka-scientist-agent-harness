@@ -5,6 +5,7 @@ The supplied scientific definitions are shared; no provider-ranking statistic is
 from pathlib import Path
 import argparse
 import json
+import re
 import shutil
 import subprocess
 import statistics
@@ -196,7 +197,10 @@ Codex wrote this harness codebase and report from the exact specification suppli
 <p>Parent review corrected scientific overclaims in Haiku and Sonnet. Sonnet's first call was rejected for background Haiku usage; later accepted calls used its explicit Sonnet pin. Sol required recovery of an audit overwritten by the controller. Completed phases do not mean an untouched autonomous run.</p>
 <div class="scroll"><table><thead><tr><th>Trial</th><th>Status</th><th>Phases</th><th>Calls</th><th>Evidence</th></tr></thead><tbody>'''+rows+'''</tbody></table></div>
 <p><a href="validation-paper.pdf">Validation paper</a> · <a href="validation-summary.md">Full report</a> · <a href="https://github.com/BurnyCoder/auto-eureka-scientist-agent-harness">Code and prospective protocol</a> · <a href="https://www.alignmentforum.org/s/5GT3yoYM9gRmMEKqL">Neel Nanda's research process</a></p></html>''',encoding='utf-8')
-    shutil.copy2(root/'reports/validation-summary.md',site/'validation-summary.md')
+    # Pages serves only site/, so report-relative links must point at the repository copies.
+    summary = re.sub(r'\]\((?!https?://|#)([^)\s]+)\)',
+                     r'](https://github.com/BurnyCoder/auto-eureka-scientist-agent-harness/blob/main/reports/\1)',body)
+    (site/'validation-summary.md').write_text(summary,encoding='utf-8')
     if pdf:
         subprocess.run(['pandoc','validation-paper.md','--from=markdown-implicit_figures','--standalone','--pdf-engine=pdflatex','-o','validation-paper.pdf'],cwd=root/'reports',check=True,timeout=180)
         shutil.copy2(root/'reports/validation-paper.pdf',site/'validation-paper.pdf')
