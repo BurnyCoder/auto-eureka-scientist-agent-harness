@@ -1,6 +1,6 @@
 """Local worker ownership, telemetry and read models for the HTTP interface.
 
-Owned-process identity follows https://psutil.readthedocs.io/en/latest/#process-class
+Owned-process identity follows https://psutil.readthedocs.io/stable/#process-class
 The worker keeps running if a browser disconnects; shutdown only targets its own PIDs.
 """
 import json
