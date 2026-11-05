@@ -1,7 +1,7 @@
 """Lossless asynchronous CLI transport with cancellation of owned process trees.
 
 Sources: https://docs.python.org/3/library/asyncio-subprocess.html
-and https://psutil.readthedocs.io/en/latest/#kill-process-tree
+and https://psutil.readthedocs.io/stable/#kill-process-tree
 """
 import asyncio
 import codecs
