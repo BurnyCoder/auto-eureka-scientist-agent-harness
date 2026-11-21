@@ -171,9 +171,9 @@ Add a real-time accuracy metrics dashboard that I can see during training so tha
 
 ## README.md
 
-At the top, mention a short description of what the project is and how it works, motivation, methodology, methods, highlights of the most significant positive and negative results, novelty, features, technologies, etc. Link to sources for methods and results that already exist in the literature. 
+At the top, mention a short description of what the project is and how it works, motivation, methodology, methods, highlights of the most significant positive and negative results, novelty, features, technologies, etc. Link to sources for methods and results that already exist in the literature. Explain it in layman's terms and in expert terms.
 
-Then add image(s). Add video(s) if possible.
+Then add image(s). Add video(s) if possible. Add labeled colorful interactive detailed visualizations of both positive and negative results, and expected ground truth, and so on, at the top of README.md, and in website and paper. 
 
 Then go into more detail.
 
@@ -221,7 +221,7 @@ After that, double-check, fact-check all claims and fix them, make sure everythi
 
 After that, double-check if the results are scientifically sound and accurate using scientific rigor. Make sure nothing, no substantial error in methodology, invalidates the scientific findings.
 
-Write a list of planned training runs, inference runs, evaluations, etc., and how do they exactly differ in reports/planned-runs.md and README.md. With details such as model, architecture, training setup, data, evaluation, etc. 
+Write a run matrix of planned training runs, inference runs, evaluations, etc., and how they exactly differ in reports/planned-runs.md and README.md. With details such as model, architecture, training setup, data, evaluation, etc. 
 
 After that, implement in the src folder, tests folder, and other folders the core functionality and push it all to GitHub with an updated detailed README.md. Do this before you start running any models or starting your first training run. Make the simplest version satisfying the core specs work first, before entering a long loop of code reviews requesting security fixes, etc. 
 
