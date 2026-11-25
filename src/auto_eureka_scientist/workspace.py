@@ -3,7 +3,7 @@ from importlib.resources import files
 from pathlib import Path
 import shutil
 
-from .config import RunConfig
+from .collection import inherit_collection
 from .policy import policy_bytes, requirements
 from .util import command, read_json, write_json
 
@@ -25,6 +25,7 @@ def initialize(project: Path, *, profile='research', task='', harness_revision='
     project.mkdir(parents=True,exist_ok=True)
     for name in ('.eureka','docs','reports','cycles'):
         (project/name).mkdir(exist_ok=True)
+    inherit_collection(project)
     policy = project/'research-policy.txt'
     if not policy.exists():
         policy.write_bytes(policy_bytes())

@@ -48,6 +48,24 @@ def test_sse_durable_ids_reconnect_and_pagination(server):
     assert page[0]['id']==first and page[0]['data']['text']=='žluťoučký 🔬'
 
 
+def test_console_collection_uses_project_marker_and_rejects_an_override(server):
+    client, service = server
+    slug = 'fixture/shared-collection'
+    (service.project / '.eureka-collection').write_text(slug)
+    assert client.get('/api/meta').json()['defaults']['hf_collection'] == slug
+    body = {'start': False, 'specs': [{'text': 'Offline collection check'}]}
+    rejected = client.post('/api/runs', json={**body, 'settings': {'hf_collection': 'fixture/other'}})
+    assert rejected.is_error and 'collection' in rejected.json()['error']
+    assert service.store.list_runs() == []
+    for endpoint in ('/api/defaults', '/api/presets/other'):
+        invalid = client.put(endpoint, json={'schema_version': 1, 'settings': {'hf_collection': 'fixture/other'}})
+        assert invalid.is_error and 'collection' in invalid.json()['error']
+    assert client.get('/api/meta').json()['defaults']['hf_collection'] == slug
+    accepted = client.post('/api/runs', json=body)
+    assert accepted.status_code == 200
+    assert service.store.get(accepted.json()['id'])['config']['hf_collection'] == slug
+
+
 def test_worker_continues_without_browser_and_server_stop_is_resumable(server):
     client,service=server
     (service.project/'fixture-delay').write_text('5')

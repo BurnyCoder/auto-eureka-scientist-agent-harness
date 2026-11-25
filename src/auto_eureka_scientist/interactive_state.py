@@ -256,10 +256,14 @@ class InteractiveState:
             run=self.get(run_id)
             if expected_revision is not None and expected_revision!=run['revision']:
                 raise ValueError('Settings revision conflict; refresh before applying changes')
-            changed={k:v for k,v in patch.items() if run['config'].get(k)!=v}
-            for key in changed:
-                if schema()['properties'][key]['x-apply']=='new run': raise ValueError(f'{key} requires a new run')
-            updated=RunConfig(**{**run['config'],**changed}).to_dict()
+            current = RunConfig.from_saved(run['config']).to_dict()
+            for key, value in patch.items():
+                if value != current[key] and schema()['properties'][key]['x-apply']=='new run':
+                    raise ValueError(f'{key} requires a new run')
+            updated = RunConfig(**{**current, **patch}).to_dict()
+            # Include an inherited destination in the revision that first adopts it.
+            changed = {key: updated[key] for key in (*patch, 'hf_collection')
+                       if run['config'].get(key) != updated[key]}
             revision=run['revision']+1
             timing={k:schema()['properties'][k]['x-apply'] for k in changed}
             self.db.execute('INSERT INTO settings_changes(run_id,at,revision,patch,previous,timing,calls,elapsed) VALUES(?,?,?,?,?,?,?,?)',

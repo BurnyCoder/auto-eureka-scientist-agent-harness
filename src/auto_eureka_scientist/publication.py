@@ -11,6 +11,7 @@ import re
 import shutil
 import time
 
+from .collection import resolve_collection
 from .util import command, digest, now, read_json, write_json
 
 
@@ -141,6 +142,22 @@ class Publisher:
                 raise InterruptedError(reason if isinstance(reason,str) else 'stop requested')
             time.sleep(min(self.config.ci_poll_seconds,max(0,deadline-time.monotonic())))
 
+    def model_collection(self, requested: str, owner: str) -> str:
+        """Resolve the destination on the Hub before uploading any checkpoint bytes."""
+        key = 'hf:collection:' + requested if requested else 'hf:collection'
+        if requested:
+            collection = json.loads(self.call(['hf', 'collections', 'info', requested, '--json']))
+        else:
+            collection = self.store.receipt(self.run_id, key) or json.loads(self.call([
+                'hf', 'collections', 'create', self.project.name, '--namespace', owner,
+                '--description', 'Reproducible research models and their recorded evaluation evidence',
+                '--exists-ok', '--json']))
+        slug = collection.get('slug') or collection.get('collection', {}).get('slug')
+        if not slug:
+            raise RuntimeError('HF collection response did not contain its slug')
+        self.store.receipt(self.run_id, key, collection)
+        return slug
+
     def models(self, cycle: Path, milestone: str) -> dict:
         if not self.config.publish:
             return {'local':True,'at':now()}
@@ -149,22 +166,19 @@ class Publisher:
             raise RuntimeError('No model artifacts to publish')
         manifest = {path.relative_to(cycle/'models').as_posix():digest(path) for path in files}
         fingerprint = hashlib.sha256(json.dumps(manifest,sort_keys=True).encode()).hexdigest()
-        key = f'hf:{cycle.name}:{milestone}:{self.config.hf_collection}:{fingerprint}'
+        requested = resolve_collection(self.project, self.config.hf_collection)
+        key = f'hf:{cycle.name}:{milestone}:{requested}:{fingerprint}'
         if previous := self.store.receipt(self.run_id,key):
             return previous
         owner = self.config.owner or self.call(['gh','api','user','--jq','.login'])
         repo_id = f'{owner}/{self.project.name}-models'
-        upload = json.loads(self.call(['hf','upload',repo_id,str(cycle/'models'),'.','--exclude','.cache/**','--json']))
-        collection_key = 'hf:collection:'+self.config.hf_collection if self.config.hf_collection else 'hf:collection'
-        collection = self.store.receipt(self.run_id,collection_key)
-        if not collection:
-            collection = json.loads(self.call(['hf','collections','info',self.config.hf_collection,'--json'])) if self.config.hf_collection else json.loads(self.call(['hf','collections','create',self.project.name,'--namespace',owner,
-                                              '--description','Reproducible research models and their recorded evaluation evidence',
-                                              '--exists-ok','--json']))
-            self.store.receipt(self.run_id,collection_key,collection)
-        slug = collection.get('slug') or collection.get('collection',{}).get('slug')
-        if not slug:
-            raise RuntimeError('HF collection response did not contain its slug')
+        slug = self.model_collection(requested, owner)
+        # A retry after a failed membership update can reuse the completed upload.
+        upload_key = f'hf-upload:{cycle.name}:{milestone}:{repo_id}:{fingerprint}'
+        upload = self.store.receipt(self.run_id, upload_key)
+        if upload is None:
+            upload = json.loads(self.call(['hf','upload',repo_id,str(cycle/'models'),'.','--exclude','.cache/**','--json']))
+            self.store.receipt(self.run_id, upload_key, upload)
         self.call(['hf','collections','add-item',slug,repo_id,'model','--exists-ok','--json'])
         info = json.loads(self.call(['hf','models','info',repo_id,'--json']))
         receipt = {'repository':repo_id,'url':f'https://huggingface.co/{repo_id}',

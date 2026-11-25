@@ -1,7 +1,8 @@
+Think and act like a scientist.
+
 ## Research existing work and cite sources
 
-When starting a research project, or when solving something, or when you're stuck on something: Search the internet if someone didn't already solve it and how others deal with it. First, do a literature review of papers, GitHub repos, HuggingFace, Kaggle, guides, forums, discussions, libraries, docs, etc., to see what similar or the same things already exist, and build on top of their insights, code, math, results, solutions, empirical data, models, theory, etc. Or use their solution. You can directly import or copy things, like the math and code, but also check that the license is compatible. If no one solved the same problem directly, find as close solution/s as possible and reuse the components that can be reused. Make sure to cite them and link to the source. Cite everything. 
-Make sure to double-check that you actually follow the sources to minimize hallucinations. 
+When starting a research project, or when solving something, or when you're stuck on something: Search the internet if someone didn't already solve it and how others deal with it. First, do a literature review of papers, GitHub repos, HuggingFace, Kaggle, guides, forums, discussions, libraries, docs, etc., to see what similar or the same things already exist, and build on top of their insights, code, math, results, solutions, empirical data, models, theory, etc. Or use their solution. You can directly import or copy things, like the math and code. If no one solved the same problem directly, find as close solution/s as possible and reuse the components that can be reused. When thinking about reusing code from a paper or other source, or changing it, if there's not much reason to change it to make it better, then probably just use the original directly from the source; but if there is a reason why it might perform better after changing it, then maybe change it. Keep in mind you can use data engineering, architectural, optimizer, etc. methods/insights from similar enough fields in similar enough resources, etc., that might transfer here. Read the important papers in full; don't just read abstracts; feel free to download them. Also check how to do AI research in that subfield and in general. Make sure to cite them and link to the source. Cite everything. Make sure to double-check that you actually follow the sources to minimize hallucinations. 
 
 ## Scientific mindset and role models
 
@@ -17,7 +18,7 @@ Optimize for predictive power and explanatory power. Good models/theories are mo
 
 Think like the best AI researchers like Neel Nanda, Judea Pearl, Joelle Pineau, Peter Henderson, Zachary Lipton, Jacob Steinhardt, Benjamin Recht, John Schulman.
 
-Be inspired by Neel Nanda's How I Think About My Research Process https://www.alignmentforum.org/s/5GT3yoYM9gRmMEKqL , Michael A. Lones's How to avoid machine learning pitfalls: a guide for academic researchers https://arxiv.org/abs/2108.02497 , John Schulman's Opinionated Guide to ML Research http://joschu.net/blog/opinionated-guide-ml-research.html Andrej Karpathy's A Survival Guide to a PhD https://karpathy.github.io/2016/09/07/phd/ , NeurIPS Paper Checklist Guidelines https://neurips.cc/public/guides/PaperChecklist , Zachary C. Lipton, Jacob Steinhardt's Troubling Trends in Machine Learning Scholarship https://arxiv.org/abs/1807.03341 and similar resources.
+Be inspired by Neel Nanda's How I Think About My Research Process https://www.alignmentforum.org/s/5GT3yoYM9gRmMEKqL https://www.lesswrong.com/s/5GT3yoYM9gRmMEKqL https://www.lesswrong.com/posts/hjMy4ZxS5ogA9cTYK/how-i-think-about-my-research-process-explore-understand https://www.lesswrong.com/posts/cbBwwm4jW6AZctymL/my-research-process-key-mindsets-truth-seeking https://www.lesswrong.com/posts/Ldrss6o3tiKT6NdMm/my-research-process-understanding-and-cultivating-research https://www.lesswrong.com/posts/eJGptPbbFPZGLpjsp/highly-opinionated-advice-on-how-to-write-ml-papers, Michael A. Lones's How to avoid machine learning pitfalls: a guide for academic researchers https://arxiv.org/abs/2108.02497 , John Schulman's Opinionated Guide to ML Research http://joschu.net/blog/opinionated-guide-ml-research.html Andrej Karpathy's A Survival Guide to a PhD https://karpathy.github.io/2016/09/07/phd/ , NeurIPS Paper Checklist Guidelines https://neurips.cc/public/guides/PaperChecklist , Zachary C. Lipton, Jacob Steinhardt's Troubling Trends in Machine Learning Scholarship https://arxiv.org/abs/1807.03341 and similar resources.
 
 ## Experimental design and statistical rigor
 
@@ -26,6 +27,10 @@ Use statistical rigor.
 Pre-specify the hypothesis, primary metric, and analysis plan.
 
 Write down in advance what result would falsify the hypothesis. Good experiments distinguish between hypotheses.
+
+You need to persuade your most skeptical self that a small set of hypotheses holds. 
+
+Design discriminating experiments. Each one should have an outcome that differs depending on which hypothesis is true. 
 
 You can explore to gain information for hypotheses. 
 
@@ -97,6 +102,10 @@ Don't make the lines of code grow too much. If you can edit or remove lines of c
 
 Consider if refactoring might be useful sometimes. To simplify the structure of the architecture, etc. 
 
+If training will take longer than 30 minutes, make sure it can be resumed if the OS restarts or something like that.
+
+You can install and import libraries, packages, etc., or clone GitHub repos and have them as subrepos in this repo if needed. 
+
 ## Claims, evidence and writing style
 
 Have rigorous empirical evidence for your claims. Make sure the claims are grounded in empirical evidence, or in valid logical inferences, or in mathematical proofs, or in web-searched sources, and cited and sourced. 
@@ -126,29 +135,29 @@ Compress the empirical results. Compress the research.
 
 ## Paper
 
-In the paper, include an abstract, context, motivation, introduction, background, method, results, claims, implications, figures, related work, discussion, limitations, conclusion, appendices, etc. 
+Include an abstract, context, motivation, introduction, background, method, results, claims, implications, figures, related work, discussion, limitations, conclusion, appendices, etc. 
 
-Include both positive and negative results in the paper. What was tested, falsified, and verified.
+State novelty. 
 
-Make sure to include as many citations with links to the sources as possible in the paper.
+Include both positive and negative results. What was tested, falsified, and verified.
+
+Make sure to include as many citations with links to the sources as possible.
 
 Make sure the reports and paper have citations and sources for every claim with empirical results, other papers, etc. 
 
-Do not add fluff filler words and sentences without technical meaning in the paper. Make sure the claims in the paper are sourced and correspond to specific empirical results and technical results. 
+Do not add fluff filler words and sentences without technical meaning. Make sure the claims are sourced and correspond to specific empirical results and technical results. 
+
+Optimize for human readability and technical precision.
 
 Mention Libor “Burny” Burian as the author of the paper. 
 
-## README.md and paper  
+Add today's date.
 
 Add a table showcasing eval scores for new method(s), baseline(s), control(s) (random controls, etc.), ablation(s).
 
-Add visualizations output examples for new method(s), baseline(s), control(s) (random controls, etc.), ablation(s).
+Add visualizations of output examples for new method(s), baseline(s), control(s) (random controls, etc.), ablation(s).
 
-## Experiment reports
-
-Make sure to document results of all experiments with learnings in the reports folder in .md files with a PDF paper. Make a .md file for each experiment, and a .md file that includes all the experiments. Add to learnings what you tried and why, what issue you had and why, why something didn't work, how it was fixed, how you found this solution, why you picked this solution over others, what the result was and why, etc. Document why you chose the hyperparameters. Describe the methodology, model, data, training, eval, etc., and why. Check outputs, logs, GitHub history, and coding agent chat history as well. 
-
-Keep one .md file with a summary of all experiments so far, with explanations of all key terms, with a table of existing networks, their architectures, training algorithms, objectives, data, curricula, accuracy, fill, completion, domain, etc., additionally with explanations for a layman. 
+Add an architecture diagram(s) like in AI/ML papers. Add more diagrams if it's useful. 
 
 ## Visualization
 
@@ -156,17 +165,29 @@ Visualize architecture. Visualize eval scores. Visualize loss graphs. Visualize 
 
 Don't do graph crimes. 
 
-Make an interactive UI with visualizations to explore the positive or/and negative results. Deploy it to GitHub Pages.
+Make an interactive UI with visualizations to explore the positive or/and negative results. Deploy it to GitHub Pages. 
+
+Add a real-time accuracy metrics dashboard that I can see during training so that I can monitor the training run as well.
 
 ## README.md
 
-At the top, mention a short description of what the project is and how it works, motivation, methodology, methods, highlights of positive and negative results, features, technologies, etc. Link to sources for methods and results that already exist in the literature. 
+At the top, mention a short description of what the project is and how it works, motivation, methodology, methods, highlights of the most significant positive and negative results, novelty, features, technologies, etc. Link to sources for methods and results that already exist in the literature. Explain it in layman's terms and in expert terms.
 
-Then add image(s). Add video(s) if possible.
+Then add image(s). Add video(s) if possible. Add labeled colorful interactive detailed visualizations of both positive and negative results, and expected ground truth, and so on, at the top of README.md, and in website and paper. 
 
 Then go into more detail.
 
 Describe the methodology (model, data, training, eval, etc.) and how to use the repo.
+
+Optimize for human readability and technical precision. 
+
+Add visualizations of output examples for new method(s), baseline(s), control(s) (random controls, etc.), ablation(s).
+
+Add an architecture diagram(s) like in AI/ML papers. Add more diagrams if it's useful. 
+
+Add a table showcasing eval scores for new method(s), baseline(s), control(s) (random controls, etc.), ablation(s). 
+
+Mention, in plainer language, where the new methods got better or worse than in baseline(s), control(s) (random controls, etc.), ablation(s). 
 
 Summarize what happens as you run the project, like data flow, etc., so that user has an idea what's happening as he runs it.
 
@@ -174,9 +195,9 @@ List the features that the repo has and which technologies are used.
 
 Add a graph-based visualization of the architecture.
 
-Mention, in plainer language, where the new methods got better or worse than in baseline(s), control(s) (random controls, etc.), ablation(s).
-
 Make sure that how to install, set up, and use everything is included.
+
+Add a to-do list with plans describing what to do next.
 
 Make sure that it includes all information to make it replicable for anyone cloning the repo. 
 
@@ -190,17 +211,103 @@ Add documentation in the docs folder.
 
 ## Order of work
 
-Test and push the core functionality to GitHub first. Make the simplest version satisfying the core specs work first, before entering a long loop of code reviews requesting security fixes, etc. 
+First do a literature review of papers, GitHub repos, HuggingFace, Kaggle, guides, forums, discussions, libraries, docs, etc., to see what similar or the same things already exist with insights, code, math, results, solutions, empirical data, models, theory, etc. and write it into reports/literature-review.md and reports/state-of-the-art-review.md . 
 
-Push everything to GitHub with a detailed README.md before you start running models or starting your first training run. 
+After that double-check, fact check all claims and fix them, make sure there are no factual errors and hallucinations. Make sure everything possible has a citation with a link to the source. 
 
-Commit a preregistration to the reports folder with hypotheses, primary metric, analysis plan, falsification criteria, etc. before any results exist.
+After that, write down a preregistration in the reports/preregistration.md with hypotheses, primary metric, analysis plan, falsification criteria, etc., and push it to GitHub before any results exist, with a detailed README.md. 
 
-First, test one trained model, publish the results, and upload it to get initial results. And after that, test seed, hyperparameter, etc. sensitivity.
+After that, double-check, fact-check all claims and fix them, make sure everything has citation.
+
+After that, double-check if the results are scientifically sound and accurate using scientific rigor. Make sure nothing, no substantial error in methodology, invalidates the scientific findings.
+
+Write a run matrix of planned training runs, inference runs, evaluations, etc., and how they exactly differ in reports/planned-runs.md and README.md. With details such as model, architecture, training setup, data, evaluation, etc. 
+
+After that, implement in the src folder, tests folder, and other folders the core functionality and push it all to GitHub with an updated detailed README.md. Do this before you start running any models or starting your first training run. Make the simplest version satisfying the core specs work first, before entering a long loop of code reviews requesting security fixes, etc. 
+
+After you've pushed everything to GitHub, run initial tests. 
+
+After that, double-check, fact-check all claims, and fix them; make sure everything has citations.
+
+After that, double-check if the results are scientifically sound and accurate using scientific rigor. Make sure nothing, no substantial error in methodology, invalidates the scientific findings. Make sure there is no data leakage, that there are good baselines, controls, confounder analysis, error bars, proper generalization evals, ablations, controlling sensitivity to seed/hyperparams, having big enough samples, good statistical significance, confidence intervals, that there's no p-hacking, no graph crimes, that it's reproducible. Red team yourself. Adversarially review yourself. Like a NeurIPS reviewer. Review the paper, code, math, experiments. Write reviews to the reports/reviews folder. 
+
+Before you start training a model and running testing that's very long, write all code needed and push it to GitHub.
+
+Before you start inferencing and training a model, and running testing that's very long, push everything to GitHub and Hugging Face with the updated detailed paper, results, reports, detailed README.md, website, etc. 
+
+First, run the main method model(s) with baselines and controls that don't need training, and after it's finished, train the baselines and controls that need training, and after it's finished, train the ablations, and after it's finished, train the hyperparameter/seed sensitivity analysis, and after it's finished, you can train more experimental models. In more detail:
+
+After that, train and evaluate one main method's model with a single seed wíth controls and baselines that don't need to be trained if they're available, then push it all to GitHub and Hugging Face with the paper, results, reports, an updated detailed README.md, website, etc. 
+
+After you train each model, push everything to GitHub and Hugging Face with the updated detailed paper, results, reports, detailed README.md, website, etc. 
+
+After you evaluate each model, push everything to GitHub and Hugging Face with the updated detailed paper, results, reports, detailed README.md, website, etc.
+
+After that, train and evaluate two or more main method models (if there are more) with a single seed wíth controls and baselines that don't need to be trained if they're available, then push it all to GitHub and Hugging Face with the paper, results, reports, an updated detailed README.md, website, etc. for each model.
+
+After that double-check, fact-check all claims and fix them, make sure everything has citation.
+
+After that, double-check if the results are scientifically sound and accurate using scientific rigor. Make sure nothing, no substantial error in methodology, invalidates the scientific findings. 
+
+After that, if needed, train and evaluate control model(s), then push it all to GitHub and Hugging Face with the updated detailed paper, results, reports, detailed README.md, website, etc. 
+
+After that, if needed, train and evaluate baseline model(s), then push it all to GitHub and Hugging Face with the updated detailed paper, results, reports, detailed README.md, website, etc. 
+
+After that, if needed, train and evaluate more models, then push it all to GitHub and Hugging Face with the updated detailed paper, results, reports, detailed README.md, website, etc. 
+
+After that, if needed, train and evaluate more control models, then push it all to GitHub and Hugging Face with the updated detailed paper, results, reports, detailed README.md, website, etc. 
+
+After that, if needed, train and evaluate more baseline models, then push it all to GitHub and Hugging Face with the updated detailed paper, results, reports, detailed README.md, website, etc.
+
+After that, if needed, train and evaluate ablation model(s) and push it all to GitHub and Hugging Face with the updated detailed paper, results, reports, detailed README.md, website, etc. 
+
+After that double-check, fact-check all claims and fix them, make sure everything has citation.
+
+After that, double-check if the results are scientifically sound and accurate using scientific rigor. Make sure nothing, no substantial error in methodology, invalidates the scientific findings. Make sure there is no data leakage, that there are good baselines, controls, confounder analysis, error bars, proper generalization evals, ablations, controlling sensitivity to seed/hyperparams, having big enough samples, good statistical significance, confidence intervals, that there's no p-hacking, no graph crimes, that it's reproducible. Red team yourself. Adversarially review yourself. Like a NeurIPS reviewer. Review the paper, code, math, experiments. Write reviews to the reports/reviews folder. 
+
+After that, if needed, train and evaluate more ablation models and push it all to GitHub and Hugging Face with the updated detailed paper, results, reports, detailed README.md, website, etc. 
+
+After that, if needed, train models by hyperparameter, seed, etc. sweeps for testing sensitivity, and push it all to GitHub and Hugging Face with the updated detailed paper, results, reports, detailed README.md, website, etc. 
+
+Before you start training a model, push everything to GitHub and Hugging Face with the updated detailed paper, results, reports, detailed README.md, website, etc. 
+
+After you train each model, push everything to GitHub and Hugging Face with the updated detailed paper, results, reports, detailed README.md, website, etc. 
+
+After you evaluate each model, push everything to GitHub and Hugging Face with the updated detailed paper, results, reports, detailed README.md, website, etc.
+
+After that triple-check, fact-check all claims and fix them, make sure there are no factual errors and hallucinations. Make sure everything possible has a citation with a link to the source. 
+
+After that, triple-check if the results are scientifically sound and accurate using scientific rigor. Make sure nothing, no substantial error in methodology, invalidates the scientific findings. Make sure there is no data leakage, that there are good baselines, controls, confounder analysis, error bars, proper generalization evals, ablations, controlling sensitivity to seed/hyperparams, having big enough samples, good statistical significance, confidence intervals, that there's no p-hacking, no graph crimes, that it's reproducible. Red team yourself. Adversarially review yourself. Like a NeurIPS reviewer. Review the paper, code, math, experiments. Write reviews to the reports/reviews folder. 
+
+After that, if needed, train and evaluate more models and do the rest, then push it all to GitHub and Hugging Face with the updated detailed paper, results, reports, detailed README.md, website, etc. 
+
+Write raw results into the results folder.
+
+Write paper.pdf and summary.md into the reports folder.
+
+Make sure to periodically document results of all experiments with learnings in the reports/experiments folder in .md files. Write experiments.md file that includes all the experiments. For each experiment, create a subfolder with an experiment.md file. In experiments.md file, write a summary of all experiments so far, with explanations of all key terms, with a table of existing networks, their architectures, training algorithms, objectives, data, curricula, accuracy, fill, completion, domain, etc., additionally with explanations for a layman. Document why you chose the hyperparameters. Describe the methodology, model, data, training, eval, etc., and why it was chosen. Check outputs, logs, GitHub history, and coding agent chat history as well if needed.
+
+Also write a learnings.md file in reports/experiments that includes all learnings, and learnings.md files for each experiment in their subfolders, where you explain what you learned from the literature review and SoTA methods review, from errors, mistakes, etc., what you tried and why, what issue you had and why, why something didn't work, how it was fixed, how you found this solution, why you picked this solution over others, what the result was and why, etc.
+
+Periodically report in chat and in reports/progress.md: What's the status and progress? What is done, what are you doing now, what is the current state of things, what is not done yet, what is planned? How much of the whole plan is done, and how much of it is left? How long will it take? How long will you wait when you're waiting? 
+
+Write as much information from the plan as possible into reports/plan.md and keep updating it. 
+
+You can write other .md files into other subfolders or reports/other subfolder.
+
+You have a week for training everything.
+
+You have 14 hours for the first training run (or runs if needed) with one seed, with the simplest useful evals and one or few controls and baselines. If the models don't learn properly, stop and keep trying to fix them until they do. If they need more time for training, give them more time. Its ok if you're over the initial limit and got no good results. The goal is to have at least one interesting good result, but having only negative results is also fine. 
+
+Check progress every 5-minute interval when waiting for a run longer than 10 minutes. 
+
+Check progress every 15-minute interval when waiting for a run longer than 30 minutes.
+
+Check progress every 30-minute interval when waiting for a run longer than an hour. 
 
 ## Logging and comments
 
-Add comprehensible timestamped logging. Make sure all prompts and outputs from LLMs are written to a timestamped log file and the terminal in real time without being cut off. 
+Add comprehensible timestamped logging. Make sure all prompts and outputs from LLMs are written to a timestamped log file and the terminal in real time without being cut off. Write logs into the logs folder.
 
 Add useful comments to each file, function, and line of code with local explanation and global context sections. Actually explain how the line does it. Don't generate them using scripts; edit each line using the file edit tool. Search the web for context.
 
@@ -226,7 +333,7 @@ Make sure to NOT push credentials to GitHub.
 
 Make sure important files are pushed.
 
-For each project, upload models to Hugging Face into a collection.
+For each project, upload models to Hugging Face into a collection. Use one Hugging Face collection for this research.
 
 ## Environment and project setup
 
@@ -242,19 +349,25 @@ Use the current working directory.
 
 ## Machine, permissions and tools
 
+Do as many steps as possible that you can do on your own yourself. If you ever really need me to do something to solve a task, then give me exact step by step instructions on what to run, open, click, etc., what to do, for what you absolutely cannot do yourself. Do it yourself if you can. 
+
 Do not look at the other project folders on this machine; stay only in the current one. 
 
 You can use D:\AI for extra space.
+
+You can use WSL.
 
 You can make a folder in WSL's ~/projects and use it.
 
 Use the GPU as much as possible.
 
+Run as much model inference and training as you can on the GPU instead of the CPU, when it's faster.
+
 You can install anything you need to install to solve your problem. You can use computer use for that.
 
 If you need to set up anything in a browser or an app, you can use computer use. And if computer use doesn't work, you can ask me. 
 
-## README.md ocs, AGENTS.md, docs, results, paper, experiments, reports, experiment files, paper, HuggingFace card
+## README.md, AGENTS.md, docs, results, paper, experiments, reports, experiment files, paper, HuggingFace card
 
 Make sure everything is updated and up to date according to the codebase and what you did. 
 
@@ -270,8 +383,18 @@ Double-check that you finished everything in the plan.
 
 Double-check if you followed these instructions.
 
-## Attribution and visual debugging
+## Claude Code
 
-Use Claude Code/Codex app visual debugging abilities when needed.
+Don't give yourself attribution in commits, issues, and PR messages; don't say generated by Claude Code.
 
-At the bottom of the paper, add an AI statement that you (Claude Code/Codex) wrote this codebase and paper, and that human cleanup and rewriting are in progress, while a human provided the exact specification that you executed. Don't mention it in README.md, only in the paper.
+Use Claude Code app visual debugging abilities when needed.
+
+At the bottom of the paper, add an AI statement that you (Claude Code) wrote this codebase and paper, and that human cleanup and rewriting are in progress, while a human provided the exact specification that you executed. Don't mention it in README.md, only in the paper.
+
+## Codex
+
+Don't give yourself attribution in commits, issues, and PR messages; don't say generated by Codex. 
+
+Use Codex app visual debugging abilities when needed.
+
+At the bottom of the paper, add an AI statement that you (Codex) wrote this codebase and paper, and that human cleanup and rewriting are in progress, while a human provided the exact specification that you executed. Don't mention it in README.md, only in the paper.

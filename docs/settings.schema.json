@@ -253,7 +253,7 @@
     },
     "hf_collection": {
       "title": "Hf collection",
-      "description": "Existing Hugging Face collection slug for model uploads.",
+      "description": "Hugging Face collection slug for model uploads. Studies inherit the destination in .eureka-collection.",
       "type": "string",
       "x-category": "Publication",
       "x-apply": "new run",

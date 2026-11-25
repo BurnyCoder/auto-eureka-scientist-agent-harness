@@ -85,7 +85,7 @@ class Service:
 
     def snapshot(self,run_id):
         run=self.store.get(run_id)
-        config=RunConfig(**run['config'])
+        config=RunConfig.from_saved(run['config'])
         attempts=self.store.attempts(run_id,limit=config.history_page_size)
         for attempt in attempts:
             result=json.loads(attempt['result'] or '{}')
@@ -97,10 +97,13 @@ class Service:
             changes=[dict(r) for r in self.store.db.execute('SELECT * FROM settings_changes WHERE run_id=? ORDER BY id',(run_id,))]
             receipts=[{'key':r[0],'value':json.loads(r[1])} for r in self.store.db.execute(
                 "SELECT key,value FROM receipts WHERE run_id=? AND (key LIKE 'github:%' OR key LIKE 'hf:%' OR key IN ('repository','pages'))",(run_id,))]
+        effective = self.store.receipt(run_id,'effective_settings') or run['config']
+        if run['status'] != 'complete':
+            effective = {**effective, 'hf_collection': config.hf_collection}
         return {'run':run,'worker_alive':self.alive(run),'specs':self.store.specs(run_id),
             'active_spec':json.loads(active[0]) if active else None,'phases':self.store.phases(run_id),
             'attempts':attempts,'messages':self.store.messages(run_id,limit=config.history_page_size),'actions':self.store.actions(run_id,pending=False,limit=config.history_page_size),
-            'effective_settings':self.store.receipt(run_id,'effective_settings') or run['config'],
+            'effective_settings':effective,
             'settings_changes':changes,'event_cursor':latest,'telemetry':self.telemetry(config,run),
             'reported_cost_usd':cost,'publications':receipts}
 

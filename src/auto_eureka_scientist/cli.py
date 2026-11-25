@@ -107,21 +107,18 @@ def configuration(args, previous=None):
     project = args.project.resolve()
     explicit=explicit_settings(args)
     if previous:
-        values={**previous,**explicit}
-    else:
-        defaults_path=project/'.eureka/settings.json'
-        defaults=import_settings(read_json(defaults_path)) if defaults_path.exists() else {}
-        if args.command=='ui': defaults={'mode':'continuous','max_loops':1,**defaults}
-        preset=load_preset(project,args.preset) if getattr(args,'preset',None) else {}
-        values=resolve_settings(project,explicit,defaults=defaults,preset=preset)
-    values['project']=str(project)
-    if previous and args.backend and args.backend!=previous['backend']:
-        raise ValueError('Resume retains its backend; start a new run to change providers')
-    if previous and values['model']!=previous['model']:
-        raise ValueError('Resume retains its model; start a separate run for a different model')
-    if previous and previous.get('model_pin') and values.get('model_pin')!=previous['model_pin']:
-        raise ValueError('Resume retains its resolved model pin')
-    return RunConfig(**values)
+        if explicit.get('backend', previous['backend']) != previous['backend']:
+            raise ValueError('Resume retains its backend; start a new run to change providers')
+        if explicit.get('model', previous['model']) != previous['model']:
+            raise ValueError('Resume retains its model; start a separate run for a different model')
+        if previous.get('model_pin') and explicit.get('model_pin', previous['model_pin']) != previous['model_pin']:
+            raise ValueError('Resume retains its resolved model pin')
+        return RunConfig.from_saved(previous, **{**explicit, 'project': str(project)})
+    defaults_path=project/'.eureka/settings.json'
+    defaults=import_settings(read_json(defaults_path)) if defaults_path.exists() else {}
+    if args.command=='ui': defaults={'mode':'continuous','max_loops':1,**defaults}
+    preset=load_preset(project,args.preset) if getattr(args,'preset',None) else {}
+    return RunConfig(**resolve_settings(project,explicit,defaults=defaults,preset=preset))
 
 
 def inspect_artifacts(args):

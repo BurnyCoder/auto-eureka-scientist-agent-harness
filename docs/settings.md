@@ -20,7 +20,7 @@ Defaults below are field defaults. Backend defaults resolve an empty model to `h
 | `repository` | `""` | "string" | value | new run | run / claude, codex | GitHub repository name; empty uses the project name. |
 | `executable` | `""` | "string" | value | new run | run / claude, codex | CLI executable path; empty discovers the selected backend on PATH. |
 | `reasoning` | `"high"` | ["low", "medium", "high", "xhigh", "max"] | value | next invocation | run / claude, codex | Codex reasoning or Claude effort for future calls. |
-| `hf_collection` | `""` | "string" | value | new run | run / claude, codex | Existing Hugging Face collection slug for model uploads. |
+| `hf_collection` | `""` | "string" | value | new run | run / claude, codex | Hugging Face collection slug for model uploads. Studies inherit the destination in .eureka-collection. |
 | `model_pin` | `""` | "string" | value | new run | run / claude | Resolved Claude model identifier, including background helpers. Codex uses its exact model field. |
 | `invocation_timeout` | `null` | ["number", "null"] | seconds | next invocation | cycle / claude, codex | Seconds allowed for one CLI call; bounded by remaining run time. |
 | `no_output_timeout` | `null` | ["number", "null"] | seconds | next invocation | cycle / claude, codex | Seconds without CLI stdout/stderr before interrupting; disabled by default. |

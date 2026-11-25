@@ -65,6 +65,8 @@ New runs use a fresh cycle directory after the project's existing cycles, includ
 
 Publication is enabled by default; `--no-publish` records local receipts for local work. `--owner` and `--repository` select GitHub destinations. Public runs create a public repository, commit the preregistration, merge core and pilot PRs, upload checkpoints, and deploy a static explorer. Only the controller owns Git/publication operations during the run. Authentication/access failures are resumable and never treated as completed publication.
 
+Every study under this project publishes its model bundle to the same Hugging Face collection. The CLI and console read the slug from `.eureka-collection`. Initializing a child study copies the marker into its repository, so a standalone clone uses the same destination. A conflicting collection setting is reported before upload. For an independent project outside this tree, `--hf-collection` selects an existing collection. [Project collection](https://huggingface.co/collections/BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75)
+
 ## Models and execution permissions
 
 Any model identifier can be passed through `--model`, `EUREKA_CLAUDE_MODEL`, or `EUREKA_CODEX_MODEL`. Availability is determined by the selected CLI and account; unavailable models produce an error without substitution. General runs are not restricted to the two validation models.
@@ -104,15 +106,15 @@ uv run --extra research --extra cuda eureka run --project workspaces/eureka-digi
 
 The [fixed machine-readable protocol](src/auto_eureka_scientist/resources/digits_protocol.json) uses scikit-learn's bundled [UCI digits](https://archive.ics.uci.edu/dataset/80/optical+recognition+of+handwritten+digits), frozen stratified train/validation/test partitions, a fixed ReLU MLP with AdamW, regularization ablations, logistic regression, a class-prior baseline, shuffled training labels, and seed/sensitivity comparisons. The pilot is published before comparisons. The primary effect and uncertainty are regenerated from paired test predictions. Intervals condition on the trained models; seed variability is reported separately. No test outcome selects a configuration.
 
-The supplied training fixture makes these trials tests of research orchestration and inspection, not independent algorithm invention or model superiority. GPU time is used for neural experiments. No harness weights exist to upload. Trained validation checkpoints are organized in the [shared research collection](https://huggingface.co/collections/BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75); pass its slug with `--hf-collection` to reuse it.
+The supplied training fixture makes these trials tests of research orchestration and inspection, not independent algorithm invention or model superiority. GPU time is used for neural experiments. No harness weights exist to upload. Each trial publishes its trained checkpoints as a model bundle.
 
 For replications after observing prior results, use `--profile digits-replication --task tasks/digits-replication.md`. The protocol and result records are explicitly exploratory. The original validation defaults remain bounded; `--max-minutes 180 --max-calls 60` explicitly selects the user-authorized extension. `eureka verify --project PATH --phase analysis` checks draft files without accepting a phase. Paths can be relative to the cycle or project when unambiguous; the prompt includes a complete handoff example.
 
 The expanded runs use these commands. Use a new project directory for a new run; use `resume` to continue an existing one without resetting consumption. Native CLI authentication determines model availability.
 
 ```sh
-uv run --extra research --extra cuda eureka run --project workspaces/eureka-digits-sonnet --task tasks/digits-replication.md --backend claude --model sonnet --model-pin claude-sonnet-5-5 --profile digits-replication --max-minutes 180 --max-calls 60 --owner BurnyCoder --hf-collection BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75
-uv run --extra research --extra cuda eureka run --project workspaces/eureka-digits-sol --task tasks/digits-replication.md --backend codex --model gpt-6.1-sol --profile digits-replication --max-minutes 180 --max-calls 60 --owner BurnyCoder --hf-collection BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75
+uv run --extra research --extra cuda eureka run --project workspaces/eureka-digits-sonnet --task tasks/digits-replication.md --backend claude --model sonnet --model-pin claude-sonnet-5-5 --profile digits-replication --max-minutes 180 --max-calls 60 --owner BurnyCoder
+uv run --extra research --extra cuda eureka run --project workspaces/eureka-digits-sol --task tasks/digits-replication.md --backend codex --model gpt-6.1-sol --profile digits-replication --max-minutes 180 --max-calls 60 --owner BurnyCoder
 ```
 
 The recorded Sonnet run initially used the alias without the full pin, rejected a mixed-model call, then resumed with the pin. The command above includes the repair from the outset; it is not a claim that the historical run had no failed attempt.
