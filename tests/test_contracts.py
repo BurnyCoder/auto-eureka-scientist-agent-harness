@@ -14,7 +14,9 @@ from auto_eureka_scientist.phases import make_prompt
 def test_policy_is_preserved():
     original = Path(__file__).parents[1] / 'prompts/full.txt'
     assert policy_bytes() == original.read_bytes()
-    assert len(requirements()) == original.read_text(encoding='utf-8').count('\n## ') + 1
+    headings = [line[3:].strip() for line in original.read_text(encoding='utf-8-sig').splitlines()
+                if line.startswith('## ')]
+    assert [entry['heading'] for entry in requirements()] == headings
 
 
 def test_every_phase_prompt_contains_the_entire_canonical_policy(tmp_path):
