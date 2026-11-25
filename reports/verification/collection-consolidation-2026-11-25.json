@@ -1,0 +1,202 @@
+{
+  "verified_at": "2026-11-25T19:23:32+00:00",
+  "collection_url": "https://huggingface.co/collections/BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75",
+  "scope": "BurnyCoder project collections identified by historical slugs, project names, and owner memberships of the recorded trial models. Model revisions and the collection landing page were fetched publicly.",
+  "verification_command": "uv run scripts/verify_collection.py",
+  "before": {
+    "at": "2026-11-25T19:17:14+00:00",
+    "collections": {
+      "BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75": [
+        {
+          "type": "model",
+          "id": "BurnyCoder/eureka-digits-haiku-models"
+        },
+        {
+          "type": "model",
+          "id": "BurnyCoder/eureka-digits-luna-models"
+        },
+        {
+          "type": "model",
+          "id": "BurnyCoder/eureka-digits-sonnet-models"
+        },
+        {
+          "type": "model",
+          "id": "BurnyCoder/eureka-digits-sol-models"
+        }
+      ],
+      "BurnyCoder/eureka-digits-haiku-6ae38bdd8bdaca1527379a69": [
+        {
+          "type": "model",
+          "id": "BurnyCoder/eureka-digits-haiku-models"
+        }
+      ],
+      "BurnyCoder/eureka-digits-luna-6ae39b1a9fbf13c0618b07a5": [
+        {
+          "type": "model",
+          "id": "BurnyCoder/eureka-digits-luna-models"
+        }
+      ]
+    }
+  },
+  "operations": [
+    {
+      "deleted_collection": "BurnyCoder/eureka-digits-haiku-6ae38bdd8bdaca1527379a69",
+      "checked_at": "2026-11-25 19:18:15 UTC",
+      "items_verified_in_shared_collection": [
+        {
+          "type": "model",
+          "id": "BurnyCoder/eureka-digits-haiku-models"
+        }
+      ],
+      "members_added": [],
+      "deleted_at": "2026-11-25 19:18:17 UTC",
+      "response": {
+        "slug": "BurnyCoder/eureka-digits-haiku-6ae38bdd8bdaca1527379a69"
+      }
+    },
+    {
+      "deleted_collection": "BurnyCoder/eureka-digits-luna-6ae39b1a9fbf13c0618b07a5",
+      "checked_at": "2026-11-25 19:18:19 UTC",
+      "items_verified_in_shared_collection": [
+        {
+          "type": "model",
+          "id": "BurnyCoder/eureka-digits-luna-models"
+        }
+      ],
+      "members_added": [],
+      "deleted_at": "2026-11-25 19:18:21 UTC",
+      "response": {
+        "slug": "BurnyCoder/eureka-digits-luna-6ae39b1a9fbf13c0618b07a5"
+      }
+    }
+  ],
+  "after": {
+    "at": "2026-11-25T19:23:32+00:00",
+    "collections": {
+      "BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75": [
+        {
+          "type": "model",
+          "id": "BurnyCoder/eureka-digits-haiku-models"
+        },
+        {
+          "type": "model",
+          "id": "BurnyCoder/eureka-digits-luna-models"
+        },
+        {
+          "type": "model",
+          "id": "BurnyCoder/eureka-digits-sonnet-models"
+        },
+        {
+          "type": "model",
+          "id": "BurnyCoder/eureka-digits-sol-models"
+        }
+      ]
+    },
+    "public_destination": {
+      "status": 200,
+      "final_url": "https://huggingface.co/collections/BurnyCoder/auto-eureka-scientist"
+    },
+    "retired_endpoints": {
+      "BurnyCoder/eureka-digits-haiku-6ae38bdd8bdaca1527379a69": {
+        "status": 404,
+        "final_url": "https://huggingface.co/api/collections/BurnyCoder/eureka-digits-haiku-6ae38bdd8bdaca1527379a69"
+      },
+      "BurnyCoder/eureka-digits-luna-6ae39b1a9fbf13c0618b07a5": {
+        "status": 404,
+        "final_url": "https://huggingface.co/api/collections/BurnyCoder/eureka-digits-luna-6ae39b1a9fbf13c0618b07a5"
+      }
+    }
+  },
+  "models": {
+    "BurnyCoder/eureka-digits-haiku-models": {
+      "before_revision": "cca5c070bb41ce52a84f0825a7e7ec77be2b337b",
+      "after_revision": "cca5c070bb41ce52a84f0825a7e7ec77be2b337b",
+      "owner_collections_before": [
+        "BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75",
+        "BurnyCoder/eureka-digits-haiku-6ae38bdd8bdaca1527379a69"
+      ],
+      "owner_collections_after": [
+        "BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75"
+      ]
+    },
+    "BurnyCoder/eureka-digits-luna-models": {
+      "before_revision": "6006c751c5c92ceb70f7d57191921f52b03cc6ef",
+      "after_revision": "6006c751c5c92ceb70f7d57191921f52b03cc6ef",
+      "owner_collections_before": [
+        "BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75",
+        "BurnyCoder/eureka-digits-luna-6ae39b1a9fbf13c0618b07a5"
+      ],
+      "owner_collections_after": [
+        "BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75"
+      ]
+    },
+    "BurnyCoder/eureka-digits-sol-models": {
+      "before_revision": "8bad5df36be339d971ffc4944c444683e969191a",
+      "after_revision": "8bad5df36be339d971ffc4944c444683e969191a",
+      "owner_collections_before": [
+        "BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75"
+      ],
+      "owner_collections_after": [
+        "BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75"
+      ]
+    },
+    "BurnyCoder/eureka-digits-sonnet-models": {
+      "before_revision": "5e0336a0c7bec39b93dcb55c27f94829dc6abd8d",
+      "after_revision": "5e0336a0c7bec39b93dcb55c27f94829dc6abd8d",
+      "owner_collections_before": [
+        "BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75"
+      ],
+      "owner_collections_after": [
+        "BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75"
+      ]
+    }
+  },
+  "child_github_repositories": {
+    "BurnyCoder/eureka-digits-haiku": {
+      "commit": "24c6e2786e3349b5d08e9e7a6546d4505bc6052d",
+      "marker": "BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75",
+      "readme": "https://github.com/BurnyCoder/eureka-digits-haiku/blob/24c6e2786e3349b5d08e9e7a6546d4505bc6052d/README.md",
+      "readme_links_to_shared_collection": true
+    },
+    "BurnyCoder/eureka-digits-luna": {
+      "commit": "e38b3f2b9359937f2cd12bc4ed28a9dd6209dd89",
+      "marker": "BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75",
+      "readme": "https://github.com/BurnyCoder/eureka-digits-luna/blob/e38b3f2b9359937f2cd12bc4ed28a9dd6209dd89/README.md",
+      "readme_links_to_shared_collection": true
+    },
+    "BurnyCoder/eureka-digits-sol": {
+      "commit": "6cfdacfc83036fa7a88f8303e51d7b1ff10b74ea",
+      "marker": "BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75"
+    },
+    "BurnyCoder/eureka-digits-sonnet": {
+      "commit": "3e2e388f44e74274fdf35e9a357877654b279eed",
+      "marker": "BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75"
+    }
+  },
+  "checks": {
+    "owner_authenticated": true,
+    "one_project_collection": true,
+    "all_expected_models_in_public_collection": true,
+    "public_model_revisions_available": true,
+    "public_destination_resolves": true,
+    "retired_collection_endpoints_return_404": true,
+    "each_model_in_only_the_shared_owner_collection": true,
+    "child_markers_and_updated_readme_links": true,
+    "public_model_revisions_match_before_cleanup": true
+  },
+  "local_regression_suite": {
+    "command": "uv run --extra research --extra cuda --extra ui pytest",
+    "tests": 96,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "separate_test_development_incident": {
+    "requested_model": "haiku",
+    "charged_harness_attempts": 1,
+    "accepted_phases": 0,
+    "status": "stopped",
+    "publication_enabled": false,
+    "description": "A recovery fixture with an implicit legacy spec started the real provider CLI. The attempt was stopped. The final regression uses a disabled spec and blocks provider invocation."
+  }
+}

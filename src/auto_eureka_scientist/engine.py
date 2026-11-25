@@ -13,6 +13,7 @@ import threading
 import time
 
 from .adapters import invocation, model_error, parse_response, terminal_event
+from .collection import inherit_collection
 from .config import RunConfig, environment
 from .contracts import PHASES
 from .execution import execute
@@ -318,7 +319,9 @@ class Controller(OperatorRuntime):
             if reason := self.limit_reason():
                 raise InterruptedError(reason)
             preserve_artifact_bytes(self.project)
-            if not maintenance: self.publisher.bootstrap()
+            if not maintenance:
+                inherit_collection(self.project)
+                self.publisher.bootstrap()
             active_cycle=(self.store.receipt(self.run_id,'applied-cycle') or {}).get('cycle')
             while True:
                 row = self.store.get(self.run_id)

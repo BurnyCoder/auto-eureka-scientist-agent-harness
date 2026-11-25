@@ -11,13 +11,16 @@ import re
 import shutil
 import time
 
-from .collection import resolve_collection
+from .collection import MARKER, resolve_collection
 from .util import command, digest, now, read_json, write_json
 
 
 def commit(project: Path, message: str) -> str:
     """Protect the explicitly requested credential exclusion at the publication boundary."""
     command(['git','add','--all'],project)
+    if (project / MARKER).is_file():
+        # Attached repositories can ignore all dotfiles. Publish the collection binding with the study.
+        command(['git', 'add', '--force', '--', MARKER], project)
     tracked = command(['git','ls-files','-z'],project).split('\0')
     for name in filter(None,tracked):
         path = Path(name)

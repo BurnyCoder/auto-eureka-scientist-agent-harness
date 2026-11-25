@@ -5,7 +5,8 @@ import pytest
 from auto_eureka_scientist.cli import configuration, parser
 from auto_eureka_scientist.config import RunConfig
 from auto_eureka_scientist.engine import Controller
-from auto_eureka_scientist.publication import Publisher
+from auto_eureka_scientist.policy import policy_hash
+from auto_eureka_scientist.publication import Publisher, commit
 from auto_eureka_scientist.state import Store
 from auto_eureka_scientist.util import command
 from auto_eureka_scientist.workspace import initialize
@@ -30,11 +31,14 @@ def test_new_study_inherits_collection_and_carries_it_in_git(tmp_path, monkeypat
 
     initialize(child)
     initialize(child)  # Reattaching an initialized study preserves its portable setting.
-    command(['git', 'add', MARKER], child)
-    command(['git', '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.org',
-             'commit', '-m', 'Record collection'], child)
+    with (child / '.gitignore').open('a') as ignores:
+        ignores.write('\n.eureka*\n')  # Attached projects can already ignore all harness dotfiles.
+    command(['git', 'config', 'user.name', 'Fixture'], child)
+    command(['git', 'config', 'user.email', 'fixture@example.org'], child)
+    commit(child, 'Record collection')
     standalone = tmp_path / 'standalone'
     command(['git', 'clone', str(child), str(standalone)], tmp_path)
+    assert (standalone / MARKER).read_text().strip() == SHARED
     assert RunConfig(str(standalone), 'codex').hf_collection == SHARED
     assert RunConfig(str(tmp_path / 'independent'), 'codex', hf_collection=RETIRED).hf_collection == RETIRED
     (child / MARKER).write_text(RETIRED)
@@ -64,6 +68,27 @@ def test_resume_adopts_project_collection_and_preserves_history(tmp_path, previo
         assert store.get(run)['calls'] == 1
         assert store.receipt(run, 'hf:collection') == {'slug': RETIRED}
         assert store.receipt(run, 'configuration_history')['changes'][-1]['previous'] == saved
+    finally:
+        store.close()
+
+
+@pytest.mark.asyncio
+async def test_resuming_a_legacy_child_copies_the_inherited_marker(tmp_path, monkeypatch):
+    child = tmp_path / 'older-study'
+    initialize(child)
+    store = Store(child)
+    try:
+        config = RunConfig(str(child), 'claude', publish=False, executable=str(child / 'offline-fixture'))
+        run = store.create(config, 'Old study', policy_hash())
+        store.receipt(run, 'repository', {'local': True, 'base': 'main'})
+        store.set_specs(run, [{'text': 'Parked study', 'enabled': False}])
+        monkeypatch.setattr('auto_eureka_scientist.engine.invocation',
+                            lambda *args, **kwargs: pytest.fail('A disabled spec must never start inference'))
+        (tmp_path / MARKER).write_text(SHARED)
+        # A local recovery with a disabled spec performs setup, then pauses.
+        result = await Controller(store, run, echo=False).run()
+        assert result['status'] == 'paused' and result['calls'] == 0
+        assert (child / MARKER).read_text().strip() == SHARED
     finally:
         store.close()
 
