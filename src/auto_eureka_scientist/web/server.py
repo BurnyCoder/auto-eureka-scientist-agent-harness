@@ -18,7 +18,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from ..config import RunConfig
 from ..policy import policy_hash
-from ..settings import schema, validate, resolve_settings, import_settings, save_preset, load_preset
+from ..settings import schema, validate, resolve_settings, import_settings, save_preset, load_preset, save_project_settings
 from ..util import read_json, write_json, command, now
 from ..workspace import initialize
 from .service import Service
@@ -228,9 +228,7 @@ def create_app(project: Path,launch_config=None,*,launch_overrides=None,launch_p
 
     @app.put('/api/defaults')
     def put_defaults(document:dict):
-        values=import_settings(document)
-        values={k:v for k,v in values.items() if k not in ('project','executable')}
-        write_json(project/'.eureka/settings.json',{'schema_version':1,'settings':values})
+        save_project_settings(project, project/'.eureka/settings.json', import_settings(document))
         return {'saved':True}
 
     @app.get('/api/runs/{run_id}/artifacts')

@@ -52,7 +52,7 @@ class Controller(OperatorRuntime):
     def __init__(self, store: Store, run_id: str, *, publisher=None, echo=True):
         self.store,self.run_id = store,run_id
         row = store.get(run_id)
-        self.config = RunConfig(**row['config'])
+        self.config = RunConfig.from_saved(row['config'])
         effective=store.receipt(run_id,'effective_settings') or {}
         from .settings import schema
         for key,definition in schema()['properties'].items():

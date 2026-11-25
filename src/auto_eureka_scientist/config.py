@@ -4,6 +4,7 @@ from pathlib import Path
 import os
 
 from dotenv import dotenv_values
+from .collection import project_collection, resolve_collection
 from .settings import setting as s, validate
 
 
@@ -23,7 +24,7 @@ class RunConfig:
     repository: str = s('',description='GitHub repository name; empty uses the project name.',category='Publication')
     executable: str = s('',description='CLI executable path; empty discovers the selected backend on PATH.',advanced=True)
     reasoning: str = s('high',description='Codex reasoning or Claude effort for future calls.',choices=['low','medium','high','xhigh','max'],apply='next invocation')
-    hf_collection: str = s('',description='Existing Hugging Face collection slug for model uploads.',category='Publication')
+    hf_collection: str = s('',description='Hugging Face collection slug for model uploads. Studies inherit the destination in .eureka-collection.',category='Publication')
     model_pin: str = s('',description='Resolved Claude model identifier, including background helpers. Codex uses its exact model field.',backends=['claude'])
     invocation_timeout: float | None = s(None,kind=['number','null'],minimum=.1,description='Seconds allowed for one CLI call; bounded by remaining run time.',category='Execution',scope='cycle',apply='next invocation')
     no_output_timeout: float | None = s(None,kind=['number','null'],minimum=.1,description='Seconds without CLI stdout/stderr before interrupting; disabled by default.',category='Execution',scope='cycle',apply='next invocation',advanced=True)
@@ -85,6 +86,7 @@ class RunConfig:
     def __post_init__(self):
         self.project = str(Path(self.project).resolve())
         validate(self.to_dict())
+        self.hf_collection = resolve_collection(Path(self.project), self.hf_collection)
         if self.backend not in ('claude', 'codex'):
             raise ValueError('backend must be claude or codex')
         self.model = self.model or {'claude':'haiku', 'codex':'gpt-6-luna'}[self.backend]
@@ -111,6 +113,15 @@ class RunConfig:
             self.max_minutes = 60 if self.max_minutes is None else self.max_minutes
             self.max_calls = 20 if self.max_calls is None else self.max_calls
             # Defaults retain the historical trial protocol; explicit user limits may extend it.
+
+    @classmethod
+    def from_saved(cls, saved: dict, **overrides):
+        """A project marker supersedes a legacy saved destination. Explicit resume options still validate."""
+        if 'hf_collection' not in overrides:
+            project = Path(overrides.get('project', saved['project']))
+            if pinned := project_collection(project):
+                overrides['hf_collection'] = pinned
+        return cls(**{**saved, **overrides})
 
     def to_dict(self):
         return asdict(self)

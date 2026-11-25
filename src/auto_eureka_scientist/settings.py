@@ -11,6 +11,7 @@ import re
 
 import jsonschema
 
+from .collection import resolve_collection
 from .util import read_json, write_json
 
 
@@ -101,11 +102,18 @@ def preset_path(project, name):
     return Path(project)/'.eureka'/'presets'/f'{name}.json'
 
 
-def save_preset(project, name, values):
+def save_project_settings(project, path, values):
+    """Validate project-specific publication settings before saving defaults or a preset."""
     validate(values,partial=True)
+    if 'hf_collection' in values:
+        resolve_collection(Path(project), values['hf_collection'])
     # Credentials are never settings; exclude machine-specific identity from shared exports.
     values = {k:v for k,v in values.items() if k not in ('project','executable')}
-    write_json(preset_path(project,name), {'schema_version':1,'settings':values})
+    write_json(path, {'schema_version':1,'settings':values})
+
+
+def save_preset(project, name, values):
+    save_project_settings(project, preset_path(project,name), values)
 
 
 def load_preset(project, name):
