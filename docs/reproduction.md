@@ -32,3 +32,7 @@ This command also regenerates the shared architecture diagrams in the README, pa
 The saved snapshots preserve the observed trial status. This command does not run either coding CLI, download credentials, or infer that a constructed public URL is reachable. Independent verification receipts are stored under `reports/verification/` when available.
 
 The original Haiku cutoff and its continuation refer to the same observations. Regeneration retains both execution statuses while showing unchanged scientific measurements once. The shared [Hugging Face collection](https://huggingface.co/collections/BurnyCoder/auto-eureka-scientist-6ae3ae37b267f00aef999f75) links all trial bundles. Parent repairs and claim corrections are disclosed in [the interpretation](../reports/validation-interpretation.md); reproducing saved measurements does not turn these development runs into independent scientific confirmation.
+
+## Verify the shared collection
+
+With the project's Hugging Face owner account and the GitHub CLI authenticated, run `uv run scripts/verify_collection.py`. It reads full collection memberships, resolves each recorded public model revision, and checks the collection markers on the child repositories' default branches. It also checks the updated Haiku and Luna README links and the HTTP status of the retired collections. The [consolidation receipt](../reports/verification/collection-consolidation-2026-11-25.json) records the before-and-after comparison.
